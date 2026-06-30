@@ -7,14 +7,16 @@ across all g_i(z) where z = Mx⊕b is minimized.
 
 from __future__ import annotations
 
+import argparse
 import itertools
 import math
+import sys
 import time
 from typing import Callable
 
 import numpy as np
 
-from anf_factor import SparseANF, simplify, greedy_merge_simplify, simplify_by_complement
+from anf_factor import SparseANF, simplify, greedy_merge_simplify, simplify_by_complement, search_affine_simplification
 
 
 class VectorANF:
@@ -326,17 +328,19 @@ def vector_simplify_per_component(
     vec: VectorANF,
     verbose: bool = False,
     return_union: bool = False,
+    n_walsh_trials: int = 10,
+    seed: int = 0,
 ) -> list[tuple[SparseANF, np.ndarray, np.ndarray]] | tuple[list[tuple[SparseANF, np.ndarray, np.ndarray]], VectorANF, np.ndarray, np.ndarray]:
     """Strategy 2: simplify each component independently.
 
     Each component f_i finds its own (M_i, b_i) and g_i,
     minimizing T(g_i) individually.
 
-    If return_union=True, also returns a shared representation:
-    - All distinct rows across all M_i collected into one M (m_total × n)
-    - All b_i entries collected into one b vector
-    - A VectorANF where all g_i are re-indexed to share the same z variables
-    This allows computing the true union T across per-component results.
+    Runs complement + greedy merge once (deterministic), then
+    repeats the Walsh search n_walsh_trials times with different
+    seeds to find the best dimension reduction.
+
+    If return_union=True, also returns a shared representation.
 
     Returns:
     - list of (g_i, M_i, b_i) per component
@@ -345,11 +349,49 @@ def vector_simplify_per_component(
     results = []
     for idx, f in enumerate(vec.components):
         if verbose:
-            print(f"  Component {idx}: n={f.n}, T={f.T()}")
-        g, M, b = simplify(f, verbose=verbose)
-        results.append((g, M, b))
+            print(f"  Component {idx}: n={f.n}, T={f.T()}", end="")
+
+        # Phase 1-2: complement + greedy merge (deterministic)
+        g, M, b = simplify_by_complement(f, verbose=False)
+        g2, M2, b2 = greedy_merge_simplify(g, verbose=False)
+        M_acc = (M2 @ M) % 2
+        b_acc = ((M2 @ b) % 2).reshape(-1, 1) ^ b2
+        g_acc = g2
+
         if verbose:
-            print(f"    → T={g.T()}, m={g.n}")
+            print(f", after greedy: T={g_acc.T()}, m={g_acc.n}")
+
+        # Phase 3: multi-trial Walsh search
+        best_g, best_M, best_b = g_acc, M_acc, b_acc
+        best_T = g_acc.T()
+
+        for trial in range(n_walsh_trials):
+            if g_acc.n <= 3 or g_acc.T() == 0:
+                break
+
+            import random as _random
+            _random.seed(seed + trial)
+
+            max_m = min(g_acc.n, 10)
+            try:
+                walsh_results = search_affine_simplification(
+                    g_acc, max_m=max_m, top_k=80, verbose=False, n_random=30,
+                    seed=seed + trial)
+            except Exception:
+                walsh_results = []
+
+            if walsh_results and walsh_results[0][1] < best_T:
+                m_w, T_w, M_w, b_w, g_w = walsh_results[0]
+                best_T = T_w
+                best_M = (M_w @ M_acc) % 2
+                best_b = ((M_w @ b_acc) % 2).reshape(-1, 1) ^ b_w
+                best_g = g_w
+                if verbose:
+                    print(f"    trial {trial+1}: Walsh found T={T_w}, m={m_w}")
+
+        results.append((best_g, best_M, best_b))
+        if verbose:
+            print(f"    → T={best_T}, m={best_g.n}")
 
     if not return_union:
         return results
@@ -426,6 +468,13 @@ def make_vector_from_expressions(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Vector Boolean function ANF simplification")
+    parser.add_argument("--seed", type=int, default=0, help="random seed (default: 0)")
+    parser.add_argument("--walsh-trials", type=int, default=10, help="Walsh search trials per component (default: 10)")
+    args = parser.parse_args()
+    seed = args.seed
+    walsh_trials = args.walsh_trials
+
     # Build variable map: i_2..i_9 → bits 0..7, i_10..i_17 → bits 8..15
     var_to_bit = {}
     for k in range(2, 18):
@@ -593,7 +642,7 @@ if __name__ == "__main__":
     print(f"\n{'='*70}")
     print("  PER-COMPONENT SIMPLIFICATION (Strategy 2)")
     print("=" * 70)
-    per_component_results, joint_vec, M_joint, b_joint = vector_simplify_per_component(vec, verbose=True, return_union=True)
+    per_component_results, joint_vec, M_joint, b_joint = vector_simplify_per_component(vec, verbose=True, return_union=True, seed=seed, n_walsh_trials=walsh_trials)
     print()
     for idx, (g, M_i, b_i) in enumerate(per_component_results):
         print(f"  g_{idx}: T={g.T()}, m={g.n}")

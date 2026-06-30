@@ -524,6 +524,7 @@ def search_affine_simplification(
     top_k: int = 80,
     verbose: bool = False,
     n_random: int = 50,
+    seed: int = 1,
 ) -> list[tuple[int, int, np.ndarray, np.ndarray, "SparseANF"]]:
     """Search for M,b that minimize T(g) with m ≤ max_m.
 
@@ -577,7 +578,7 @@ def search_affine_simplification(
             pass
 
     # ---- 3. Random M,b for dimension reduction ----
-    rng = random.Random(1)
+    rng = random.Random(seed)
     for m in range(1, max_m + 1):
         for _ in range(n_random):
             # Random M with controlled sparsity
