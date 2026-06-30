@@ -128,12 +128,57 @@ CMakeFiles/anf_simplify.dir/src/simplify.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/anf_simplify.dir/src/simplify.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/simplify.cpp -o CMakeFiles/anf_simplify.dir/src/simplify.cpp.s
 
+CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o: CMakeFiles/anf_simplify.dir/flags.make
+CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o: /home/wangfz/bool/cpp/src/int_poly.cpp
+CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o: CMakeFiles/anf_simplify.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o -MF CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o.d -o CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o -c /home/wangfz/bool/cpp/src/int_poly.cpp
+
+CMakeFiles/anf_simplify.dir/src/int_poly.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/anf_simplify.dir/src/int_poly.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/int_poly.cpp > CMakeFiles/anf_simplify.dir/src/int_poly.cpp.i
+
+CMakeFiles/anf_simplify.dir/src/int_poly.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/anf_simplify.dir/src/int_poly.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/int_poly.cpp -o CMakeFiles/anf_simplify.dir/src/int_poly.cpp.s
+
+CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o: CMakeFiles/anf_simplify.dir/flags.make
+CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o: /home/wangfz/bool/cpp/src/vector_anf.cpp
+CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o: CMakeFiles/anf_simplify.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o -MF CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o.d -o CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o -c /home/wangfz/bool/cpp/src/vector_anf.cpp
+
+CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/vector_anf.cpp > CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.i
+
+CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/vector_anf.cpp -o CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.s
+
+CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o: CMakeFiles/anf_simplify.dir/flags.make
+CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o: /home/wangfz/bool/cpp/src/vector_int_poly.cpp
+CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o: CMakeFiles/anf_simplify.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o -MF CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o.d -o CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o -c /home/wangfz/bool/cpp/src/vector_int_poly.cpp
+
+CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/vector_int_poly.cpp > CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.i
+
+CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/vector_int_poly.cpp -o CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.s
+
 # Object files for target anf_simplify
 anf_simplify_OBJECTS = \
 "CMakeFiles/anf_simplify.dir/src/main.cpp.o" \
 "CMakeFiles/anf_simplify.dir/src/sparse_anf.cpp.o" \
 "CMakeFiles/anf_simplify.dir/src/gf2_linalg.cpp.o" \
-"CMakeFiles/anf_simplify.dir/src/simplify.cpp.o"
+"CMakeFiles/anf_simplify.dir/src/simplify.cpp.o" \
+"CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o" \
+"CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o" \
+"CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o"
 
 # External object files for target anf_simplify
 anf_simplify_EXTERNAL_OBJECTS =
@@ -142,9 +187,12 @@ anf_simplify: CMakeFiles/anf_simplify.dir/src/main.cpp.o
 anf_simplify: CMakeFiles/anf_simplify.dir/src/sparse_anf.cpp.o
 anf_simplify: CMakeFiles/anf_simplify.dir/src/gf2_linalg.cpp.o
 anf_simplify: CMakeFiles/anf_simplify.dir/src/simplify.cpp.o
+anf_simplify: CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o
+anf_simplify: CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o
+anf_simplify: CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o
 anf_simplify: CMakeFiles/anf_simplify.dir/build.make
 anf_simplify: CMakeFiles/anf_simplify.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable anf_simplify"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable anf_simplify"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/anf_simplify.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

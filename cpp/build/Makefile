@@ -219,6 +219,33 @@ src/gf2_linalg.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/gf2_linalg.cpp.s
 .PHONY : src/gf2_linalg.cpp.s
 
+src/int_poly.o: src/int_poly.cpp.o
+.PHONY : src/int_poly.o
+
+# target to build an object file
+src/int_poly.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/int_poly.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o
+.PHONY : src/int_poly.cpp.o
+
+src/int_poly.i: src/int_poly.cpp.i
+.PHONY : src/int_poly.i
+
+# target to preprocess a source file
+src/int_poly.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/int_poly.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/int_poly.cpp.i
+.PHONY : src/int_poly.cpp.i
+
+src/int_poly.s: src/int_poly.cpp.s
+.PHONY : src/int_poly.s
+
+# target to generate assembly for a file
+src/int_poly.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/int_poly.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/int_poly.cpp.s
+.PHONY : src/int_poly.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -297,6 +324,60 @@ src/sparse_anf.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/sparse_anf.cpp.s
 .PHONY : src/sparse_anf.cpp.s
 
+src/vector_anf.o: src/vector_anf.cpp.o
+.PHONY : src/vector_anf.o
+
+# target to build an object file
+src/vector_anf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/vector_anf.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o
+.PHONY : src/vector_anf.cpp.o
+
+src/vector_anf.i: src/vector_anf.cpp.i
+.PHONY : src/vector_anf.i
+
+# target to preprocess a source file
+src/vector_anf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/vector_anf.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.i
+.PHONY : src/vector_anf.cpp.i
+
+src/vector_anf.s: src/vector_anf.cpp.s
+.PHONY : src/vector_anf.s
+
+# target to generate assembly for a file
+src/vector_anf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/vector_anf.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.s
+.PHONY : src/vector_anf.cpp.s
+
+src/vector_int_poly.o: src/vector_int_poly.cpp.o
+.PHONY : src/vector_int_poly.o
+
+# target to build an object file
+src/vector_int_poly.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o
+.PHONY : src/vector_int_poly.cpp.o
+
+src/vector_int_poly.i: src/vector_int_poly.cpp.i
+.PHONY : src/vector_int_poly.i
+
+# target to preprocess a source file
+src/vector_int_poly.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.i
+.PHONY : src/vector_int_poly.cpp.i
+
+src/vector_int_poly.s: src/vector_int_poly.cpp.s
+.PHONY : src/vector_int_poly.s
+
+# target to generate assembly for a file
+src/vector_int_poly.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_core.dir/build.make CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.s
+.PHONY : src/vector_int_poly.cpp.s
+
 test/test_main.o: test/test_main.cpp.o
 .PHONY : test/test_main.o
 
@@ -339,6 +420,9 @@ help:
 	@echo "... src/gf2_linalg.o"
 	@echo "... src/gf2_linalg.i"
 	@echo "... src/gf2_linalg.s"
+	@echo "... src/int_poly.o"
+	@echo "... src/int_poly.i"
+	@echo "... src/int_poly.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
@@ -348,6 +432,12 @@ help:
 	@echo "... src/sparse_anf.o"
 	@echo "... src/sparse_anf.i"
 	@echo "... src/sparse_anf.s"
+	@echo "... src/vector_anf.o"
+	@echo "... src/vector_anf.i"
+	@echo "... src/vector_anf.s"
+	@echo "... src/vector_int_poly.o"
+	@echo "... src/vector_int_poly.i"
+	@echo "... src/vector_int_poly.s"
 	@echo "... test/test_main.o"
 	@echo "... test/test_main.i"
 	@echo "... test/test_main.s"

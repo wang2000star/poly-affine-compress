@@ -1,2 +1,2 @@
-/usr/bin/ar qc libanf_core.a CMakeFiles/anf_core.dir/src/sparse_anf.cpp.o CMakeFiles/anf_core.dir/src/gf2_linalg.cpp.o CMakeFiles/anf_core.dir/src/simplify.cpp.o
+/usr/bin/ar qc libanf_core.a CMakeFiles/anf_core.dir/src/sparse_anf.cpp.o CMakeFiles/anf_core.dir/src/gf2_linalg.cpp.o CMakeFiles/anf_core.dir/src/simplify.cpp.o CMakeFiles/anf_core.dir/src/int_poly.cpp.o CMakeFiles/anf_core.dir/src/vector_anf.cpp.o CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o
 /usr/bin/ranlib libanf_core.a

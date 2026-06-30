@@ -4,8 +4,11 @@
 CMakeFiles/anf_test.dir/test/test_main.cpp.o
  /home/wangfz/bool/cpp/test/test_main.cpp
  /home/wangfz/bool/cpp/include/gf2_linalg.h
+ /home/wangfz/bool/cpp/include/int_poly.h
  /home/wangfz/bool/cpp/include/simplify.h
  /home/wangfz/bool/cpp/include/sparse_anf.h
+ /home/wangfz/bool/cpp/include/vector_anf.h
+ /home/wangfz/bool/cpp/include/vector_int_poly.h
  /usr/include/alloca.h
  /usr/include/asm-generic/errno-base.h
  /usr/include/asm-generic/errno.h

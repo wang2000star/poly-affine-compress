@@ -3,8 +3,11 @@
 
 CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_main.cpp \
   /home/wangfz/bool/cpp/include/gf2_linalg.h \
+  /home/wangfz/bool/cpp/include/int_poly.h \
   /home/wangfz/bool/cpp/include/simplify.h \
   /home/wangfz/bool/cpp/include/sparse_anf.h \
+  /home/wangfz/bool/cpp/include/vector_anf.h \
+  /home/wangfz/bool/cpp/include/vector_int_poly.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -363,15 +366,17 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/x86_64-linux-gnu/bits/fp-logb.h:
 
-/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
+/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
+
+/usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/endianness.h:
+
+/usr/include/x86_64-linux-gnu/bits/endian.h:
 
 /usr/include/c++/11/bits/stl_vector.h:
 
 /usr/include/c++/11/bits/enable_special_members.h:
-
-/usr/include/c++/11/bits/streambuf_iterator.h:
-
-/usr/include/c++/11/bits/range_access.h:
 
 /usr/include/c++/11/bits/stl_heap.h:
 
@@ -417,8 +422,6 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/c++/11/bits/nested_exception.h:
 
-/usr/include/c++/11/bits/streambuf.tcc:
-
 /usr/include/c++/11/bits/ostream.tcc:
 
 /usr/include/c++/11/bits/ostream_insert.h:
@@ -439,10 +442,6 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
 
-/usr/include/c++/11/bits/locale_facets.h:
-
-/usr/include/c++/11/limits:
-
 /usr/include/x86_64-linux-gnu/c++/11/bits/gthr.h:
 
 /usr/include/c++/11/bits/locale_classes.tcc:
@@ -452,6 +451,22 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 /usr/include/c++/11/bits/locale_classes.h:
 
 /usr/include/c++/11/bits/stl_algobase.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
+
+/usr/include/c++/11/bits/stl_numeric.h:
+
+/usr/include/c++/11/bits/alloc_traits.h:
+
+/usr/include/c++/11/tr1/special_function_util.h:
+
+/usr/include/c++/11/bits/localefwd.h:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/error_constants.h:
+
+/usr/include/c++/11/bits/vector.tcc:
+
+/usr/include/c++/11/bits/hashtable_policy.h:
 
 /usr/include/c++/11/bits/node_handle.h:
 
@@ -469,9 +484,9 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/c++/11/backward/binders.h:
 
-/usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
+/usr/include/asm-generic/errno-base.h:
 
-/usr/include/c++/11/bits/basic_ios.h:
+/usr/include/c++/11/bits/functexcept.h:
 
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
@@ -479,9 +494,9 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/c++/11/bits/allocator.h:
 
-/usr/include/asm-generic/errno-base.h:
+/usr/include/c++/11/bits/invoke.h:
 
-/usr/include/c++/11/bits/functexcept.h:
+/usr/include/c++/11/bits/std_abs.h:
 
 /usr/include/c++/11/bits/functional_hash.h:
 
@@ -491,13 +506,57 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/assert.h:
 
-/home/wangfz/bool/cpp/include/gf2_linalg.h:
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/include/c++/11/bits/predefined_ops.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
 
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
 /usr/include/c++/11/bits/cxxabi_forced.h:
+
+/usr/include/c++/11/bits/range_access.h:
+
+/usr/include/c++/11/bits/streambuf_iterator.h:
+
+/usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
+
+/usr/include/c++/11/bits/basic_ios.h:
+
+/home/wangfz/bool/cpp/include/vector_int_poly.h:
+
+/usr/include/c++/11/array:
+
+/usr/include/c++/11/pstl/glue_numeric_defs.h:
+
+/usr/include/c++/11/bits/exception_defines.h:
+
+/usr/include/alloca.h:
+
+/usr/include/c++/11/cstdio:
+
+/usr/include/c++/11/bits/ios_base.h:
+
+/usr/include/endian.h:
+
+/home/wangfz/bool/cpp/include/simplify.h:
+
+/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
+
+/home/wangfz/bool/cpp/include/int_poly.h:
+
+/usr/include/c++/11/bits/basic_string.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/atomic_word.h:
+
+/usr/include/c++/11/pstl/pstl_config.h:
+
+/usr/include/locale.h:
+
+/home/wangfz/bool/cpp/include/gf2_linalg.h:
 
 /usr/include/c++/11/bits/stl_pair.h:
 
@@ -511,33 +570,9 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/c++/11/tr1/bessel_function.tcc:
 
-/usr/include/c++/11/array:
+/usr/include/c++/11/bits/locale_facets.h:
 
-/usr/include/c++/11/bits/basic_string.h:
-
-/usr/include/x86_64-linux-gnu/gnu/stubs.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/atomic_word.h:
-
-/usr/include/c++/11/pstl/pstl_config.h:
-
-/usr/include/locale.h:
-
-/usr/include/x86_64-linux-gnu/bits/endianness.h:
-
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
-
-/usr/include/c++/11/bits/predefined_ops.h:
-
-/usr/include/c++/11/bits/exception_defines.h:
-
-/usr/include/alloca.h:
-
-/usr/include/c++/11/pstl/glue_numeric_defs.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
-
-/usr/include/c++/11/unordered_map:
+/usr/include/c++/11/limits:
 
 /usr/include/x86_64-linux-gnu/bits/math-vector.h:
 
@@ -545,21 +580,23 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/c++/11/cwchar:
 
+/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
+
+/usr/include/c++/11/unordered_map:
+
 /usr/include/c++/11/bits/charconv.h:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h:
 
 /usr/include/c++/11/bits/cpp_type_traits.h:
 
+/home/wangfz/bool/cpp/include/vector_anf.h:
+
 /usr/include/c++/11/bits/exception.h:
 
-/usr/include/c++/11/cstdio:
+/usr/include/c++/11/vector:
 
-/usr/include/endian.h:
-
-/home/wangfz/bool/cpp/include/simplify.h:
-
-/usr/include/c++/11/bits/ios_base.h:
+/usr/include/c++/11/bits/concept_check.h:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/ctype_inline.h:
 
@@ -571,27 +608,9 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 
 /usr/include/c++/11/tuple:
 
-/usr/include/c++/11/bits/localefwd.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/error_constants.h:
-
-/usr/include/c++/11/bits/vector.tcc:
-
-/usr/include/c++/11/bits/hashtable_policy.h:
+/usr/include/c++/11/bits/streambuf.tcc:
 
 /usr/include/c++/11/bits/string_view.tcc:
-
-/usr/include/c++/11/bits/std_abs.h:
-
-/usr/include/c++/11/bits/invoke.h:
-
-/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
-
-/usr/include/c++/11/bits/stl_numeric.h:
-
-/usr/include/c++/11/bits/alloc_traits.h:
-
-/usr/include/c++/11/tr1/special_function_util.h:
 
 /usr/include/c++/11/bits/uniform_int_dist.h:
 
@@ -618,10 +637,6 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 /usr/include/c++/11/compare:
 
 /usr/include/c++/11/concepts:
-
-/usr/include/c++/11/bits/concept_check.h:
-
-/usr/include/c++/11/vector:
 
 /usr/include/c++/11/debug/debug.h:
 
@@ -764,9 +779,3 @@ CMakeFiles/anf_test.dir/test/test_main.cpp.o: /home/wangfz/bool/cpp/test/test_ma
 /usr/include/stdio.h:
 
 /usr/include/wchar.h:
-
-/usr/include/x86_64-linux-gnu/bits/endian.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
-
-/usr/include/x86_64-linux-gnu/bits/errno.h:

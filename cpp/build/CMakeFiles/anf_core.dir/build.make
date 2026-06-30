@@ -114,11 +114,56 @@ CMakeFiles/anf_core.dir/src/simplify.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/anf_core.dir/src/simplify.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/simplify.cpp -o CMakeFiles/anf_core.dir/src/simplify.cpp.s
 
+CMakeFiles/anf_core.dir/src/int_poly.cpp.o: CMakeFiles/anf_core.dir/flags.make
+CMakeFiles/anf_core.dir/src/int_poly.cpp.o: /home/wangfz/bool/cpp/src/int_poly.cpp
+CMakeFiles/anf_core.dir/src/int_poly.cpp.o: CMakeFiles/anf_core.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/anf_core.dir/src/int_poly.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/anf_core.dir/src/int_poly.cpp.o -MF CMakeFiles/anf_core.dir/src/int_poly.cpp.o.d -o CMakeFiles/anf_core.dir/src/int_poly.cpp.o -c /home/wangfz/bool/cpp/src/int_poly.cpp
+
+CMakeFiles/anf_core.dir/src/int_poly.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/anf_core.dir/src/int_poly.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/int_poly.cpp > CMakeFiles/anf_core.dir/src/int_poly.cpp.i
+
+CMakeFiles/anf_core.dir/src/int_poly.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/anf_core.dir/src/int_poly.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/int_poly.cpp -o CMakeFiles/anf_core.dir/src/int_poly.cpp.s
+
+CMakeFiles/anf_core.dir/src/vector_anf.cpp.o: CMakeFiles/anf_core.dir/flags.make
+CMakeFiles/anf_core.dir/src/vector_anf.cpp.o: /home/wangfz/bool/cpp/src/vector_anf.cpp
+CMakeFiles/anf_core.dir/src/vector_anf.cpp.o: CMakeFiles/anf_core.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/anf_core.dir/src/vector_anf.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/anf_core.dir/src/vector_anf.cpp.o -MF CMakeFiles/anf_core.dir/src/vector_anf.cpp.o.d -o CMakeFiles/anf_core.dir/src/vector_anf.cpp.o -c /home/wangfz/bool/cpp/src/vector_anf.cpp
+
+CMakeFiles/anf_core.dir/src/vector_anf.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/anf_core.dir/src/vector_anf.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/vector_anf.cpp > CMakeFiles/anf_core.dir/src/vector_anf.cpp.i
+
+CMakeFiles/anf_core.dir/src/vector_anf.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/anf_core.dir/src/vector_anf.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/vector_anf.cpp -o CMakeFiles/anf_core.dir/src/vector_anf.cpp.s
+
+CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o: CMakeFiles/anf_core.dir/flags.make
+CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o: /home/wangfz/bool/cpp/src/vector_int_poly.cpp
+CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o: CMakeFiles/anf_core.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o -MF CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o.d -o CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o -c /home/wangfz/bool/cpp/src/vector_int_poly.cpp
+
+CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/vector_int_poly.cpp > CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.i
+
+CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/vector_int_poly.cpp -o CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.s
+
 # Object files for target anf_core
 anf_core_OBJECTS = \
 "CMakeFiles/anf_core.dir/src/sparse_anf.cpp.o" \
 "CMakeFiles/anf_core.dir/src/gf2_linalg.cpp.o" \
-"CMakeFiles/anf_core.dir/src/simplify.cpp.o"
+"CMakeFiles/anf_core.dir/src/simplify.cpp.o" \
+"CMakeFiles/anf_core.dir/src/int_poly.cpp.o" \
+"CMakeFiles/anf_core.dir/src/vector_anf.cpp.o" \
+"CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o"
 
 # External object files for target anf_core
 anf_core_EXTERNAL_OBJECTS =
@@ -126,9 +171,12 @@ anf_core_EXTERNAL_OBJECTS =
 libanf_core.a: CMakeFiles/anf_core.dir/src/sparse_anf.cpp.o
 libanf_core.a: CMakeFiles/anf_core.dir/src/gf2_linalg.cpp.o
 libanf_core.a: CMakeFiles/anf_core.dir/src/simplify.cpp.o
+libanf_core.a: CMakeFiles/anf_core.dir/src/int_poly.cpp.o
+libanf_core.a: CMakeFiles/anf_core.dir/src/vector_anf.cpp.o
+libanf_core.a: CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o
 libanf_core.a: CMakeFiles/anf_core.dir/build.make
 libanf_core.a: CMakeFiles/anf_core.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libanf_core.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX static library libanf_core.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/anf_core.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/anf_core.dir/link.txt --verbose=$(VERBOSE)
 

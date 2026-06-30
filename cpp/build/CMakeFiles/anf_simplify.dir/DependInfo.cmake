@@ -9,9 +9,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/wangfz/bool/cpp/src/gf2_linalg.cpp" "CMakeFiles/anf_simplify.dir/src/gf2_linalg.cpp.o" "gcc" "CMakeFiles/anf_simplify.dir/src/gf2_linalg.cpp.o.d"
+  "/home/wangfz/bool/cpp/src/int_poly.cpp" "CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o" "gcc" "CMakeFiles/anf_simplify.dir/src/int_poly.cpp.o.d"
   "/home/wangfz/bool/cpp/src/main.cpp" "CMakeFiles/anf_simplify.dir/src/main.cpp.o" "gcc" "CMakeFiles/anf_simplify.dir/src/main.cpp.o.d"
   "/home/wangfz/bool/cpp/src/simplify.cpp" "CMakeFiles/anf_simplify.dir/src/simplify.cpp.o" "gcc" "CMakeFiles/anf_simplify.dir/src/simplify.cpp.o.d"
   "/home/wangfz/bool/cpp/src/sparse_anf.cpp" "CMakeFiles/anf_simplify.dir/src/sparse_anf.cpp.o" "gcc" "CMakeFiles/anf_simplify.dir/src/sparse_anf.cpp.o.d"
+  "/home/wangfz/bool/cpp/src/vector_anf.cpp" "CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o" "gcc" "CMakeFiles/anf_simplify.dir/src/vector_anf.cpp.o.d"
+  "/home/wangfz/bool/cpp/src/vector_int_poly.cpp" "CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o" "gcc" "CMakeFiles/anf_simplify.dir/src/vector_int_poly.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

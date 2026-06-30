@@ -1,10 +1,16 @@
 file(REMOVE_RECURSE
   "CMakeFiles/anf_core.dir/src/gf2_linalg.cpp.o"
   "CMakeFiles/anf_core.dir/src/gf2_linalg.cpp.o.d"
+  "CMakeFiles/anf_core.dir/src/int_poly.cpp.o"
+  "CMakeFiles/anf_core.dir/src/int_poly.cpp.o.d"
   "CMakeFiles/anf_core.dir/src/simplify.cpp.o"
   "CMakeFiles/anf_core.dir/src/simplify.cpp.o.d"
   "CMakeFiles/anf_core.dir/src/sparse_anf.cpp.o"
   "CMakeFiles/anf_core.dir/src/sparse_anf.cpp.o.d"
+  "CMakeFiles/anf_core.dir/src/vector_anf.cpp.o"
+  "CMakeFiles/anf_core.dir/src/vector_anf.cpp.o.d"
+  "CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o"
+  "CMakeFiles/anf_core.dir/src/vector_int_poly.cpp.o.d"
   "libanf_core.a"
   "libanf_core.pdb"
 )
