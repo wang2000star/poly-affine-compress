@@ -148,6 +148,18 @@ class SparseANF:
     def degree(self) -> int:
         return max((m.bit_count() for m in self.terms), default=0)
 
+    def variables_used(self) -> set[int]:
+        """Return set of variable indices appearing in any monomial."""
+        used: set[int] = set()
+        for m in self.terms:
+            i = 0
+            while m:
+                if m & 1:
+                    used.add(i)
+                m >>= 1
+                i += 1
+        return used
+
     def copy(self) -> "SparseANF":
         return SparseANF(dict(self.terms), self.n)
 
