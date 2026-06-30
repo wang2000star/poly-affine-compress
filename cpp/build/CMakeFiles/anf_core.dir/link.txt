@@ -1,0 +1,2 @@
+/usr/bin/ar qc libanf_core.a CMakeFiles/anf_core.dir/src/sparse_anf.cpp.o CMakeFiles/anf_core.dir/src/gf2_linalg.cpp.o CMakeFiles/anf_core.dir/src/simplify.cpp.o
+/usr/bin/ranlib libanf_core.a

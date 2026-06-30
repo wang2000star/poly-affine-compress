@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/wangfz/bool/cpp/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
