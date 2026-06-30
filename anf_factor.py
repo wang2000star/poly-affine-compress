@@ -594,6 +594,364 @@ def search_affine_simplification(
 
 
 # ====================================================================
+#  Greedy XOR Merge — pairwise variable merging heuristic
+# ====================================================================
+
+def _score_merge(terms: dict[int, int], i: int, j: int) -> int:
+    """Exact ΔT = T(after) - T(before) for merging x_i → x_i⊕x_j.
+
+    Uses set-XOR formula: |new| = |unchanged| + |toggles| - 2|unchanged ∩ toggles|
+    Derived from computing new_terms = (unchanged) ⊕ (toggles).
+    """
+    toggles: dict[int, int] = {}
+    for m, v in terms.items():
+        if (m >> i) & 1:
+            toggles[m] = toggles.get(m, 0) ^ v          # toggle off
+            rest = m ^ (1 << i)
+            new_m = rest if ((m >> j) & 1) else rest | (1 << j)
+            toggles[new_m] = toggles.get(new_m, 0) ^ v  # toggle on
+
+    n_changed = sum(1 for m in terms if (m >> i) & 1)
+    n_toggles = sum(1 for c in toggles.values() if c)
+    n_overlap = sum(1 for m, c in toggles.items()
+                    if c and m in terms and not ((m >> i) & 1))
+    return n_toggles - 2 * n_overlap - n_changed
+
+
+def _apply_merge(terms: dict[int, int], i: int, j: int) -> dict[int, int]:
+    """Replace x_i with x_i⊕x_j in the ANF.  Returns new term dict."""
+    new: dict[int, int] = {}
+    for m, v in terms.items():
+        if (m >> i) & 1:
+            new[m] = new.get(m, 0) ^ v          # toggle off
+            rest = m ^ (1 << i)
+            new_m = rest if ((m >> j) & 1) else rest | (1 << j)
+            new[new_m] = new.get(new_m, 0) ^ v  # toggle on
+        else:
+            new[m] = new.get(m, 0) ^ v
+    return {k: v for k, v in new.items() if v}
+
+
+def greedy_merge_simplify(
+    f: SparseANF,
+    max_iter: int = 100,
+    verbose: bool = False,
+) -> tuple[SparseANF, np.ndarray, np.ndarray]:
+    """Greedy pairwise XOR merge to reduce T(f) and m.
+
+    At each step, find the pair (i,j) such that replacing x_i with
+    x_i⊕x_j gives the largest reduction in T.  Apply it, drop unused
+    variables, and repeat.  M tracks the accumulated transformation.
+
+    Returns (g, M, b) where f(x) = g(Mx⊕b) and g has ≤ f.n variables.
+    """
+    terms = dict(f.terms)  # {mask: coeff} in current variable space
+    if not terms:
+        return SparseANF({}, 0), np.eye(f.n, dtype=np.uint8), np.zeros((f.n, 1), dtype=np.uint8)
+
+    m = f.n
+    M = np.eye(m, dtype=np.uint8)   # rows correspond to current variables
+    b = np.zeros((m, 1), dtype=np.uint8)
+    orig_T = f.T()
+
+    if verbose:
+        print(f"\nGreedy merge: n={m}, T₀={orig_T}")
+
+    for iteration in range(max_iter):
+        if len(terms) <= 1:
+            break
+
+        # ---- find active variables ----
+        active = set()
+        for mask in terms:
+            t = mask
+            while t:
+                lsb = t & -t
+                active.add((lsb.bit_length() - 1))
+                t ^= lsb
+        active_list = sorted(active)
+
+        if len(active_list) <= 1:
+            break
+
+        # ---- precompute per-variable term lists ----
+        terms_by_var: dict[int, list[int]] = {var: [] for var in active_list}
+        for mask in terms:
+            t = mask
+            while t:
+                lsb = t & -t
+                i = (lsb.bit_length() - 1)
+                terms_by_var[i].append(mask)
+                t ^= lsb
+
+        # ---- score all pairs (i,j) with i != j ----
+        best_delta = 0
+        best_i = best_j = -1
+
+        for i in active_list:
+            ti = terms_by_var[i]
+            if not ti:
+                continue
+            n_changed_i = len(ti)
+            for j in active_list:
+                if i == j:
+                    continue
+
+                # Compute delta using the toggle method
+                toggle_counts: dict[int, int] = {}
+                for mask_m in ti:
+                    toggle_counts[mask_m] = toggle_counts.get(mask_m, 0) ^ 1
+                    rest = mask_m ^ (1 << i)
+                    new_m = rest if ((mask_m >> j) & 1) else rest | (1 << j)
+                    toggle_counts[new_m] = toggle_counts.get(new_m, 0) ^ 1
+
+                n_toggles = sum(1 for c in toggle_counts.values() if c)
+                # Overlap: toggled masks that are also in unchanged terms
+                n_overlap = 0
+                for mask_m, c in toggle_counts.items():
+                    if c and mask_m in terms and not ((mask_m >> i) & 1):
+                        n_overlap += 1
+
+                delta = n_toggles - 2 * n_overlap - n_changed_i
+                if delta < best_delta:
+                    best_delta = delta
+                    best_i, best_j = i, j
+
+        if best_delta >= 0:
+            break
+
+        i, j = best_i, best_j
+
+        # ---- apply merge ----
+        M[i] ^= M[j]   # row operation: new z_i = z_i ⊕ z_j
+        terms = _apply_merge(terms, i, j)
+
+        # ---- drop unused variables ----
+        used = set()
+        for mask in terms:
+            t = mask
+            while t:
+                lsb = t & -t
+                used.add((lsb.bit_length() - 1))
+                t ^= lsb
+
+        if len(used) < m:
+            # Remap variable indices and M rows
+            sorted_used = sorted(used)
+            old_to_new = {old: new for new, old in enumerate(sorted_used)}
+
+            remapped: dict[int, int] = {}
+            for mask, v in terms.items():
+                new_mask = 0
+                for old_k in sorted_used:
+                    if (mask >> old_k) & 1:
+                        new_mask |= (1 << old_to_new[old_k])
+                remapped[new_mask] = remapped.get(new_mask, 0) ^ v
+            terms = {k: v for k, v in remapped.items() if v}
+
+            M = M[list(sorted_used)]  # keep only used rows
+            b = b[list(sorted_used)]
+            m = len(sorted_used)
+
+        if verbose and (iteration % 10 == 0 or best_delta < 0):
+            pct = (orig_T - len(terms)) / orig_T * 100
+            print(f"  iter {iteration}: T={len(terms)}/{orig_T} ({pct:.1f}%↓) m={m}")
+
+    if verbose:
+        pct = (orig_T - len(terms)) / orig_T * 100
+        print(f"  Final: T={len(terms)}/{orig_T} ({pct:.1f}%↓) m={m}")
+
+    return SparseANF(terms, m), M, b
+
+
+# ====================================================================
+#  Complement variable selection: z_i = x_i or x_i⊕1
+# ====================================================================
+
+
+def simplify_by_complement(
+    f: SparseANF,
+    verbose: bool = False,
+) -> tuple[SparseANF, np.ndarray, np.ndarray]:
+    """Minimize T(g) by complementing variables: z_i = x_i or z_i = x_i⊕1.
+
+    For n ≤ 16: exhaustive over all 2ⁿ complement patterns (Gray code, fast).
+    For n > 16: greedy bit-flipping search.
+
+    Returns (g, M, b) where f(x) = g(Mx⊕b), M=I_n, b is complement vector.
+    After complement, unused z variables are dropped.
+    """
+    n = f.n
+    M = np.eye(n, dtype=np.uint8)
+    b = np.zeros((n, 1), dtype=np.uint8)
+
+    if n <= 0:
+        return f, M, b
+
+    if n <= 16:
+        # ---- exhaustive: Gray code incremental, O(2ⁿ · T(f)) ----
+        # g(b) = f(z⊕b).  Flipping b_i corresponds to g'(z) = g(z⊕e_i):
+        #   for each monomial m with bit i, toggle m without i.
+        best_T = f.T()
+        best_b = np.zeros((n, 1), dtype=np.uint8)
+
+        if verbose:
+            print(f"\nComplement search (Gray, 2^{n}={1<<n}): n={n}, T₀={best_T}")
+
+        # Start with g = f (b=0)
+        cur_terms: dict[int, int] = dict(f.terms)
+        cur_T = len(cur_terms)
+
+        # Gray code: iterate over b masks in Gray order
+        prev_mask = 0
+        for step in range(1, 1 << n):
+            # Find which bit flips in Gray code from prev to step
+            gray = step ^ (step >> 1)
+            change_bit = (prev_mask ^ gray).bit_length() - 1
+            prev_mask = gray
+
+            # Update g: flip effect of bit change_bit
+            # g'(z) = g(z⊕e_i): toggle m\{i} for each m with bit i
+            toggled = 0
+            for m, v in list(cur_terms.items()):
+                if (m >> change_bit) & 1:
+                    m_without = m ^ (1 << change_bit)
+                    cur_terms[m_without] = cur_terms.get(m_without, 0) ^ v
+                    if cur_terms[m_without] == 0:
+                        del cur_terms[m_without]
+                        toggled -= 1
+                    else:
+                        toggled += 1
+            cur_T += toggled
+
+            if cur_T < best_T:
+                best_T = cur_T
+                best_b = np.array([(gray >> i) & 1 for i in range(n)], dtype=np.uint8).reshape(-1, 1)
+
+        if verbose:
+            pct = (f.T() - best_T) / f.T() * 100
+            print(f"  best: T={best_T}/{f.T()} ({pct:.1f}%↓)")
+
+        # Compute best g from best_b using substitute_affine
+        if best_T < f.T():
+            g = f.substitute_affine(M, best_b)
+        else:
+            g = f
+        b = best_b
+    else:
+        # ---- greedy: flip bits one at a time ----
+        best_g = f
+        best_b = np.zeros((n, 1), dtype=np.uint8)
+        b_vec = np.zeros((n, 1), dtype=np.uint8)
+        best_T = f.T()
+        improved = True
+        it = 0
+
+        if verbose:
+            print(f"\nComplement search (greedy): n={n}, T₀={best_T}")
+
+        while improved:
+            improved = False
+            for i in range(n):
+                b_vec[i] ^= 1  # flip bit i
+                g = f.substitute_affine(M, b_vec)
+                if g.T() < best_T:
+                    best_T = g.T()
+                    best_b = b_vec.copy()
+                    best_g = g
+                    improved = True
+                    if verbose:
+                        pct = (f.T() - best_T) / f.T() * 100
+                        print(f"  iter {it}: flip[{i}] → T={best_T}/{f.T()} ({pct:.1f}%↓)")
+                else:
+                    b_vec[i] ^= 1  # flip back
+            it += 1
+            if it > 2 * n:
+                break
+
+        g = best_g
+        b = best_b
+
+    # ---- drop unused variables ----
+    used = set()
+    for mask in g.terms:
+        t = mask
+        while t:
+            lsb = t & -t
+            used.add((lsb.bit_length() - 1))
+            t ^= lsb
+
+    if len(used) < g.n:
+        sorted_used = sorted(used)
+        M_compact = M[list(sorted_used)]
+        b_compact = b[list(sorted_used)]
+        # Remap term indices
+        old_to_new = {old: new for new, old in enumerate(sorted_used)}
+        remapped = {}
+        for mask, v in g.terms.items():
+            new_mask = 0
+            for old_k in sorted_used:
+                if (mask >> old_k) & 1:
+                    new_mask |= (1 << old_to_new[old_k])
+            remapped[new_mask] = remapped.get(new_mask, 0) ^ v
+        g = SparseANF({k: v for k, v in remapped.items() if v}, len(sorted_used))
+        return g, M_compact, b_compact
+
+    return g, M, b
+
+
+# ====================================================================
+#  Combined simplification pipeline
+# ====================================================================
+
+
+def simplify(
+    f: SparseANF,
+    verbose: bool = False,
+) -> tuple[SparseANF, np.ndarray, np.ndarray]:
+    """Combined ANF simplification pipeline.
+
+    Stages:
+    1. Complement selection (greedy/exhaustive z_i = x_i or x_i⊕1)
+    2. Greedy pairwise XOR merge
+    3. Walsh-guided dimension reduction (from search_affine_simplification)
+
+    Returns (g, M, b) where f(x) = g(Mx⊕b).
+    """
+    n, orig_T = f.n, f.T()
+
+    if verbose:
+        print(f"\n=== Simplify: n={n}, T₀={orig_T} ===")
+
+    g, M, b = simplify_by_complement(f, verbose=verbose)
+
+    g2, M2, b2 = greedy_merge_simplify(g, verbose=verbose)
+    M = (M2 @ M) % 2
+    b = ((M2 @ b) % 2).reshape(-1, 1) ^ b2
+    g = g2
+
+    if g.n > 3 and g.T() > 0:
+        try:
+            results = search_affine_simplification(
+                g, max_m=min(g.n, 10), top_k=80, verbose=verbose, n_random=30)
+        except Exception:
+            results = []
+        if results and results[0][1] < g.T():
+            m_w, T_w, M_w, b_w, g_w = results[0]
+            if verbose:
+                print(f"  Walsh: T={T_w}/{g.T()} ({(g.T()-T_w)/g.T()*100:.1f}%↓)")
+            M = (M_w @ M) % 2
+            b = ((M_w @ b) % 2).reshape(-1, 1) ^ b_w
+            g = g_w
+
+    if verbose:
+        pct = (orig_T - g.T()) / orig_T * 100
+        print(f"  Final: T={g.T()}/{orig_T} ({pct:.1f}%↓), m={g.n}")
+
+    return g, M, b
+
+
+# ====================================================================
 #  Demos
 # ====================================================================
 

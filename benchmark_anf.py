@@ -27,6 +27,8 @@ from anf_factor import (
     SparseANF,
     gf2_extend_to_invertible,
     search_affine_simplification,
+    greedy_merge_simplify,
+    simplify,
     _walsh_spectrum,
 )
 
@@ -335,28 +337,22 @@ def run_benchmark():
 
         t_start = time.time()
         try:
-            if f.n <= 12:
-                g, M, b = repeated_walsh_minimize(f, max_iter=12, top_k=200,
-                                                   verbose=True)
-            elif f.n <= 24:
-                g, M, b = repeated_walsh_minimize(f, max_iter=8, top_k=150,
-                                                   verbose=True)
-            else:
-                g, M, b = repeated_walsh_minimize(f, max_iter=6, top_k=100,
-                                                   verbose=True)
+            g, M, b = simplify(f, verbose=True)
             elapsed = time.time() - t_start
             signal.alarm(0)
 
-            red = (f.T() - g.T()) / f.T() * 100
+            red = (f.T() - g.T()) / f.T() * 100 if f.T() > 0 else 0
             deg_ok = g.degree() <= f.degree()
             print(f"  ──────────────────────────────────────")
             print(f"  T: {f.T()} → {g.T()}  ({red:.1f}%↓)")
             print(f"  deg: {f.degree()} → {g.degree()}  {'✓' if deg_ok else '⚠'}")
+            print(f"  m: {f.n} → {g.n}")
             print(f"  ⏱  {elapsed:.2f}s")
 
             results.append({
                 "name": name,
                 "n": f.n,
+                "m_out": g.n,
                 "T_in": f.T(),
                 "T_out": g.T(),
                 "red%": red,
@@ -381,7 +377,7 @@ def run_benchmark():
             })
         except Exception as e:
             elapsed = time.time() - t_start
-            print(f"  ❌ ERROR: {e}")
+            print(f"  ERROR: {e}")
             import traceback
             traceback.print_exc()
         finally:
@@ -390,7 +386,7 @@ def run_benchmark():
     print("\n" + "=" * 66)
     print("  SUMMARY")
     print("=" * 66)
-    hdr = f"  {'Name':<20} {'n':<4} {'T_in':<7} {'T_out':<7} {'Red%':<8} {'deg':<10} {'Time':<8}"
+    hdr = f"  {'Name':<20} {'n':<4} {'m_out':<6} {'T_in':<7} {'T_out':<7} {'Red%':<8} {'deg':<12} {'Time':<8}"
     print(hdr)
     print("  " + "-" * 66)
     for r in results:
@@ -403,7 +399,7 @@ def run_benchmark():
             t_str = str(tout)
             deg_str = f"{r['deg_in']}→{r['deg_out']}{'✓' if r['deg_out'] <= r['deg_in'] else '⚠'}"
         to = f" ({r['red%']:.1f}%)" if r['T_out'] > 0 else ""
-        print(f"  {r['name']:<20} {r['n']:<4} {r['T_in']:<7} {t_str:<7} {to:<8} {deg_str:<10} {r['time_s']:<7.2f}s{(' ' + note) if note else ''}")
+        print(f"  {r['name']:<20} {r['n']:<4} {r.get('m_out','-'):<6} {r['T_in']:<7} {t_str:<7} {to:<8} {deg_str:<12} {r['time_s']:<7.2f}s{(' ' + note) if note else ''}")
     print()
 
 
@@ -411,9 +407,62 @@ def run_benchmark():
 #  Main
 # ====================================================================
 
+def bench_method_comparison():
+    """Compare Walsh-only vs combined pipeline on small structured cases."""
+    print("=" * 66)
+    print("  METHOD COMPARISON: Walsh vs Combined Pipeline")
+    print("=" * 66)
+
+    test_cases = [
+        ("n=8 cubic", SparseANF.random_cubic, (8, 0.2, 100)),
+        ("n=12 cubic", SparseANF.random_cubic, (12, 0.15, 200)),
+        ("n=16 struct", None, None),  # built below
+        ("n=24 LinStr", SparseANF.from_linear_structure, (24, 5, 300)),
+        ("n=48 LinStr", SparseANF.from_linear_structure, (48, 5, 400)),
+    ]
+
+    # n=16 structured case
+    ft = {}
+    for i in range(3):
+        for j in range(3, 6):
+            ft[(1<<i)|(1<<j)] = 1
+    for i in range(6, 9):
+        for j in range(9, 12):
+            ft[(1<<i)|(1<<j)] = ft.get((1<<i)|(1<<j),0)^1
+    ft = {k:v for k,v in ft.items() if v}
+
+    print(f"\n  {'Case':<18} {'T_in':<6} {'Walsh T':<9} {'Pipe T':<9} {'Walsh m':<9} {'Pipe m':<9}")
+    print("  " + "-" * 60)
+
+    for name, maker, args in test_cases:
+        if name == "n=16 struct":
+            f = SparseANF(ft, 16)
+        else:
+            f = maker(*args)
+
+        # Walsh-only
+        t0 = time.time()
+        if f.n <= 12:
+            g_w, M_w, b_w = repeated_walsh_minimize(f, max_iter=8, top_k=150, verbose=False)
+        else:
+            g_w, M_w, b_w = repeated_walsh_minimize(f, max_iter=6, top_k=100, verbose=False)
+        tw = time.time() - t0
+
+        # Combined
+        t0 = time.time()
+        g_p, M_p, b_p = simplify(f, verbose=False)
+        tp = time.time() - t0
+
+        print(f"  {name:<18} {f.T():<6} {g_w.T():<9} {g_p.T():<9} {g_w.n:<9} {g_p.n:<9}")
+
+    print()
+
+
 if __name__ == "__main__":
     bench_transform_time()
     print()
     verify_n8()
+    print()
+    bench_method_comparison()
     print()
     run_benchmark()
