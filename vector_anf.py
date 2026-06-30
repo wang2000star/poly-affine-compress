@@ -325,13 +325,22 @@ def vector_simplify(
 def vector_simplify_per_component(
     vec: VectorANF,
     verbose: bool = False,
-) -> list[tuple[SparseANF, np.ndarray, np.ndarray]]:
+    return_union: bool = False,
+) -> list[tuple[SparseANF, np.ndarray, np.ndarray]] | tuple[list[tuple[SparseANF, np.ndarray, np.ndarray]], VectorANF, np.ndarray, np.ndarray]:
     """Strategy 2: simplify each component independently.
 
     Each component f_i finds its own (M_i, b_i) and g_i,
     minimizing T(g_i) individually.
 
-    Returns list of (g_i, M_i, b_i).
+    If return_union=True, also returns a shared representation:
+    - All distinct rows across all M_i collected into one M (m_total × n)
+    - All b_i entries collected into one b vector
+    - A VectorANF where all g_i are re-indexed to share the same z variables
+    This allows computing the true union T across per-component results.
+
+    Returns:
+    - list of (g_i, M_i, b_i) per component
+    - if return_union: also (joint_vec, M_joint, b_joint)
     """
     results = []
     for idx, f in enumerate(vec.components):
@@ -341,7 +350,55 @@ def vector_simplify_per_component(
         results.append((g, M, b))
         if verbose:
             print(f"    → T={g.T()}, m={g.n}")
-    return results
+
+    if not return_union:
+        return results
+
+    # Build shared M containing distinct rows from all M_i
+    all_rows: list[np.ndarray] = []
+    row_to_idx: dict[tuple, int] = {}
+    comp_maps: list[list[int]] = []  # for each component, which row in joint M
+
+    for g, M_i, b_i in results:
+        cmap = []
+        for r in range(M_i.shape[0]):
+            row = tuple(M_i[r].tolist())
+            if row not in row_to_idx:
+                row_to_idx[row] = len(all_rows)
+                all_rows.append(M_i[r])
+            cmap.append(row_to_idx[row])
+        comp_maps.append(cmap)
+
+    if not all_rows:
+        return results, VectorANF([SparseANF({}, 0)] * vec.k), np.zeros((0, vec.n), dtype=np.uint8), np.zeros((0, 1), dtype=np.uint8)
+
+    M_joint = np.array(all_rows, dtype=np.uint8)
+    m_total = M_joint.shape[0]
+
+    # Build joint b vector: collect all distinct b entries
+    b_joint = np.zeros((m_total, 1), dtype=np.uint8)
+    for (g, M_i, b_i), cmap in zip(results, comp_maps):
+        for local_idx, global_idx in enumerate(cmap):
+            b_joint[global_idx, 0] = b_i[local_idx, 0]
+
+    # Remap each g_i to the shared variable space
+    joint_comps = []
+    for (g, M_i, b_i), cmap in zip(results, comp_maps):
+        remapped_terms = {}
+        for mask, v in g.terms.items():
+            new_mask = 0
+            t = mask
+            while t:
+                lsb = t & -t
+                local_var = (lsb.bit_length() - 1)
+                global_var = cmap[local_var]
+                new_mask |= 1 << global_var
+                t ^= lsb
+            remapped_terms[new_mask] = v
+        joint_comps.append(SparseANF(remapped_terms, m_total))
+
+    joint_vec = VectorANF(joint_comps)
+    return results, joint_vec, M_joint, b_joint
 
 
 # ====================================================================
@@ -536,7 +593,9 @@ if __name__ == "__main__":
     print(f"\n{'='*70}")
     print("  PER-COMPONENT SIMPLIFICATION (Strategy 2)")
     print("=" * 70)
-    per_component_results = vector_simplify_per_component(vec, verbose=True)
+    per_component_results, joint_vec, M_joint, b_joint = vector_simplify_per_component(vec, verbose=True, return_union=True)
     print()
     for idx, (g, M_i, b_i) in enumerate(per_component_results):
         print(f"  g_{idx}: T={g.T()}, m={g.n}")
+    print(f"\n  After merging distinct rows into shared M ({M_joint.shape[0]}×{M_joint.shape[1]}):")
+    print(f"  Union T (shared variable space): {joint_vec.union_T()}")
