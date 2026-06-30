@@ -204,25 +204,26 @@ def _gf2_rank(M: np.ndarray) -> int:
     A = M.copy()
     n, m = A.shape
     rank = 0
-    col = 0
-    for row in range(n):
-        if col >= m:
+    row = 0
+    for col in range(m):
+        if row >= n:
             break
+        # 找 pivot
         pivot = None
         for i in range(row, n):
             if A[i, col]:
                 pivot = i
                 break
         if pivot is None:
-            col += 1
-            row -= 1  # 补偿外层循环的 row++
             continue
+        # 交换到当前行
         A[[row, pivot]] = A[[pivot, row]]
+        # 消去其他行
         for i in range(n):
             if i != row and A[i, col]:
                 A[i] ^= A[row]
         rank += 1
-        col += 1
+        row += 1
     return rank
 
 
