@@ -54,8 +54,14 @@ VectorSimplifyResult vector_greedy_merge(const VectorANF& vec,
 VectorSimplifyResult vector_simplify_by_complement(const VectorANF& vec,
                                                     bool verbose = false);
 
-// Combined pipeline: complement + greedy merge
+// Combined pipeline: complement + greedy merge + complement union + random search
 VectorSimplifyResult vector_simplify(const VectorANF& vec, bool verbose = false);
+
+// Random M,b search for vector Boolean (with union)
+VectorSimplifyResult vector_search_random(const VectorANF& vec,
+                                           int max_m, int n_trials,
+                                           uint64_t seed = 1,
+                                           bool verbose = false);
 
 // Per-component simplification (strategy 2)
 struct VectorPerCompResult {

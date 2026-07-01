@@ -19,16 +19,24 @@ struct ExpHash {
     }
 };
 
-// Sparse multivariate integer polynomial over Z.
+// Sparse multivariate polynomial over Z or F_p.
 // terms: exponent vector -> coefficient (non-zero).
+// mod = 0: integer polynomial over Z.
+// mod > 0: polynomial over F_mod (coefficient arithmetic modulo mod).
 class IntPoly {
 public:
     std::unordered_map<ExpVector, int64_t, ExpHash> terms;
-    int n = 0;  // number of variables
+    int n = 0;      // number of variables
+    int64_t mod = 0; // 0 = Z, >0 = F_mod
 
     IntPoly() = default;
-    IntPoly(const std::unordered_map<ExpVector, int64_t, ExpHash>& terms, int n);
-    IntPoly(std::unordered_map<ExpVector, int64_t, ExpHash>&& terms, int n);
+    IntPoly(const std::unordered_map<ExpVector, int64_t, ExpHash>& terms, int n, int64_t mod = 0);
+    IntPoly(std::unordered_map<ExpVector, int64_t, ExpHash>&& terms, int n, int64_t mod = 0);
+
+    // Mod-aware helpers
+    int64_t reduce(int64_t x) const;
+    static int64_t mul_mod(int64_t a, int64_t b, int64_t mod);
+    bool coeff_zero(int64_t c) const;
 
     int T() const { return (int)terms.size(); }
     int degree() const;
@@ -124,5 +132,24 @@ int verify_int_poly(const IntPoly& f, const IntPoly& g,
                     const std::vector<std::vector<int64_t>>& M,
                     const std::vector<int64_t>& b,
                     int n_tests = 100);
+
+// ---- F_p matrix helpers ----
+// Modular inverse via extended Euclidean algorithm
+int64_t fp_inv_mod(int64_t a, int64_t p);
+
+// F_p matrix inversion (exact modular Gaussian elimination)
+std::vector<std::vector<int64_t>> fp_mat_invert(
+    const std::vector<std::vector<int64_t>>& M, int n, int64_t p);
+
+// Extend m×n matrix (m < n, full row rank) to n×n invertible over F_p
+std::vector<std::vector<int64_t>> fp_extend_to_invertible(
+    const std::vector<std::vector<int64_t>>& M, int m, int n, int64_t p);
+
+// Extend m×n matrix (m > n, full column rank) to m×m invertible over F_p
+std::vector<std::vector<int64_t>> fp_extend_columns_to_invertible(
+    const std::vector<std::vector<int64_t>>& M, int m, int n, int64_t p);
+
+// Check if m×n matrix has full row rank over F_p
+bool fp_has_full_row_rank(const std::vector<std::vector<int64_t>>& M, int m, int n, int64_t p);
 
 #endif // ANF_INT_POLY_H

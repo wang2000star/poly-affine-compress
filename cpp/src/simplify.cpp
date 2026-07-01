@@ -188,6 +188,157 @@ SimplifyResult greedy_merge_simplify(const SparseANF& f,
 }
 
 // ====================================================================
+//  Gradient-guided greedy merge
+// ====================================================================
+
+SimplifyResult greedy_merge_simplify_gradient(const SparseANF& f,
+                                               int max_iter, bool verbose) {
+    std::unordered_map<uint64_t, uint8_t> terms = f.terms;
+    int m = f.n;
+    std::vector<uint64_t> M(m, 0);
+    for (int i = 0; i < m; ++i) M[i] = (uint64_t)1 << i;
+    uint64_t b = 0;
+    int orig_T = f.T();
+
+    if (verbose) {
+        std::cout << "\nGradient-guided merge: n=" << m << ", T₀=" << orig_T << "\n";
+    }
+
+    for (int iter = 0; iter < max_iter; ++iter) {
+        if (terms.size() <= 1) break;
+
+        // Find active variables
+        uint64_t active_mask = 0;
+        for (auto& [mask, v] : terms) active_mask |= mask;
+        std::vector<int> active_list;
+        uint64_t t = active_mask;
+        while (t) {
+            int i = __builtin_ctzll(t);
+            t &= t - 1;
+            active_list.push_back(i);
+        }
+        if (active_list.size() <= 1) break;
+
+        // Phase A: gradient-guided scoring
+        int best_delta = 0;
+        int best_i = -1, best_j = -1;
+
+        // Compute gradients for active variables
+        SparseANF cur_anf(terms, m);
+        auto grads = cur_anf.gradient();
+        std::vector<int> grad_T(m, 0);
+        for (int i : active_list) grad_T[i] = grads[i].T();
+
+        // Precompute mask-based toggle delta for speed
+        for (int i : active_list) {
+            if (grad_T[i] == 0) continue;
+            // Precompute terms containing i
+            std::vector<uint64_t> ti;
+            for (auto& [mask, v] : terms) {
+                if ((mask >> i) & 1) ti.push_back(mask);
+            }
+            int n_changed_i = (int)ti.size();
+
+            for (int j : active_list) {
+                if (i == j || grad_T[j] == 0) continue;
+                // Gradient overlap: share at least one monomial
+                bool overlap = false;
+                for (auto& [gm, gv] : grads[i].terms) {
+                    if (gv && grads[j].terms.count(gm) && grads[j].terms.at(gm)) {
+                        overlap = true;
+                        break;
+                    }
+                }
+                if (!overlap) continue;
+
+                // Score exact merge
+                std::unordered_map<uint64_t, uint8_t> toggle_counts;
+                for (auto tm : ti) {
+                    toggle_counts[tm] ^= 1;
+                    uint64_t rest = tm ^ (uint64_t(1) << i);
+                    uint64_t new_m = ((tm >> j) & 1) ? rest : (rest | (uint64_t(1) << j));
+                    toggle_counts[new_m] ^= 1;
+                }
+                int n_toggles = 0;
+                for (auto& [m, c] : toggle_counts) {
+                    if (c & 1) ++n_toggles;
+                }
+                int n_overlap = 0;
+                for (auto& [m, c] : toggle_counts) {
+                    if ((c & 1) && terms.count(m) && !((m >> i) & 1)) {
+                        ++n_overlap;
+                    }
+                }
+                int delta = n_toggles - 2 * n_overlap - n_changed_i;
+                if (delta < best_delta) {
+                    best_delta = delta;
+                    best_i = i;
+                    best_j = j;
+                }
+            }
+        }
+
+        // Phase B: exhaustive if gradient found nothing
+        if (best_delta >= 0) {
+            for (int i : active_list) {
+                std::vector<uint64_t> ti;
+                for (auto& [mask, v] : terms) {
+                    if ((mask >> i) & 1) ti.push_back(mask);
+                }
+                int n_changed_i = (int)ti.size();
+
+                for (int j : active_list) {
+                    if (i == j) continue;
+                    std::unordered_map<uint64_t, uint8_t> toggle_counts;
+                    for (auto tm : ti) {
+                        toggle_counts[tm] ^= 1;
+                        uint64_t rest = tm ^ (uint64_t(1) << i);
+                        uint64_t new_m = ((tm >> j) & 1) ? rest : (rest | (uint64_t(1) << j));
+                        toggle_counts[new_m] ^= 1;
+                    }
+                    int n_toggles = 0;
+                    for (auto& [m, c] : toggle_counts) {
+                        if (c & 1) ++n_toggles;
+                    }
+                    int n_overlap = 0;
+                    for (auto& [m, c] : toggle_counts) {
+                        if ((c & 1) && terms.count(m) && !((m >> i) & 1)) {
+                            ++n_overlap;
+                        }
+                    }
+                    int delta = n_toggles - 2 * n_overlap - n_changed_i;
+                    if (delta < best_delta) {
+                        best_delta = delta;
+                        best_i = i;
+                        best_j = j;
+                    }
+                }
+            }
+        }
+
+        if (best_delta >= 0) break;
+
+        M[best_i] ^= M[best_j];
+        terms = apply_xor_merge(terms, best_i, best_j);
+
+        SparseANF cur(terms, m);
+        auto result = drop_unused(cur, M, b);
+        terms = result.g.terms;
+        m = result.g.n;
+        M = result.M;
+        b = result.b;
+
+        if (verbose) {
+            double pct = (orig_T - (int)terms.size()) * 100.0 / orig_T;
+            std::cout << "  iter " << iter << ": T=" << terms.size()
+                      << "/" << orig_T << " (" << pct << "%↓) m=" << m << "\n";
+        }
+    }
+
+    return {SparseANF(terms, m), M, b};
+}
+
+// ====================================================================
 //  Complement search
 // ====================================================================
 
@@ -300,8 +451,22 @@ SimplifyResult search_random(const SparseANF& f, int max_m, int n_trials,
     for (int trial = 0; trial < n_trials; ++trial) {
         int m = (rng() % max_m) + 1;
         std::vector<uint64_t> M(m, 0);
-        for (int j = 0; j < m; ++j) {
-            M[j] = rng() & low_mask(n);
+
+        if (rng() % 3 < 2) {
+            // Dense random rows (existing)
+            for (int j = 0; j < m; ++j) {
+                M[j] = rng() & low_mask(n);
+            }
+        } else {
+            // Sparse: 2-3 bits per row (new)
+            for (int j = 0; j < m; ++j) {
+                M[j] = 0;
+                int nbits = 2 + (rng() % 2);
+                for (int b = 0; b < nbits; ++b) {
+                    int bit = rng() % n;
+                    M[j] |= (uint64_t)1 << bit;
+                }
+            }
         }
         uint64_t b = rng() & low_mask(m);
 
@@ -365,7 +530,40 @@ SimplifyResult simplify(const SparseANF& f, bool verbose) {
     auto M_acc = r1.M;
     auto b_acc = r1.b;
 
-    // Phase 2: greedy merge
+    // Phase 2a: gradient-guided greedy merge
+    auto r2a = greedy_merge_simplify_gradient(g, 50, verbose);
+    if (r2a.g.T() < g.T()) {
+        int m2a = (int)r2a.M.size();
+        std::vector<uint64_t> M_new;
+        for (int row = 0; row < m2a; ++row) {
+            uint64_t combined = 0;
+            uint64_t t = r2a.M[row];
+            while (t) {
+                int i = __builtin_ctzll(t);
+                t &= t - 1;
+                combined ^= M_acc[i];
+            }
+            M_new.push_back(combined);
+        }
+        uint64_t b_new = 0;
+        for (int j = 0; j < m2a; ++j) {
+            if (__builtin_parityll(r2a.M[j] & b_acc))
+                b_new |= (uint64_t)1 << j;
+        }
+        b_new ^= r2a.b;
+
+        g = r2a.g;
+        M_acc = M_new;
+        b_acc = b_new;
+
+        if (verbose) {
+            double pct = (orig_T - g.T()) * 100.0 / orig_T;
+            std::cout << "  After gradient merge: T=" << g.T() << "/" << orig_T
+                      << " (" << pct << "%↓), m=" << g.n << "\n";
+        }
+    }
+
+    // Phase 2b: exhaustive greedy merge
     auto r2 = greedy_merge_simplify(g, 100, verbose);
     // Compose: M = r2.M @ M_acc (with uint64_t row ops)
     int m2 = (int)r2.M.size();

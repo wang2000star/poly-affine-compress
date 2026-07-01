@@ -83,6 +83,7 @@ static VectorIntSimplifyResult vector_drop_unused_int(
 
     std::sort(used.begin(), used.end());
 
+    int64_t poly_mod = vec.components.empty() ? 0 : vec.components[0].mod;
     std::vector<IntPoly> new_comps;
     for (auto& f : vec.components) {
         std::unordered_map<ExpVector, int64_t, ExpHash> new_terms;
@@ -92,7 +93,7 @@ static VectorIntSimplifyResult vector_drop_unused_int(
                 new_exp.push_back(idx < (int)exp.size() ? exp[idx] : 0);
             new_terms[std::move(new_exp)] = c;
         }
-        new_comps.push_back(IntPoly(std::move(new_terms), (int)used.size()));
+        new_comps.push_back(IntPoly(std::move(new_terms), (int)used.size(), poly_mod));
     }
 
     std::vector<std::vector<int64_t>> new_M;
@@ -147,14 +148,49 @@ VectorIntSimplifyResult vector_greedy_merge_int(
         // Use sum of T_i as proxy (faster than union_T for trial)
         int best_sum = 0;
 
+        // Phase A: gradient-guided — compute gradients per component
+        std::vector<std::vector<IntPoly>> grads;
+        for (auto& f : cur.components) grads.push_back(f.gradient());
+
         for (int i : active) {
             for (int j : active) {
                 if (i == j) continue;
+
+                // Check gradient overlap across all components
+                bool overlap = false;
+                for (int c = 0; c < cur.k && !overlap; ++c) {
+                    auto& gi = grads[c][i].terms;
+                    auto& gj = grads[c][j].terms;
+                    if (gi.empty() || gj.empty()) continue;
+                    for (auto& [exp, v] : gi) {
+                        if (v != 0 && gj.count(exp) && gj.at(exp) != 0) {
+                            overlap = true; break;
+                        }
+                    }
+                }
+                if (!overlap) continue;
+
                 for (int64_t k : k_values) {
                     int sum_T = vector_try_merge_int_T(cur, i, j, k);
                     if (best_i < 0 || sum_T < best_sum) {
                         best_sum = sum_T;
                         best_i = i; best_j = j; best_k = k;
+                    }
+                }
+            }
+        }
+
+        // Phase B: exhaustive if gradient found nothing
+        if (best_i < 0) {
+            for (int i : active) {
+                for (int j : active) {
+                    if (i == j) continue;
+                    for (int64_t k : k_values) {
+                        int sum_T = vector_try_merge_int_T(cur, i, j, k);
+                        if (best_i < 0 || sum_T < best_sum) {
+                            best_sum = sum_T;
+                            best_i = i; best_j = j; best_k = k;
+                        }
                     }
                 }
             }
@@ -172,9 +208,16 @@ VectorIntSimplifyResult vector_greedy_merge_int(
             new_comps.push_back(f.substitute_linear(best_i, coeffs));
         }
         cur = VectorIntPoly(new_comps);
-        for (int col = 0; col < (int)M[best_i].size(); ++col)
-            M[best_i][col] += best_k * M[best_j][col];
-        b[best_i] += best_k * b[best_j];
+        {
+            int64_t mod = cur.components.empty() ? 0 : cur.components[0].mod;
+            auto reduce_val = [&](int64_t x) {
+                if (mod == 0) return x;
+                return (x % mod + mod) % mod;
+            };
+            for (int col = 0; col < (int)M[best_i].size(); ++col)
+                M[best_i][col] = reduce_val(M[best_i][col] + best_k * M[best_j][col]);
+            b[best_i] = reduce_val(b[best_i] + best_k * b[best_j]);
+        }
 
         auto result = vector_drop_unused_int(cur, M, b);
         cur = result.g; M = result.M; b = result.b;
@@ -290,21 +333,26 @@ VectorIntSimplifyResult vector_simplify_int(const VectorIntPoly& vec, bool verbo
     if (r1.g.union_T() < cur.union_T()) {
         int m_new = (int)r1.M.size();
         int m_cur = (int)M_acc.size();
+        int64_t mod = r1.g.components.empty() ? 0 : r1.g.components[0].mod;
+        auto reduce_val = [&](int64_t x) {
+            if (mod == 0) return x;
+            return (x % mod + mod) % mod;
+        };
 
         std::vector<std::vector<int64_t>> M_new(m_new, std::vector<int64_t>(n, 0));
         for (int j = 0; j < m_new; ++j) {
             for (int k = 0; k < m_cur; ++k) {
                 if (r1.M[j][k] == 0) continue;
                 for (int i = 0; i < n; ++i)
-                    M_new[j][i] += r1.M[j][k] * M_acc[k][i];
+                    M_new[j][i] = reduce_val(M_new[j][i] + r1.M[j][k] * M_acc[k][i]);
             }
         }
 
         std::vector<int64_t> b_new(m_new, 0);
         for (int j = 0; j < m_new; ++j) {
             for (int k = 0; k < m_cur; ++k)
-                b_new[j] += r1.M[j][k] * b_acc[k];
-            b_new[j] += r1.b[j];
+                b_new[j] = reduce_val(b_new[j] + r1.M[j][k] * b_acc[k]);
+            b_new[j] = reduce_val(b_new[j] + r1.b[j]);
         }
 
         cur = r1.g;
@@ -323,21 +371,26 @@ VectorIntSimplifyResult vector_simplify_int(const VectorIntPoly& vec, bool verbo
         if (r2.g.union_T() < cur.union_T()) {
             int m_new = (int)r2.M.size();
             int m_cur = (int)M_acc.size();
+            int64_t mod = r2.g.components.empty() ? 0 : r2.g.components[0].mod;
+            auto reduce_val = [&](int64_t x) {
+                if (mod == 0) return x;
+                return (x % mod + mod) % mod;
+            };
 
             std::vector<std::vector<int64_t>> M_new(m_new, std::vector<int64_t>(n, 0));
             for (int j = 0; j < m_new; ++j) {
                 for (int k = 0; k < m_cur; ++k) {
                     if (r2.M[j][k] == 0) continue;
                     for (int i = 0; i < n; ++i)
-                        M_new[j][i] += r2.M[j][k] * M_acc[k][i];
+                        M_new[j][i] = reduce_val(M_new[j][i] + r2.M[j][k] * M_acc[k][i]);
                 }
             }
 
             std::vector<int64_t> b_new(m_new, 0);
             for (int j = 0; j < m_new; ++j) {
                 for (int k = 0; k < m_cur; ++k)
-                    b_new[j] += r2.M[j][k] * b_acc[k];
-                b_new[j] += r2.b[j];
+                    b_new[j] = reduce_val(b_new[j] + r2.M[j][k] * b_acc[k]);
+                b_new[j] = reduce_val(b_new[j] + r2.b[j]);
             }
 
             cur = r2.g;

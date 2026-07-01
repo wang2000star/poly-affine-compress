@@ -10,18 +10,33 @@
 //  IntPoly implementation
 // ====================================================================
 
-IntPoly::IntPoly(const std::unordered_map<ExpVector, int64_t, ExpHash>& t, int n)
-    : n(n) {
+IntPoly::IntPoly(const std::unordered_map<ExpVector, int64_t, ExpHash>& t, int n, int64_t m)
+    : n(n), mod(m) {
     for (auto& [exp, c] : t) {
-        if (c != 0) terms[exp] = c;
+        if (!coeff_zero(c)) terms[exp] = reduce(c);
     }
 }
 
-IntPoly::IntPoly(std::unordered_map<ExpVector, int64_t, ExpHash>&& t, int n)
-    : n(n) {
+IntPoly::IntPoly(std::unordered_map<ExpVector, int64_t, ExpHash>&& t, int n, int64_t m)
+    : n(n), mod(m) {
     for (auto& [exp, c] : t) {
-        if (c != 0) terms[std::move(exp)] = c;
+        if (!coeff_zero(c)) terms[std::move(exp)] = reduce(c);
     }
+}
+
+int64_t IntPoly::reduce(int64_t x) const {
+    if (mod == 0) return x;
+    int64_t r = x % mod;
+    return r < 0 ? r + mod : r;
+}
+
+int64_t IntPoly::mul_mod(int64_t a, int64_t b, int64_t mod) {
+    if (mod == 0) return a * b;
+    return (int64_t)((__int128_t)a * b % mod);
+}
+
+bool IntPoly::coeff_zero(int64_t c) const {
+    return mod == 0 ? c == 0 : c % mod == 0;
 }
 
 int IntPoly::degree() const {
@@ -50,13 +65,13 @@ IntPoly IntPoly::operator+(const IntPoly& other) const {
     for (auto& [exp, c] : other.terms) {
         auto it = result.find(exp);
         if (it != result.end()) {
-            it->second += c;
-            if (it->second == 0) result.erase(it);
+            it->second = reduce(it->second + c);
+            if (coeff_zero(it->second)) result.erase(it);
         } else {
-            result[exp] = c;
+            result[exp] = reduce(c);
         }
     }
-    return IntPoly(std::move(result), n);
+    return IntPoly(std::move(result), n, mod);
 }
 
 IntPoly IntPoly::operator-(const IntPoly& other) const {
@@ -65,13 +80,13 @@ IntPoly IntPoly::operator-(const IntPoly& other) const {
     for (auto& [exp, c] : other.terms) {
         auto it = result.find(exp);
         if (it != result.end()) {
-            it->second -= c;
-            if (it->second == 0) result.erase(it);
+            it->second = reduce(it->second - c);
+            if (coeff_zero(it->second)) result.erase(it);
         } else {
-            result[exp] = -c;
+            result[exp] = reduce(-c);
         }
     }
-    return IntPoly(std::move(result), n);
+    return IntPoly(std::move(result), n, mod);
 }
 
 IntPoly IntPoly::operator*(const IntPoly& other) const {
@@ -81,23 +96,27 @@ IntPoly IntPoly::operator*(const IntPoly& other) const {
         for (auto& [e2, c2] : other.terms) {
             ExpVector e(n, 0);
             for (int i = 0; i < n; ++i) e[i] = e1[i] + e2[i];
+            int64_t prod = mul_mod(c1, c2, mod);
             auto it = result.find(e);
             if (it != result.end()) {
-                it->second += c1 * c2;
-                if (it->second == 0) result.erase(it);
+                it->second = reduce(it->second + prod);
+                if (coeff_zero(it->second)) result.erase(it);
             } else {
-                result[std::move(e)] = c1 * c2;
+                result[std::move(e)] = reduce(prod);
             }
         }
     }
-    return IntPoly(std::move(result), n);
+    return IntPoly(std::move(result), n, mod);
 }
 
 IntPoly IntPoly::operator*(int64_t scalar) const {
-    if (scalar == 0) return IntPoly({}, n);
+    if (coeff_zero(scalar)) return IntPoly({}, n, mod);
     std::unordered_map<ExpVector, int64_t, ExpHash> result;
-    for (auto& [exp, c] : terms) result[exp] = c * scalar;
-    return IntPoly(std::move(result), n);
+    for (auto& [exp, c] : terms) {
+        int64_t val = mul_mod(c, scalar, mod);
+        if (!coeff_zero(val)) result[exp] = val;
+    }
+    return IntPoly(std::move(result), n, mod);
 }
 
 IntPoly IntPoly::partial_deriv(int var) const {
@@ -107,10 +126,11 @@ IntPoly IntPoly::partial_deriv(int var) const {
         if (e > 0) {
             ExpVector new_exp = exp;
             new_exp[var] = e - 1;
-            result[std::move(new_exp)] = c * e;
+            int64_t val = mul_mod(c, e, mod);
+            if (!coeff_zero(val)) result[std::move(new_exp)] = reduce(val);
         }
     }
-    return IntPoly(std::move(result), n);
+    return IntPoly(std::move(result), n, mod);
 }
 
 std::vector<IntPoly> IntPoly::gradient() const {
@@ -138,23 +158,24 @@ IntPoly IntPoly::substitute_linear(int var, const std::vector<int64_t>& coeffs) 
     assert((int)coeffs.size() == n);
 
     IntPoly base_poly = linear_form_poly(coeffs, n);
-    IntPoly result({}, n);
+    base_poly.mod = mod;
+    IntPoly result({}, n, mod);
 
     for (auto& [exp, c] : terms) {
         int e = exp[var];
         if (e == 0) {
             auto it = result.terms.find(exp);
             if (it != result.terms.end()) {
-                it->second += c;
-                if (it->second == 0) result.terms.erase(it);
+                it->second = reduce(it->second + c);
+                if (coeff_zero(it->second)) result.terms.erase(it);
             } else {
-                result.terms[exp] = c;
+                result.terms[exp] = reduce(c);
             }
             continue;
         }
         ExpVector rest_exp = exp;
         rest_exp[var] = 0;
-        auto rest_poly = IntPoly({{rest_exp, c}}, n);
+        auto rest_poly = IntPoly({{rest_exp, c}}, n, mod);
 
         IntPoly term_poly = base_poly;
         for (int p = 1; p < e; ++p) term_poly = term_poly * base_poly;
@@ -163,10 +184,10 @@ IntPoly IntPoly::substitute_linear(int var, const std::vector<int64_t>& coeffs) 
         for (auto& [e2, c2] : prod.terms) {
             auto it = result.terms.find(e2);
             if (it != result.terms.end()) {
-                it->second += c2;
-                if (it->second == 0) result.terms.erase(it);
+                it->second = reduce(it->second + c2);
+                if (coeff_zero(it->second)) result.terms.erase(it);
             } else {
-                result.terms[std::move(e2)] = c2;
+                result.terms[std::move(e2)] = reduce(c2);
             }
         }
     }
@@ -176,7 +197,7 @@ IntPoly IntPoly::substitute_linear(int var, const std::vector<int64_t>& coeffs) 
 // ---- Forward expansion: x = Nz + c, always works for any m ----
 IntPoly IntPoly::expand_affine(const std::vector<std::vector<int64_t>>& N,
                                 const std::vector<int64_t>& c) const {
-    if (N.empty() || n == 0) return IntPoly({}, N.empty() ? 0 : (int)N[0].size());
+    if (N.empty() || n == 0) return IntPoly({}, N.empty() ? 0 : (int)N[0].size(), mod);
     int m = (int)N[0].size();
 
     // g(z) = f(Nz + c): expand each term Π_i (N[i]·z + c[i])^{e_i}
@@ -184,7 +205,7 @@ IntPoly IntPoly::expand_affine(const std::vector<std::vector<int64_t>>& N,
     ExpVector zero_exp(m, 0);
 
     for (auto& [exp, coeff] : terms) {
-        IntPoly cur_poly({}, m);
+        IntPoly cur_poly({}, m, mod);
         cur_poly.terms[zero_exp] = 1;
 
         for (int i = 0; i < n && i < (int)exp.size(); ++i) {
@@ -192,6 +213,8 @@ IntPoly IntPoly::expand_affine(const std::vector<std::vector<int64_t>>& N,
             if (e == 0) continue;
 
             IntPoly affine = single_affine(N[i], i < (int)c.size() ? c[i] : 0, m);
+            // Propagate mod to affine
+            affine.mod = mod;
             if (e == 1) {
                 cur_poly = cur_poly * affine;
             } else {
@@ -200,19 +223,19 @@ IntPoly IntPoly::expand_affine(const std::vector<std::vector<int64_t>>& N,
                 cur_poly = cur_poly * pow_poly;
             }
         }
-        if (coeff != 1) cur_poly = cur_poly * coeff;
+        if (!coeff_zero(coeff) && coeff != 1) cur_poly = cur_poly * coeff;
 
         for (auto& [e2, c2] : cur_poly.terms) {
             auto it = result.find(e2);
             if (it != result.end()) {
-                it->second += c2;
-                if (it->second == 0) result.erase(it);
+                it->second = reduce(it->second + c2);
+                if (coeff_zero(it->second)) result.erase(it);
             } else {
-                result[std::move(e2)] = c2;
+                result[std::move(e2)] = reduce(c2);
             }
         }
     }
-    return IntPoly(std::move(result), m);
+    return IntPoly(std::move(result), m, mod);
 }
 
 // ====================================================================
@@ -373,17 +396,17 @@ IntPoly IntPoly::substitute_affine_structured(
         int64_t a = 0;
         for (int i = 0; i < n; ++i) {
             if (M[j][i] != 0) {
-                if (nz_col >= 0) return IntPoly({}, m); // should not reach
+                if (nz_col >= 0) return IntPoly({}, m, mod);
                 nz_col = i;
                 a = M[j][i];
             }
         }
-        if (nz_col < 0) continue; // all-zero row (constant z)
-        if (a != 1 && a != -1) continue; // non-invertible, skip
+        if (nz_col < 0) continue;
+        if (a != 1 && a != -1) continue;
         int i = nz_col;
-        if (covered[i]) continue; // already have a mapping for x_i
+        if (covered[i]) continue;
         N[i][j] = a;
-        c_vec[i] = -a * b[j];
+        c_vec[i] = reduce(-a * b[j]);
         covered[i] = true;
     }
 
@@ -391,7 +414,7 @@ IntPoly IntPoly::substitute_affine_structured(
     for (auto& [exp, coeff] : terms) {
         for (int i = 0; i < n && i < (int)exp.size(); ++i) {
             if (exp[i] > 0 && !covered[i]) {
-                return IntPoly({}, m);
+                return IntPoly({}, m, mod);
             }
         }
     }
@@ -420,19 +443,25 @@ IntPoly IntPoly::substitute_affine(const std::vector<std::vector<int64_t>>& M,
             return substitute_affine_structured(M, b);
         }
         // General m > n: extend columns to (m×m), invert, take first n rows as left inverse
-        auto M_ext = int_extend_columns_to_invertible(M, m, n);
-        auto inv_ext = int_mat_invert(M_ext, m);
+        std::vector<std::vector<int64_t>> inv_ext;
+        if (mod > 0) {
+            auto M_ext = fp_extend_columns_to_invertible(M, m, n, mod);
+            inv_ext = fp_mat_invert(M_ext, m, mod);
+        } else {
+            auto M_ext = int_extend_columns_to_invertible(M, m, n);
+            inv_ext = int_mat_invert(M_ext, m);
+        }
         if (inv_ext.empty()) {
             std::cerr << "substitute_affine: failed to compute left inverse (m="
                       << m << ", n=" << n << ")\n";
-            return IntPoly({}, m);
+            return IntPoly({}, m, mod);
         }
         // Left inverse N is first n rows (n×m)
         std::vector<std::vector<int64_t>> N(inv_ext.begin(), inv_ext.begin() + n);
         std::vector<int64_t> c_vec(n, 0);
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < m; ++j)
-                c_vec[i] -= N[i][j] * b[j];
+                c_vec[i] = reduce(c_vec[i] - N[i][j] * b[j]);
         return expand_affine(N, c_vec);
     }
 
@@ -442,36 +471,48 @@ IntPoly IntPoly::substitute_affine(const std::vector<std::vector<int64_t>>& M,
 
     if (m == n) {
         // Direct inversion
-        auto inv = int_mat_invert(M, n);
-        if (inv.empty()) {
-            std::cerr << "substitute_affine: M not invertible over Z\n";
-            return IntPoly({}, m);
+        std::vector<std::vector<int64_t>> inv;
+        if (mod > 0) {
+            inv = fp_mat_invert(M, n, mod);
+        } else {
+            inv = int_mat_invert(M, n);
         }
-        N = inv;  // n×n, serves as n×m since m=n
+        if (inv.empty()) {
+            std::cerr << "substitute_affine: M not invertible over "
+                      << (mod > 0 ? "F_" + std::to_string(mod) : "Z") << "\n";
+            return IntPoly({}, m, mod);
+        }
+        N = inv;
 
         // c = -N·b
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < m; ++j)
-                c[i] -= N[i][j] * b[j];
+                c[i] = reduce(c[i] - N[i][j] * b[j]);
     } else {
         // m < n: extend to n×n, invert, take first m columns
-        auto M_ext = int_extend_to_invertible(M, m, n);
-        auto inv_ext = int_mat_invert(M_ext, n);
+        std::vector<std::vector<int64_t>> inv_ext;
+        if (mod > 0) {
+            auto M_ext = fp_extend_to_invertible(M, m, n, mod);
+            inv_ext = fp_mat_invert(M_ext, n, mod);
+        } else {
+            auto M_ext = int_extend_to_invertible(M, m, n);
+            inv_ext = int_mat_invert(M_ext, n);
+        }
         if (inv_ext.empty()) {
             std::cerr << "substitute_affine: failed to extend M to invertible\n";
-            return IntPoly({}, m);
+            return IntPoly({}, m, mod);
         }
 
         // N = first m columns of inv_ext (n×m)
         N.resize(n, std::vector<int64_t>(m, 0));
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < m; ++j)
-                N[i][j] = inv_ext[i][j];  // inv_ext[i] has m columns
+                N[i][j] = inv_ext[i][j];
 
-        // c = -N·b  (b is m, extended b_ext has 0 for extra vars)
+        // c = -N·b
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < m; ++j)
-                c[i] -= N[i][j] * b[j];
+                c[i] = reduce(c[i] - N[i][j] * b[j]);
     }
 
     // 2) g(z) = f(Nz + c) via forward expansion
@@ -495,17 +536,23 @@ IntPoly IntPoly::substitute_affine_union(
     std::vector<int64_t> b_ext = b;
     b_ext.resize(total, 0);
     // Left inverse: N·M_ext = I_n via column extension + inversion
-    auto M_sq = int_extend_columns_to_invertible(M_ext, total, n);
-    auto inv = int_mat_invert(M_sq, total);
+    std::vector<std::vector<int64_t>> inv;
+    if (mod > 0) {
+        auto M_sq = fp_extend_columns_to_invertible(M_ext, total, n, mod);
+        inv = fp_mat_invert(M_sq, total, mod);
+    } else {
+        auto M_sq = int_extend_columns_to_invertible(M_ext, total, n);
+        inv = int_mat_invert(M_sq, total);
+    }
     if (inv.empty()) {
         std::cerr << "substitute_affine_union: left inverse failed\n";
-        return IntPoly({}, total);
+        return IntPoly({}, total, mod);
     }
     std::vector<std::vector<int64_t>> N(inv.begin(), inv.begin() + n);
     std::vector<int64_t> c(n, 0);
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < total; ++j)
-            c[i] -= N[i][j] * b_ext[j];
+            c[i] = reduce(c[i] - N[i][j] * b_ext[j]);
     return expand_affine(N, c);
 }
 
@@ -532,18 +579,19 @@ IntPoly IntPoly::single_affine(const std::vector<int64_t>& row,
             terms[std::move(exp)] = row[j];
         }
     }
-    return IntPoly(std::move(terms), m);
+    return IntPoly(std::move(terms), m, 0); // mod=0 — will be set by caller
 }
 
 int64_t IntPoly::eval(const std::vector<int64_t>& values) const {
     int64_t result = 0;
     for (auto& [exp, c] : terms) {
-        int64_t term_val = c;
+        int64_t term_val = reduce(c);
         for (int i = 0; i < n && i < (int)exp.size(); ++i) {
+            int64_t v = i < (int)values.size() ? values[i] : 0;
             for (int p = 0; p < exp[i]; ++p)
-                term_val *= i < (int)values.size() ? values[i] : 0;
+                term_val = mul_mod(term_val, v, mod);
         }
-        result += term_val;
+        result = reduce(result + term_val);
     }
     return result;
 }
@@ -597,7 +645,7 @@ static IntSimplifyResult drop_unused_int(const IntPoly& f,
         if (idx < (int)M.size()) new_M.push_back(M[idx]);
         new_b.push_back(idx < (int)b.size() ? b[idx] : 0);
     }
-    return {IntPoly(std::move(new_terms), (int)used.size()), new_M, new_b};
+    return {IntPoly(std::move(new_terms), (int)used.size(), f.mod), new_M, new_b};
 }
 
 // ====================================================================
@@ -614,7 +662,7 @@ IntPoly try_merge_int(const IntPoly& f, int i, int j, int64_t k) {
 IntSimplifyResult greedy_merge_simplify_int(const IntPoly& f,
                                              int max_iter, bool verbose) {
     if (f.terms.empty())
-        return {IntPoly({}, f.n), identity_int(f.n), std::vector<int64_t>(f.n, 0)};
+        return {IntPoly({}, f.n, f.mod), identity_int(f.n), std::vector<int64_t>(f.n, 0)};
 
     IntPoly cur = f;
     auto M = identity_int(f.n);
@@ -624,6 +672,10 @@ IntSimplifyResult greedy_merge_simplify_int(const IntPoly& f,
     if (verbose)
         std::cout << "\nGreedy merge (int): n=" << f.n << ", T₀=" << orig_T << "\n";
 
+    auto reduce_val = [&](int64_t x) {
+        if (cur.mod == 0) return x;
+        return (x % cur.mod + cur.mod) % cur.mod;
+    };
     std::vector<int64_t> k_values = {1, -1, 2, -2};
 
     for (int iter = 0; iter < max_iter; ++iter) {
@@ -650,9 +702,9 @@ IntSimplifyResult greedy_merge_simplify_int(const IntPoly& f,
         if (best_delta >= 0) break;
 
         for (int col = 0; col < f.n; ++col)
-            M[best_i][col] += best_k * M[best_j][col];
+            M[best_i][col] = reduce_val(M[best_i][col] + best_k * M[best_j][col]);
         cur = try_merge_int(cur, best_i, best_j, best_k);
-        b[best_i] += best_k * b[best_j];
+        b[best_i] = reduce_val(b[best_i] + best_k * b[best_j]);
 
         auto result = drop_unused_int(cur, M, b);
         cur = result.g; M = result.M; b = result.b;
@@ -676,17 +728,21 @@ IntSimplifyResult greedy_merge_simplify_int(const IntPoly& f,
 // ====================================================================
 
 static bool gradient_match_int(const IntPoly& g_i, const IntPoly& g_j, int64_t k) {
+    int64_t mod = g_i.mod;
     if (g_i.T() != g_j.T()) return false;
     for (auto& [exp, c] : g_i.terms) {
         auto it = g_j.terms.find(exp);
-        if (it == g_j.terms.end() || it->second != k * c) return false;
+        if (it == g_j.terms.end()) return false;
+        int64_t expected = IntPoly::mul_mod(k, c, mod);
+        if (mod == 0) { if (it->second != expected) return false; }
+        else { if ((it->second % mod + mod) % mod != (expected % mod + mod) % mod) return false; }
     }
     return true;
 }
 
 IntSimplifyResult simplify_by_gradient_int(const IntPoly& f, bool verbose) {
     if (f.terms.empty())
-        return {IntPoly({}, f.n), identity_int(f.n), std::vector<int64_t>(f.n, 0)};
+        return {IntPoly({}, f.n, f.mod), identity_int(f.n), std::vector<int64_t>(f.n, 0)};
 
     IntPoly cur = f;
     auto M = identity_int(f.n);
@@ -696,6 +752,10 @@ IntSimplifyResult simplify_by_gradient_int(const IntPoly& f, bool verbose) {
     if (verbose)
         std::cout << "\nGradient-guided merge: n=" << f.n << ", T₀=" << orig_T << "\n";
 
+    auto reduce_val = [&](int64_t x) {
+        if (cur.mod == 0) return x;
+        return (x % cur.mod + cur.mod) % cur.mod;
+    };
     std::vector<int64_t> k_values = {1, -1, 2, -2};
 
     for (int iter = 0; iter < 30; ++iter) {
@@ -744,9 +804,9 @@ IntSimplifyResult simplify_by_gradient_int(const IntPoly& f, bool verbose) {
         if (best_i < 0 || best_delta >= 0) break;
 
         for (int col = 0; col < f.n; ++col)
-            M[best_i][col] += best_k * M[best_j][col];
+            M[best_i][col] = reduce_val(M[best_i][col] + best_k * M[best_j][col]);
         cur = try_merge_int(cur, best_i, best_j, best_k);
-        b[best_i] += best_k * b[best_j];
+        b[best_i] = reduce_val(b[best_i] + best_k * b[best_j]);
 
         auto result = drop_unused_int(cur, M, b);
         cur = result.g; M = result.M; b = result.b;
@@ -797,6 +857,197 @@ static bool int_has_full_row_rank(const std::vector<std::vector<int64_t>>& M, in
     return rank == m;
 }
 
+// ====================================================================
+//  F_p matrix helpers (exact modular arithmetic)
+// ====================================================================
+
+int64_t fp_inv_mod(int64_t a, int64_t p) {
+    a %= p;
+    if (a < 0) a += p;
+    int64_t t = 0, newt = 1;
+    int64_t r = p, newr = a;
+    while (newr != 0) {
+        int64_t q = r / newr;
+        int64_t tmp = t - q * newt; t = newt; newt = tmp;
+        tmp = r - q * newr; r = newr; newr = tmp;
+    }
+    if (r > 1) return 0; // not invertible
+    if (t < 0) t += p;
+    return t;
+}
+
+std::vector<std::vector<int64_t>> fp_mat_invert(
+    const std::vector<std::vector<int64_t>>& M, int n, int64_t p) {
+    // Augmented matrix [M | I_n]
+    std::vector<std::vector<int64_t>> aug(n, std::vector<int64_t>(2 * n, 0));
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            aug[i][j] = M[i][j] % p;
+    for (int i = 0; i < n; ++i)
+        aug[i][n + i] = 1;
+
+    for (int col = 0; col < n; ++col) {
+        // Find pivot
+        int pivot = -1;
+        for (int r = col; r < n; ++r) {
+            aug[r][col] %= p;
+            if (aug[r][col] < 0) aug[r][col] += p;
+            if (aug[r][col] != 0) { pivot = r; break; }
+        }
+        if (pivot < 0) return {}; // singular
+        std::swap(aug[col], aug[pivot]);
+
+        // Normalize pivot row
+        int64_t piv_val = aug[col][col];
+        int64_t inv_piv = fp_inv_mod(piv_val, p);
+        if (inv_piv == 0) return {};
+        for (int j = 0; j < 2 * n; ++j)
+            aug[col][j] = (int64_t)((__int128_t)aug[col][j] * inv_piv % p);
+
+        // Eliminate other rows
+        for (int r = 0; r < n; ++r) {
+            if (r == col) continue;
+            int64_t factor = aug[r][col];
+            if (factor == 0) continue;
+            for (int j = 0; j < 2 * n; ++j)
+                aug[r][j] = (aug[r][j] - (__int128_t)factor * aug[col][j]) % p;
+        }
+    }
+
+    std::vector<std::vector<int64_t>> inv(n, std::vector<int64_t>(n, 0));
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            inv[i][j] = (aug[i][n + j] % p + p) % p;
+    return inv;
+}
+
+std::vector<std::vector<int64_t>> fp_extend_to_invertible(
+    const std::vector<std::vector<int64_t>>& M, int m, int n, int64_t p) {
+    assert(m < n);
+    std::vector<std::vector<int64_t>> rows = M;
+    rows.resize(n, std::vector<int64_t>(n, 0));
+
+    // Modular elimination to find pivot columns
+    std::vector<std::vector<int64_t>> work(m, std::vector<int64_t>(n, 0));
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            work[i][j] = M[i][j] % p;
+
+    std::vector<bool> pivot_col(n, false);
+    int rank = 0;
+    for (int col = 0; col < n && rank < m; ++col) {
+        int pivot = -1;
+        for (int r = rank; r < m; ++r) {
+            if (work[r][col] % p != 0) { pivot = r; break; }
+        }
+        if (pivot < 0) continue;
+
+        std::swap(work[rank], work[pivot]);
+        std::swap(rows[rank], rows[pivot]);
+        pivot_col[col] = true;
+
+        // Normalize pivot row in work matrix
+        int64_t inv_piv = fp_inv_mod(work[rank][col], p);
+        for (int j = col; j < n; ++j)
+            work[rank][j] = (int64_t)((__int128_t)work[rank][j] * inv_piv % p);
+
+        // Eliminate
+        for (int r = 0; r < m; ++r) {
+            if (r == rank) continue;
+            int64_t factor = work[r][col];
+            if (factor == 0) continue;
+            for (int j = col; j < n; ++j)
+                work[r][j] = (work[r][j] - (__int128_t)factor * work[rank][j]) % p;
+        }
+        ++rank;
+    }
+
+    // Add unit rows for non-pivot columns
+    int slot = m;
+    for (int col = 0; col < n; ++col) {
+        if (!pivot_col[col]) {
+            rows[slot][col] = 1;
+            ++slot;
+        }
+    }
+    return rows;
+}
+
+std::vector<std::vector<int64_t>> fp_extend_columns_to_invertible(
+    const std::vector<std::vector<int64_t>>& M, int m, int n, int64_t p) {
+    assert(m > n);
+    std::vector<std::vector<int64_t>> work(m, std::vector<int64_t>(n, 0));
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            work[i][j] = M[i][j] % p;
+
+    std::vector<int> perm(m);
+    for (int i = 0; i < m; ++i) perm[i] = i;
+
+    int rank = 0;
+    for (int col = 0; col < n && rank < m; ++col) {
+        int pivot = -1;
+        for (int r = rank; r < m; ++r) {
+            if (work[r][col] % p != 0) { pivot = r; break; }
+        }
+        if (pivot < 0) continue;
+        std::swap(work[rank], work[pivot]);
+        std::swap(perm[rank], perm[pivot]);
+        int64_t inv_piv = fp_inv_mod(work[rank][col], p);
+        for (int j = col; j < n; ++j)
+            work[rank][j] = (int64_t)((__int128_t)work[rank][j] * inv_piv % p);
+        for (int r = 0; r < m; ++r) {
+            if (r == rank) continue;
+            int64_t factor = work[r][col];
+            if (factor == 0) continue;
+            for (int j = col; j < n; ++j)
+                work[r][j] = (work[r][j] - (__int128_t)factor * work[rank][j]) % p;
+        }
+        ++rank;
+    }
+
+    std::vector<std::vector<int64_t>> result(m, std::vector<int64_t>(m, 0));
+    for (int r = 0; r < m; ++r)
+        for (int j = 0; j < n; ++j)
+            result[r][j] = M[r][j] % p;
+
+    for (int j = 0; j < m - n; ++j) {
+        int np_row = perm[n + j];
+        result[np_row][n + j] = 1;
+    }
+    return result;
+}
+
+bool fp_has_full_row_rank(const std::vector<std::vector<int64_t>>& M, int m, int n, int64_t p) {
+    if (m > n || m == 0) return false;
+    std::vector<std::vector<int64_t>> work(m, std::vector<int64_t>(n, 0));
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            work[i][j] = M[i][j] % p;
+
+    int rank = 0;
+    for (int col = 0; col < n && rank < m; ++col) {
+        int pivot = -1;
+        for (int r = rank; r < m; ++r) {
+            if (work[r][col] % p != 0) { pivot = r; break; }
+        }
+        if (pivot < 0) continue;
+        std::swap(work[rank], work[pivot]);
+        int64_t inv_piv = fp_inv_mod(work[rank][col], p);
+        for (int j = col; j < n; ++j)
+            work[rank][j] = (int64_t)((__int128_t)work[rank][j] * inv_piv % p);
+        for (int r = 0; r < m; ++r) {
+            if (r == rank) continue;
+            int64_t factor = work[r][col];
+            if (factor == 0) continue;
+            for (int j = col; j < n; ++j)
+                work[r][j] = (work[r][j] - (__int128_t)factor * work[rank][j]) % p;
+        }
+        ++rank;
+    }
+    return rank == m;
+}
+
 IntSimplifyResult search_random_int(const IntPoly& f, int max_m, int n_trials,
                                      uint64_t seed, bool verbose) {
     int n = f.n;
@@ -834,7 +1085,9 @@ IntSimplifyResult search_random_int(const IntPoly& f, int max_m, int n_trials,
                 b[row] = entry_dist(rng);
             }
             // Need full row rank for right inverse
-            if (!int_has_full_row_rank(M, m, n)) continue;
+            bool ok = (f.mod > 0) ? fp_has_full_row_rank(M, m, n, f.mod)
+                                  : int_has_full_row_rank(M, m, n);
+            if (!ok) continue;
         }
 
         auto g = f.substitute_affine(M, b);
@@ -885,19 +1138,24 @@ static void compose_matrices(IntSimplifyResult& acc, const IntSimplifyResult& ne
                               int orig_n) {
     int m1 = (int)acc.M.size();
     int m2 = (int)next.M.size();
+    int64_t mod = next.g.mod;
+    auto mod_op = [mod](int64_t val) {
+        if (mod == 0) return val;
+        return (val % mod + mod) % mod;
+    };
     std::vector<std::vector<int64_t>> M_new(m2, std::vector<int64_t>(orig_n, 0));
     for (int j = 0; j < m2; ++j) {
         for (int k = 0; k < m1; ++k) {
             if (next.M[j][k] == 0) continue;
             for (int i = 0; i < orig_n; ++i)
-                M_new[j][i] += next.M[j][k] * acc.M[k][i];
+                M_new[j][i] = mod_op(M_new[j][i] + next.M[j][k] * acc.M[k][i]);
         }
     }
     std::vector<int64_t> b_new(m2, 0);
     for (int j = 0; j < m2; ++j) {
         for (int k = 0; k < m1; ++k)
-            b_new[j] += next.M[j][k] * acc.b[k];
-        b_new[j] += next.b[j];
+            b_new[j] = mod_op(b_new[j] + next.M[j][k] * acc.b[k]);
+        b_new[j] = mod_op(b_new[j] + next.b[j]);
     }
     acc.g = next.g;
     acc.M = M_new;
@@ -957,6 +1215,7 @@ int verify_int_poly(const IntPoly& f, const IntPoly& g,
                      const std::vector<std::vector<int64_t>>& M,
                      const std::vector<int64_t>& b, int n_tests) {
     int m = (int)M.size();
+    int64_t mod = f.mod;
     std::mt19937_64 rng(12345);
     std::uniform_int_distribution<int64_t> dist(-5, 5);
     int errors = 0;
@@ -972,7 +1231,13 @@ int verify_int_poly(const IntPoly& f, const IntPoly& g,
             z[j] += j < (int)b.size() ? b[j] : 0;
         }
 
-        if (f.eval(x) != g.eval(z)) ++errors;
+        int64_t fv = f.eval(x);
+        int64_t gv = g.eval(z);
+        if (mod > 0) {
+            fv = (fv % mod + mod) % mod;
+            gv = (gv % mod + mod) % mod;
+        }
+        if (fv != gv) ++errors;
     }
     return errors;
 }

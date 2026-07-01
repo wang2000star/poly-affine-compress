@@ -367,6 +367,140 @@ void test_intpoly_gradient_merge() {
 }
 
 // ====================================================================
+//  F_p (mod p) tests
+// ====================================================================
+
+void test_fp_basic() {
+    int64_t p = 65537;
+    // f = 3x0 + 5x1 (mod p), n=2
+    std::unordered_map<ExpVector, int64_t, ExpHash> terms;
+    terms[ExpVector{1, 0}] = 3;
+    terms[ExpVector{0, 1}] = 5;
+    IntPoly f(terms, 2, p);
+    TEST("fp T", f.T() == 2);
+    TEST("fp n", f.n == 2);
+    TEST("fp mod", f.mod == p);
+    TEST("fp eval reduced", f.eval({100, 200}) == (3*100 + 5*200) % p);
+
+    // Addition mod p
+    auto sum = f + f;
+    TEST("fp add T", sum.T() == 2);
+    TEST("fp add eval", sum.eval({100, 200}) == (6*100 + 10*200) % p);
+
+    // Subtraction mod p
+    auto diff = f - f;
+    TEST("fp sub T", diff.T() == 0);
+    TEST("fp sub empty", diff.terms.empty());
+
+    // Scalar multiplication mod p
+    auto scaled = f * 100000;
+    TEST("fp scalar T", scaled.T() == 2);
+    TEST("fp scalar eval", scaled.eval({3, 5}) == (3 * 3 * 100000 + 5 * 5 * 100000) % p);
+
+    // Multiplication
+    auto prod = f * f;
+    // (3x0 + 5x1)² = (3x0)² + 2·3·5·x0x1 + (5x1)² = 9x0² + 30x0x1 + 25x1²
+    TEST("fp mul T", prod.T() == 3);
+    TEST("fp mul eval", prod.eval({3, 5}) == (9*9 + 30*15 + 25*25) % p);
+
+    // partial_deriv
+    auto d0 = f.partial_deriv(0);
+    TEST("fp deriv T", d0.T() == 1);
+    TEST("fp deriv eval", d0.eval({10, 20}) == 3 % p);
+}
+
+void test_fp_substitute_affine() {
+    int64_t p = 65537;
+    // f = x0² + x1² + x0x1, n=2
+    std::unordered_map<ExpVector, int64_t, ExpHash> terms;
+    terms[ExpVector{2, 0}] = 1;
+    terms[ExpVector{0, 2}] = 1;
+    terms[ExpVector{1, 1}] = 1;
+    IntPoly f(terms, 2, p);
+
+    // Invertible M over F_p: [[2,1],[1,1]], det=1 → invertible
+    std::vector<std::vector<int64_t>> M = {{2, 1}, {1, 1}};
+    std::vector<int64_t> b = {0, 0};
+    auto g = f.substitute_affine(M, b);
+    TEST("fp subst_affine T > 0", g.T() > 0);
+    int errors = verify_int_poly(f, g, M, b, 50);
+    TEST("fp subst_affine verify", errors == 0);
+
+    // M = [[1,0],[0,1]] (identity)
+    M = {{1, 0}, {0, 1}};
+    g = f.substitute_affine(M, b);
+    TEST("fp identity verify", verify_int_poly(f, g, M, b, 50) == 0);
+
+    // m < n: f depends only on x0, M captures x0
+    terms.clear();
+    terms[ExpVector{2, 0}] = 1;  // x0² only
+    terms[ExpVector{1, 0}] = 3;  // 3·x0 only
+    IntPoly f3(terms, 2, p);
+
+    M = {{1, 0}};  // z0 = x0, captures all of f3's variables
+    std::vector<int64_t> b2 = {0};
+    g = f3.substitute_affine(M, b2);
+    TEST("fp m<n verify", verify_int_poly(f3, g, M, b2, 50) == 0);
+}
+
+void test_fp_simplify() {
+    int64_t p = 65537;
+    // f = (x0 + x1 + x2)³ + (x3 - x4)² mod p
+    // Should see the gradient structure
+    std::unordered_map<ExpVector, int64_t, ExpHash> terms;
+    // (x0+x1+x2)³
+    terms[ExpVector{3,0,0,0,0}] = 1;
+    terms[ExpVector{2,1,0,0,0}] = 3;
+    terms[ExpVector{2,0,1,0,0}] = 3;
+    terms[ExpVector{1,2,0,0,0}] = 3;
+    terms[ExpVector{1,1,1,0,0}] = 6;
+    terms[ExpVector{1,0,2,0,0}] = 3;
+    terms[ExpVector{0,3,0,0,0}] = 1;
+    terms[ExpVector{0,2,1,0,0}] = 3;
+    terms[ExpVector{0,1,2,0,0}] = 3;
+    terms[ExpVector{0,0,3,0,0}] = 1;
+    // (x3-x4)²
+    terms[ExpVector{0,0,0,2,0}] = 1;
+    terms[ExpVector{0,0,0,1,1}] = p - 2;  // -2 mod p
+    terms[ExpVector{0,0,0,0,2}] = 1;
+
+    IntPoly f(terms, 5, p);
+    auto r = simplify_int(f, false);
+    int errors = verify_int_poly(f, r.g, r.M, r.b, 50);
+    TEST("fp simplify verify", errors == 0);
+    // Should reduce dimension (gradients of x0,x1,x2 are equal mod p)
+    TEST("fp simplify m <= 4", r.g.n <= 4);
+}
+
+void test_fp_matrix_helpers() {
+    int64_t p = 7;  // small p for easy manual verification
+
+    // fp_inv_mod: 2⁻¹ ≡ 4 (mod 7) since 2*4 ≡ 1 mod 7
+    TEST("fp inv mod", fp_inv_mod(2, p) == 4);
+    TEST("fp inv mod 1", fp_inv_mod(1, p) == 1);
+    TEST("fp inv mod neg", fp_inv_mod(-1, p) == 6);
+
+    // Invertible 2×2 over F_7: [[2,1],[1,1]], det=1
+    std::vector<std::vector<int64_t>> M = {{2, 1}, {1, 1}};
+    auto inv = fp_mat_invert(M, 2, p);
+    TEST("fp 2x2 invert size", inv.size() == 2);
+    // verify M * inv = I
+    TEST("fp 2x2 invert[0]", (M[0][0]*inv[0][0] + M[0][1]*inv[1][0]) % p == 1);
+    TEST("fp 2x2 invert[1]", (M[0][0]*inv[0][1] + M[0][1]*inv[1][1]) % p == 0);
+
+    // extend to invertible: m=1, n=2 over F_7
+    std::vector<std::vector<int64_t>> M2 = {{1, 2}};
+    auto ext = fp_extend_to_invertible(M2, 1, 2, p);
+    TEST("fp extend height", ext.size() == 2);
+    auto ext_inv = fp_mat_invert(ext, 2, p);
+    TEST("fp extend invertible", !ext_inv.empty());
+
+    // has_full_row_rank
+    TEST("fp rank full", fp_has_full_row_rank({{1,2},{3,4}}, 2, 2, p));
+    TEST("fp rank dependent", !fp_has_full_row_rank({{2,4},{1,2}}, 2, 2, p));
+}
+
+// ====================================================================
 //  VectorANF tests
 // ====================================================================
 
@@ -532,6 +666,12 @@ int main() {
     test_intpoly_search_random();
     test_intpoly_simplify();
     test_intpoly_gradient_merge();
+
+    // F_p
+    test_fp_matrix_helpers();
+    test_fp_basic();
+    test_fp_substitute_affine();
+    test_fp_simplify();
 
     // VectorANF
     test_vector_anf_basic();

@@ -189,9 +189,27 @@ VectorSimplifyResult vector_greedy_merge(const VectorANF& vec,
         int best_i = -1, best_j = -1;
         VectorANF best_vec;
 
+        // Phase A: gradient-guided — only score pairs with overlapping gradient support
+        auto grads = cur.gradient();
+
         for (int i : active) {
             for (int j : active) {
                 if (i == j) continue;
+
+                // Check if any component has gradient overlap between i and j
+                bool overlap = false;
+                for (int c = 0; c < cur.k && !overlap; ++c) {
+                    auto& gi = grads[c][i].terms;
+                    auto& gj = grads[c][j].terms;
+                    if (gi.empty() || gj.empty()) continue;
+                    for (auto& [m, v] : gi) {
+                        if (v && gj.count(m) && gj.at(m)) {
+                            overlap = true; break;
+                        }
+                    }
+                }
+                if (!overlap) continue;
+
                 int T = vector_try_merge_T(cur, i, j);
                 if (T < best_T) {
                     best_T = T;
@@ -201,6 +219,25 @@ VectorSimplifyResult vector_greedy_merge(const VectorANF& vec,
                     coeffs[i] = 1;
                     coeffs[j] = 1;
                     best_vec = cur.substitute_linear(i, coeffs);
+                }
+            }
+        }
+
+        // Phase B: exhaustive if gradient found nothing
+        if (best_i < 0) {
+            for (int i : active) {
+                for (int j : active) {
+                    if (i == j) continue;
+                    int T = vector_try_merge_T(cur, i, j);
+                    if (T < best_T) {
+                        best_T = T;
+                        best_i = i;
+                        best_j = j;
+                        std::vector<uint8_t> coeffs(cur.n, 0);
+                        coeffs[i] = 1;
+                        coeffs[j] = 1;
+                        best_vec = cur.substitute_linear(i, coeffs);
+                    }
                 }
             }
         }
@@ -302,6 +339,79 @@ VectorSimplifyResult vector_simplify_by_complement(const VectorANF& vec,
 
     auto result = vector_drop_unused(best_vec, identity_vec(n), best_b);
     return {result.g, result.M, result.b};
+}
+
+// ====================================================================
+//  Random search with union
+// ====================================================================
+
+VectorSimplifyResult vector_search_random(const VectorANF& vec,
+                                           int max_m, int n_trials,
+                                           uint64_t seed, bool verbose) {
+    if (vec.union_T() <= 1)
+        return {vec, identity_vec(vec.n), 0};
+
+    int n = vec.n;
+    int best_T = vec.union_T();
+    VectorANF best_vec = vec;
+    auto best_M = identity_vec(n);
+    uint64_t best_b = 0;
+
+    std::mt19937_64 rng(seed);
+
+    for (int trial = 0; trial < n_trials; ++trial) {
+        int m = (rng() % max_m) + 1;
+        std::vector<uint64_t> M(m, 0);
+
+        if (rng() % 3 < 2) {
+            // Dense random rows
+            for (int j = 0; j < m; ++j)
+                M[j] = rng() & low_mask(n);
+        } else {
+            // Sparse: 2-3 bits per row
+            for (int j = 0; j < m; ++j) {
+                M[j] = 0;
+                int nbits = 2 + (rng() % 2);
+                for (int b = 0; b < nbits; ++b)
+                    M[j] |= (uint64_t)1 << (rng() % n);
+            }
+        }
+
+        // Skip rank-deficient for m ≤ n
+        if (m <= n && gf2_rank(M, n) < m) continue;
+        // For m > n, need full column rank
+        if (m > n && gf2_rank(M, n) < n) continue;
+
+        uint64_t b_bits = rng() & low_mask(m);
+
+        // Try union for each component
+        std::vector<SparseANF> new_comps;
+        for (auto& f : vec.components) {
+            new_comps.push_back(f.substitute_affine_union(M, b_bits));
+        }
+        VectorANF candidate(new_comps);
+        int T = candidate.union_T();
+
+        if (T < best_T) {
+            // Build M_ext = [M; I_n], b_ext = [b; 0]
+            std::vector<uint64_t> M_ext = M;
+            for (int i = 0; i < n; ++i) M_ext.push_back((uint64_t)1 << i);
+            uint64_t b_ext = b_bits;
+
+            best_T = T;
+            best_vec = candidate;
+            best_M = M_ext;
+            best_b = b_ext;
+
+            if (verbose) {
+                double pct = (vec.union_T() - T) * 100.0 / vec.union_T();
+                std::cout << "  trial " << trial << ": T=" << T
+                          << "/" << vec.union_T() << " (" << pct << "%↓)"
+                          << " m=" << (int)M_ext.size() << " [union]\n";
+            }
+        }
+    }
+    return {best_vec, best_M, best_b};
 }
 
 // ====================================================================
@@ -420,6 +530,42 @@ VectorSimplifyResult vector_simplify(const VectorANF& vec, bool verbose) {
 
             if (verbose) {
                 std::cout << "  After complement union: T=" << cur.union_T()
+                          << ", m=" << cur.n << "\n";
+            }
+        }
+    }
+
+    // Phase 4: random search with union
+    if (cur.union_T() > 1 && cur.n > 0) {
+        int max_random_m = std::max(std::min(cur.n, 8), 1);
+        auto r4 = vector_search_random(cur, max_random_m, 100, 2, false);
+        if (r4.g.union_T() < cur.union_T()) {
+            int m4 = (int)r4.M.size();
+            int m_cur = (int)M_acc.size();
+            std::vector<uint64_t> M_new;
+            for (int row = 0; row < m4; ++row) {
+                uint64_t combined = 0;
+                uint64_t t = r4.M[row];
+                while (t) {
+                    int i = __builtin_ctzll(t);
+                    t &= t - 1;
+                    combined ^= M_acc[i];
+                }
+                M_new.push_back(combined);
+            }
+            uint64_t b_new = 0;
+            for (int j = 0; j < m4; ++j) {
+                if (__builtin_parityll(r4.M[j] & b_acc))
+                    b_new |= (uint64_t)1 << j;
+            }
+            b_new ^= r4.b;
+
+            cur = r4.g;
+            M_acc = M_new;
+            b_acc = b_new;
+
+            if (verbose) {
+                std::cout << "  After random: T=" << cur.union_T()
                           << ", m=" << cur.n << "\n";
             }
         }

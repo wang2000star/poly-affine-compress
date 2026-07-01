@@ -20,6 +20,12 @@ SimplifyResult greedy_merge_simplify(const SparseANF& f,
                                      int max_iter = 100,
                                      bool verbose = false);
 
+// Gradient-guided greedy merge: only score pairs with overlapping gradient support.
+// Faster for large n when most variable pairs are independent.
+SimplifyResult greedy_merge_simplify_gradient(const SparseANF& f,
+                                               int max_iter = 100,
+                                               bool verbose = false);
+
 // ---- Complement Search ----
 
 // For n ≤ 16: exhaustive Gray code over all 2ⁿ complement patterns.
