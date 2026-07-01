@@ -309,18 +309,38 @@ SimplifyResult search_random(const SparseANF& f, int max_m, int n_trials,
         if (gf2_rank(M, n) < std::min(m, n)) continue;
 
         auto g = f.substitute_affine(M, b);
-        if (g.T() < best_T) {
-            // Verify when dimension changes (extend+restrict or left-inverse path)
-            if (g.n != f.n && !verify_substitution(f, g, M, b, 50)) {
+
+        // Decide whether to use Z = Z1 ∪ Z2
+        // Start with the plain version as default
+        auto g_best = g;
+        std::vector<uint64_t> M_best = M;
+        uint64_t b_best = b;
+        bool use_union = false;
+
+        // Try union only if it improves T
+        auto g_u = f.substitute_affine_union(M, b);
+        if (g_u.T() < g.T()) {
+            M_best = M;
+            for (int i = 0; i < f.n; ++i)
+                M_best.push_back((uint64_t)1 << i);
+            b_best = b;
+            g_best = g_u;
+            use_union = true;
+        }
+
+        if (g_best.T() < best_T) {
+            // Verify when dimension changes
+            if (g_best.n != f.n && !verify_substitution(f, g_best, M_best, b_best, 50)) {
                 continue;
             }
-            best_T = g.T();
-            best = {g, M, b};
+            best_T = g_best.T();
+            best = {g_best, M_best, b_best};
             if (verbose) {
                 double pct = (f.T() - best_T) * 100.0 / f.T();
                 std::cout << "  trial " << trial << ": T=" << best_T
                           << "/" << f.T() << " (" << pct << "%↓)"
-                          << " m=" << m << "\n";
+                          << " m=" << (int)M_best.size()
+                          << (use_union ? " [union]" : "") << "\n";
             }
         }
     }
@@ -382,14 +402,7 @@ SimplifyResult simplify(const SparseANF& f, bool verbose) {
 
     // Phase 3: random M,b search
     if (g.n > 0 && g.T() > 1) {
-        int max_random_m;
-        if (g.n < f.n) {
-            // Dimension reduced — explore up to 3× n (capped at 64 for uint64_t b)
-            max_random_m = std::min(std::max(g.n * 3, 8), 64);
-        } else {
-            // No reduction — keep search focused on small m
-            max_random_m = std::min(8, g.n);
-        }
+        int max_random_m = std::max(g.n, 1);
         auto r3 = search_random(g, max_random_m, 200, 1, false);
         if (r3.g.T() < g.T()) {
             // Compose: M = r3.M @ M_acc

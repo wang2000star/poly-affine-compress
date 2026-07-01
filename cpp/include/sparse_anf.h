@@ -40,8 +40,20 @@ public:
     // Returns g(z) in m variables.
     SparseANF substitute_affine(const std::vector<uint64_t>& M, uint64_t b) const;
 
+    // Union framework: Z = Z1 ∪ Z2 where Z1 = X (n vars), Z2 = Mx⊕b (m vars).
+    // Builds M_ext = [M; I_n] ((m+n)×n), b_ext = [b; 0], calls substitute_affine.
+    // Result g has (m+n) vars; m ≤ n recommended (Z1 provides n extra vars).
+    SparseANF substitute_affine_union(const std::vector<uint64_t>& M,
+                                      uint64_t b) const;
+
     // Variables used in any monomial
     std::vector<int> variables_used() const;
+
+    // Partial derivative ∂f/∂x_var (Boolean derivative: f(x) ⊕ f(x⊕e_var))
+    SparseANF partial_deriv(int var) const;
+
+    // Gradient: list of partial derivatives
+    std::vector<SparseANF> gradient() const;
 
     // Expand f(N(z ⊕ c)) where N is n×m, c is n-bit vector
     SparseANF expand_with(const std::vector<uint64_t>& N, uint64_t c, int m) const;
@@ -54,6 +66,10 @@ private:
     // Expand a single monomial through linear forms
     std::unordered_map<uint64_t, uint8_t> expand_monomial(
         uint64_t x_mask, const std::vector<uint64_t>& N, uint64_t c, int m) const;
+
+    // Direct substitution for structured M (each row has ≤1 bit)
+    SparseANF substitute_affine_structured(const std::vector<uint64_t>& M,
+                                           uint64_t b) const;
 };
 
 // Apply merge x_i → x_i⊕x_j, return new terms

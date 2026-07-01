@@ -10,6 +10,9 @@ add_library(anf_core
     src/sparse_anf.cpp
     src/gf2_linalg.cpp
     src/simplify.cpp
+    src/int_poly.cpp
+    src/vector_anf.cpp
+    src/vector_int_poly.cpp
 )
 
 target_include_directories(anf_core PUBLIC include)
@@ -20,6 +23,9 @@ add_executable(anf_simplify
     src/sparse_anf.cpp
     src/gf2_linalg.cpp
     src/simplify.cpp
+    src/int_poly.cpp
+    src/vector_anf.cpp
+    src/vector_int_poly.cpp
 )
 
 target_include_directories(anf_simplify PRIVATE include)

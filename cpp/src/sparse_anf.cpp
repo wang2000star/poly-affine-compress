@@ -160,6 +160,62 @@ std::unordered_map<uint64_t, uint8_t> SparseANF::expand_monomial(
     return clean;
 }
 
+// Structured substitute_affine: each z_j = x_{i(j)} or z_j = x_{i(j)}⊕1
+// (each row of M has at most one 1-bit). Direct substitution without inversion.
+SparseANF SparseANF::substitute_affine_structured(const std::vector<uint64_t>& M,
+                                                   uint64_t b) const {
+    int m = (int)M.size();
+    // Map each x_i to a preferred z_j (plain over complement)
+    std::vector<int> z_of_var(n, -1);
+    for (int j = 0; j < m; ++j) {
+        if (M[j] == 0) continue;
+        int i = __builtin_ctzll(M[j]);
+        bool is_comp = (b >> j) & 1;
+        if (z_of_var[i] < 0) {
+            z_of_var[i] = j;
+        } else if (((b >> z_of_var[i]) & 1) && !is_comp) {
+            z_of_var[i] = j;  // prefer plain over complement
+        }
+    }
+
+    std::unordered_map<uint64_t, uint8_t> g_terms;
+    for (auto& [mask, v] : terms) {
+        uint64_t t = mask;
+        uint64_t g_base = 0;
+        std::vector<int> comp_rows;  // rows where z_j = x_i⊕1
+        bool ok = true;
+        while (t) {
+            int i = __builtin_ctzll(t);
+            t &= t - 1;
+            int j = z_of_var[i];
+            if (j < 0) { ok = false; break; }
+            g_base |= (uint64_t)1 << j;
+            if ((b >> j) & 1) comp_rows.push_back(j);
+        }
+        if (!ok) continue;
+
+        if (comp_rows.empty()) {
+            g_terms[g_base] ^= v;
+        } else {
+            // Expand: Π (z⊕1) = Σ_{subset} Π_{in subset} z
+            int k = (int)comp_rows.size();
+            for (int sub = 0; sub < (1 << k); ++sub) {
+                uint64_t gs = g_base;
+                for (int p = 0; p < k; ++p) {
+                    if (!((sub >> p) & 1))
+                        gs &= ~((uint64_t)1 << comp_rows[p]);
+                }
+                g_terms[gs] ^= v;
+            }
+        }
+    }
+    std::unordered_map<uint64_t, uint8_t> clean;
+    for (auto& [tm, tv] : g_terms) {
+        if (tv & 1) clean[tm] = 1;
+    }
+    return SparseANF(clean, m);
+}
+
 SparseANF SparseANF::substitute_affine(const std::vector<uint64_t>& M, uint64_t b) const {
     // M is m×n: M[j] is n-bit mask (which x_i appear in z_j)
     // z_j = Σ_i M[j][i]·x_i ⊕ b_j
@@ -200,15 +256,28 @@ SparseANF SparseANF::substitute_affine(const std::vector<uint64_t>& M, uint64_t 
         return SparseANF({}, m);
     }
 
-    if (m > n && rank == n) {
-        // Full column rank (m > n): compute left inverse N·M = I_n
-        GF2Matrix M_ext = gf2_extend_columns_to_invertible(M, m, n);
-        GF2Matrix M_inv = gf2_invert(M_ext, m);
-        if (M_inv.empty()) return SparseANF({}, m);
-        // Left inverse N = first n rows of M_inv (n×m)
-        GF2Matrix N(M_inv.begin(), M_inv.begin() + n);
-        uint64_t c = gf2_mat_vec_mul(N, b);
-        return expand_with(N, c, m);
+    if (m > n) {
+        // Check if M is "structured": each row has at most one 1-bit.
+        // This covers z_j = x_{i(j)} or z_j = x_{i(j)}⊕1, no linear combinations.
+        // In this case we can do direct substitution without matrix inversion.
+        bool structured = true;
+        for (auto& row : M) {
+            if (row && (row & (row - 1))) { structured = false; break; }
+        }
+        if (structured) {
+            return substitute_affine_structured(M, b);
+        }
+        if (rank == n) {
+            // Full column rank: left inverse N·M = I_n
+            GF2Matrix M_ext = gf2_extend_columns_to_invertible(M, m, n);
+            GF2Matrix M_inv = gf2_invert(M_ext, m);
+            if (M_inv.empty()) return SparseANF({}, m);
+            GF2Matrix N(M_inv.begin(), M_inv.begin() + n);
+            uint64_t c = gf2_mat_vec_mul(N, b);
+            return expand_with(N, c, m);
+        }
+        // rank < n: not supported (information loss)
+        return SparseANF({}, m);
     }
 
     // m < n, full row rank: extend to invertible, transform, restrict
@@ -244,6 +313,26 @@ SparseANF SparseANF::substitute_affine(const std::vector<uint64_t>& M, uint64_t 
     return SparseANF(clean, m);
 }
 
+// Z = Z1 ∪ Z2: Z1 = X (n vars), Z2 = Mx⊕b (m vars, m ≤ n recommended)
+// Uses left inverse path directly to avoid structured shortcut.
+SparseANF SparseANF::substitute_affine_union(const std::vector<uint64_t>& M,
+                                              uint64_t b) const {
+    int m = (int)M.size();
+    int total = m + n;
+    // Build M_ext = [M; I_n] ((m+n)×n), b_ext = [b; 0] ((m+n)-bit)
+    GF2Matrix M_ext = M;
+    for (int i = 0; i < n; ++i)
+        M_ext.push_back((uint64_t)1 << i);
+    uint64_t b_ext = b;
+    // Left inverse: N·M_ext = I_n
+    auto M_sq = gf2_extend_columns_to_invertible(M_ext, total, n);
+    auto M_inv = gf2_invert(M_sq, total);
+    if (M_inv.empty()) return SparseANF({}, total);
+    GF2Matrix N(M_inv.begin(), M_inv.begin() + n);
+    uint64_t c = gf2_mat_vec_mul(N, b_ext);
+    return expand_with(N, c, total);
+}
+
 std::vector<int> SparseANF::variables_used() const {
     std::vector<int> used;
     uint64_t seen = 0;
@@ -257,6 +346,28 @@ std::vector<int> SparseANF::variables_used() const {
         used.push_back(i);
     }
     return used;
+}
+
+SparseANF SparseANF::partial_deriv(int var) const {
+    std::unordered_map<uint64_t, uint8_t> result;
+    for (auto& [mask, v] : terms) {
+        if ((mask >> var) & 1) {
+            uint64_t rest = mask ^ ((uint64_t)1 << var);
+            result[rest] ^= v;
+        }
+        // variable i not in monomial → derivative contribution is 0
+    }
+    std::unordered_map<uint64_t, uint8_t> clean;
+    for (auto& [m, val] : result) {
+        if (val & 1) clean[m] = 1;
+    }
+    return SparseANF(clean, n);
+}
+
+std::vector<SparseANF> SparseANF::gradient() const {
+    std::vector<SparseANF> grads(n);
+    for (int i = 0; i < n; ++i) grads[i] = partial_deriv(i);
+    return grads;
 }
 
 void SparseANF::print() const {
