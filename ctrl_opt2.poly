@@ -1,0 +1,499 @@
+======================================================================
+  策略 2（各自变换）: ctrl.poly
+======================================================================
+
+  原始输入: opcode0, opcode1, opcode2, opcode3, opcode4, opext0, opext1
+  输出函数: oseloregdst0, oseloregdst1, oselopB0, oselopB1, oaluop0, oaluop1, oaluop2, oaluopext0, oaluopext1, oaluopext2, oaluopext3, ohalt, oregwrite, oselpcopA, oselpcopB, obeqz, obnez, obgez, obltz, ojump, oCin, oinvA, oinvB, osign, omemwrite, oselwb
+
+--- oseloregdst0 ---
+  原始: T=9, deg=5, vars=7
+  简化: T=9→5 (44.4%↓), m=7→5
+  耗时: 0.080s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oseloregdst0_0 = opcode0
+    z_oseloregdst0_1 = opcode1 ⊕ opcode3
+    z_oseloregdst0_2 = opcode2 ⊕ opcode3
+    z_oseloregdst0_3 = opcode3
+    z_oseloregdst0_4 = opcode4
+
+  g(z) =
+    z_oseloregdst0_1·z_oseloregdst0_2 ⊕ z_oseloregdst0_3·z_oseloregdst0_4 ⊕ z_oseloregdst0_1·z_oseloregdst0_2·z_oseloregdst0_3 ⊕ z_oseloregdst0_1·z_oseloregdst0_2·z_oseloregdst0_4 ⊕ z_oseloregdst0_0·z_oseloregdst0_1·z_oseloregdst0_2·z_oseloregdst0_3·z_oseloregdst0_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oseloregdst1 ---
+  原始: T=10, deg=5, vars=7
+  简化: T=10→6 (40.0%↓), m=7→5
+  耗时: 0.082s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oseloregdst1_0 = opcode0 ⊕ 1
+    z_oseloregdst1_1 = opcode1 ⊕ opcode2 ⊕ 1
+    z_oseloregdst1_2 = opcode2 ⊕ 1
+    z_oseloregdst1_3 = opcode3 ⊕ 1
+    z_oseloregdst1_4 = opcode4
+
+  g(z) =
+    z_oseloregdst1_1·z_oseloregdst1_3 ⊕ z_oseloregdst1_1·z_oseloregdst1_2·z_oseloregdst1_3 ⊕ z_oseloregdst1_1·z_oseloregdst1_3·z_oseloregdst1_4 ⊕ z_oseloregdst1_2·z_oseloregdst1_3·z_oseloregdst1_4 ⊕ z_oseloregdst1_0·z_oseloregdst1_1·z_oseloregdst1_2·z_oseloregdst1_4 ⊕ z_oseloregdst1_0·z_oseloregdst1_1·z_oseloregdst1_2·z_oseloregdst1_3·z_oseloregdst1_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oselopB0 ---
+  原始: T=12, deg=4, vars=7
+  简化: T=12→4 (66.7%↓), m=7→5
+  耗时: 0.078s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oselopB0_0 = opcode0 ⊕ 1
+    z_oselopB0_1 = opcode1
+    z_oselopB0_2 = opcode2 ⊕ 1
+    z_oselopB0_3 = opcode3
+    z_oselopB0_4 = opcode4
+
+  g(z) =
+    z_oselopB0_1·z_oselopB0_2·z_oselopB0_3 ⊕ z_oselopB0_0·z_oselopB0_1·z_oselopB0_2·z_oselopB0_4 ⊕ z_oselopB0_0·z_oselopB0_2·z_oselopB0_3·z_oselopB0_4 ⊕ z_oselopB0_1·z_oselopB0_2·z_oselopB0_3·z_oselopB0_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oselopB1 ---
+  原始: T=10, deg=5, vars=7
+  简化: T=10→4 (60.0%↓), m=7→5
+  耗时: 0.078s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oselopB1_0 = opcode0
+    z_oselopB1_1 = opcode1 ⊕ 1
+    z_oselopB1_2 = opcode2 ⊕ 1
+    z_oselopB1_3 = opcode3
+    z_oselopB1_4 = opcode4
+
+  g(z) =
+    z_oselopB1_4 ⊕ z_oselopB1_3·z_oselopB1_4 ⊕ z_oselopB1_1·z_oselopB1_2·z_oselopB1_3 ⊕ z_oselopB1_0·z_oselopB1_1·z_oselopB1_2·z_oselopB1_3·z_oselopB1_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oaluop0 ---
+  原始: T=12, deg=7, vars=7
+  简化: T=12→8 (33.3%↓), m=7→7
+  耗时: 0.246s
+
+  线性变换 z = Mx ⊕ b (m=7):
+    z_oaluop0_0 = opcode0
+    z_oaluop0_1 = opcode1
+    z_oaluop0_2 = opcode2 ⊕ 1
+    z_oaluop0_3 = opcode3
+    z_oaluop0_4 = opcode4
+    z_oaluop0_5 = opext0
+    z_oaluop0_6 = opext1 ⊕ 1
+
+  g(z) =
+    z_oaluop0_0·z_oaluop0_4 ⊕ z_oaluop0_0·z_oaluop0_2·z_oaluop0_4 ⊕ z_oaluop0_0·z_oaluop0_3·z_oaluop0_4 ⊕ z_oaluop0_0·z_oaluop0_1·z_oaluop0_2·z_oaluop0_3 ⊕ z_oaluop0_0·z_oaluop0_2·z_oaluop0_3·z_oaluop0_4 ⊕ z_oaluop0_0·z_oaluop0_1·z_oaluop0_2·z_oaluop0_3·z_oaluop0_4 ⊕ z_oaluop0_1·z_oaluop0_2·z_oaluop0_3·z_oaluop0_4·z_oaluop0_5 ⊕ z_oaluop0_0·z_oaluop0_1·z_oaluop0_2·z_oaluop0_3·z_oaluop0_4·z_oaluop0_5·z_oaluop0_6
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oaluop1 ---
+  原始: T=6, deg=5, vars=7
+  简化: T=6→4 (33.3%↓), m=7→5
+  耗时: 0.079s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oaluop1_0 = opcode1
+    z_oaluop1_1 = opcode2 ⊕ opcode4 ⊕ 1
+    z_oaluop1_2 = opcode3
+    z_oaluop1_3 = opcode4
+    z_oaluop1_4 = opext1
+
+  g(z) =
+    z_oaluop1_0·z_oaluop1_1·z_oaluop1_2 ⊕ z_oaluop1_0·z_oaluop1_1·z_oaluop1_3 ⊕ z_oaluop1_0·z_oaluop1_2·z_oaluop1_3·z_oaluop1_4 ⊕ z_oaluop1_0·z_oaluop1_1·z_oaluop1_2·z_oaluop1_3·z_oaluop1_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oaluop2 ---
+  原始: T=7, deg=5, vars=7
+  简化: T=7→5 (28.6%↓), m=7→5
+  耗时: 0.079s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oaluop2_0 = opcode0
+    z_oaluop2_1 = opcode1
+    z_oaluop2_2 = opcode2 ⊕ 1
+    z_oaluop2_3 = opcode3
+    z_oaluop2_4 = opcode4
+
+  g(z) =
+    z_oaluop2_2·z_oaluop2_3 ⊕ z_oaluop2_2·z_oaluop2_4 ⊕ z_oaluop2_3·z_oaluop2_4 ⊕ z_oaluop2_2·z_oaluop2_3·z_oaluop2_4 ⊕ z_oaluop2_0·z_oaluop2_1·z_oaluop2_2·z_oaluop2_3·z_oaluop2_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oaluopext0 ---
+  原始: T=9, deg=5, vars=7
+  简化: T=9→6 (33.3%↓), m=7→5
+  耗时: 0.081s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oaluopext0_0 = opcode0 ⊕ opcode1 ⊕ opcode2 ⊕ 1
+    z_oaluopext0_1 = opcode1
+    z_oaluopext0_2 = opcode2
+    z_oaluopext0_3 = opcode3
+    z_oaluopext0_4 = opcode4
+
+  g(z) =
+    z_oaluopext0_1·z_oaluopext0_2 ⊕ z_oaluopext0_1·z_oaluopext0_2·z_oaluopext0_3 ⊕ z_oaluopext0_1·z_oaluopext0_2·z_oaluopext0_4 ⊕ z_oaluopext0_0·z_oaluopext0_3·z_oaluopext0_4 ⊕ z_oaluopext0_0·z_oaluopext0_1·z_oaluopext0_3·z_oaluopext0_4 ⊕ z_oaluopext0_0·z_oaluopext0_1·z_oaluopext0_2·z_oaluopext0_3·z_oaluopext0_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oaluopext1 ---
+  原始: T=9, deg=5, vars=7
+  简化: T=9→4 (55.6%↓), m=7→5
+  耗时: 0.076s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oaluopext1_0 = opcode0 ⊕ 1
+    z_oaluopext1_1 = opcode1
+    z_oaluopext1_2 = opcode2
+    z_oaluopext1_3 = opcode3 ⊕ 1
+    z_oaluopext1_4 = opcode4
+
+  g(z) =
+    z_oaluopext1_1·z_oaluopext1_2·z_oaluopext1_3 ⊕ z_oaluopext1_1·z_oaluopext1_2·z_oaluopext1_4 ⊕ z_oaluopext1_0·z_oaluopext1_1·z_oaluopext1_3·z_oaluopext1_4 ⊕ z_oaluopext1_0·z_oaluopext1_1·z_oaluopext1_2·z_oaluopext1_3·z_oaluopext1_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oaluopext2 ---
+  原始: T=10, deg=5, vars=7
+  简化: T=10→6 (40.0%↓), m=7→5
+  耗时: 0.081s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oaluopext2_0 = opcode0 ⊕ 1
+    z_oaluopext2_1 = opcode1 ⊕ opcode2 ⊕ 1
+    z_oaluopext2_2 = opcode2 ⊕ 1
+    z_oaluopext2_3 = opcode3 ⊕ 1
+    z_oaluopext2_4 = opcode4
+
+  g(z) =
+    z_oaluopext2_1·z_oaluopext2_3 ⊕ z_oaluopext2_1·z_oaluopext2_2·z_oaluopext2_3 ⊕ z_oaluopext2_1·z_oaluopext2_2·z_oaluopext2_4 ⊕ z_oaluopext2_1·z_oaluopext2_3·z_oaluopext2_4 ⊕ z_oaluopext2_0·z_oaluopext2_2·z_oaluopext2_3·z_oaluopext2_4 ⊕ z_oaluopext2_0·z_oaluopext2_1·z_oaluopext2_2·z_oaluopext2_3·z_oaluopext2_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oaluopext3 ---
+  原始: T=10, deg=5, vars=7
+  简化: T=10→6 (40.0%↓), m=7→5
+  耗时: 0.082s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oaluopext3_0 = opcode0 ⊕ 1
+    z_oaluopext3_1 = opcode1 ⊕ opcode3
+    z_oaluopext3_2 = opcode2 ⊕ 1
+    z_oaluopext3_3 = opcode3
+    z_oaluopext3_4 = opcode4
+
+  g(z) =
+    z_oaluopext3_4 ⊕ z_oaluopext3_2·z_oaluopext3_3 ⊕ z_oaluopext3_3·z_oaluopext3_4 ⊕ z_oaluopext3_0·z_oaluopext3_1·z_oaluopext3_2·z_oaluopext3_4 ⊕ z_oaluopext3_1·z_oaluopext3_2·z_oaluopext3_3·z_oaluopext3_4 ⊕ z_oaluopext3_0·z_oaluopext3_1·z_oaluopext3_2·z_oaluopext3_3·z_oaluopext3_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- ohalt ---
+  原始: T=32, deg=5, vars=7
+  简化: T=32→1 (96.9%↓), m=7→5
+  耗时: 0.069s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_ohalt_0 = opcode0 ⊕ 1
+    z_ohalt_1 = opcode1 ⊕ 1
+    z_ohalt_2 = opcode2 ⊕ 1
+    z_ohalt_3 = opcode3 ⊕ 1
+    z_ohalt_4 = opcode4 ⊕ 1
+
+  g(z) =
+    z_ohalt_0·z_ohalt_1·z_ohalt_2·z_ohalt_3·z_ohalt_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oregwrite ---
+  原始: T=15, deg=5, vars=7
+  简化: T=15→6 (60.0%↓), m=7→5
+  耗时: 0.079s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oregwrite_0 = opcode0 ⊕ 1
+    z_oregwrite_1 = opcode1 ⊕ 1
+    z_oregwrite_2 = opcode2 ⊕ opcode3 ⊕ 1
+    z_oregwrite_3 = opcode3 ⊕ 1
+    z_oregwrite_4 = opcode4 ⊕ 1
+
+  g(z) =
+    1 ⊕ z_oregwrite_2·z_oregwrite_4 ⊕ z_oregwrite_1·z_oregwrite_3·z_oregwrite_4 ⊕ z_oregwrite_0·z_oregwrite_1·z_oregwrite_2·z_oregwrite_3 ⊕ z_oregwrite_1·z_oregwrite_2·z_oregwrite_3·z_oregwrite_4 ⊕ z_oregwrite_0·z_oregwrite_1·z_oregwrite_2·z_oregwrite_3·z_oregwrite_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oselpcopA ---
+  原始: T=4, deg=4, vars=7
+  简化: T=4→1 (75.0%↓), m=7→4
+  耗时: 0.036s
+
+  线性变换 z = Mx ⊕ b (m=4):
+    z_oselpcopA_0 = opcode0
+    z_oselpcopA_1 = opcode2
+    z_oselpcopA_2 = opcode3 ⊕ 1
+    z_oselpcopA_3 = opcode4 ⊕ 1
+
+  g(z) =
+    z_oselpcopA_0·z_oselpcopA_1·z_oselpcopA_2·z_oselpcopA_3
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oselpcopB ---
+  原始: T=8, deg=4, vars=7
+  简化: T=8→1 (87.5%↓), m=7→4
+  耗时: 0.036s
+
+  线性变换 z = Mx ⊕ b (m=4):
+    z_oselpcopB_0 = opcode0 ⊕ 1
+    z_oselpcopB_1 = opcode2
+    z_oselpcopB_2 = opcode3 ⊕ 1
+    z_oselpcopB_3 = opcode4 ⊕ 1
+
+  g(z) =
+    z_oselpcopB_0·z_oselpcopB_1·z_oselpcopB_2·z_oselpcopB_3
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- obeqz ---
+  原始: T=8, deg=5, vars=7
+  简化: T=8→1 (87.5%↓), m=7→5
+  耗时: 0.068s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_obeqz_0 = opcode0 ⊕ 1
+    z_obeqz_1 = opcode1 ⊕ 1
+    z_obeqz_2 = opcode2
+    z_obeqz_3 = opcode3
+    z_obeqz_4 = opcode4 ⊕ 1
+
+  g(z) =
+    z_obeqz_0·z_obeqz_1·z_obeqz_2·z_obeqz_3·z_obeqz_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- obnez ---
+  原始: T=4, deg=5, vars=7
+  简化: T=4→1 (75.0%↓), m=7→5
+  耗时: 0.068s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_obnez_0 = opcode0
+    z_obnez_1 = opcode1 ⊕ 1
+    z_obnez_2 = opcode2
+    z_obnez_3 = opcode3
+    z_obnez_4 = opcode4 ⊕ 1
+
+  g(z) =
+    z_obnez_0·z_obnez_1·z_obnez_2·z_obnez_3·z_obnez_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- obgez ---
+  原始: T=2, deg=5, vars=7
+  简化: T=2→1 (50.0%↓), m=7→5
+  耗时: 0.070s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_obgez_0 = opcode0
+    z_obgez_1 = opcode1
+    z_obgez_2 = opcode2
+    z_obgez_3 = opcode3
+    z_obgez_4 = opcode4 ⊕ 1
+
+  g(z) =
+    z_obgez_0·z_obgez_1·z_obgez_2·z_obgez_3·z_obgez_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- obltz ---
+  原始: T=4, deg=5, vars=7
+  简化: T=4→1 (75.0%↓), m=7→5
+  耗时: 0.068s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_obltz_0 = opcode0 ⊕ 1
+    z_obltz_1 = opcode1
+    z_obltz_2 = opcode2
+    z_obltz_3 = opcode3
+    z_obltz_4 = opcode4 ⊕ 1
+
+  g(z) =
+    z_obltz_0·z_obltz_1·z_obltz_2·z_obltz_3·z_obltz_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- ojump ---
+  原始: T=4, deg=3, vars=7
+  简化: T=4→1 (75.0%↓), m=7→3
+  耗时: 0.000s
+
+  线性变换 z = Mx ⊕ b (m=3):
+    z_ojump_0 = opcode2
+    z_ojump_1 = opcode3 ⊕ 1
+    z_ojump_2 = opcode4 ⊕ 1
+
+  g(z) =
+    z_ojump_0·z_ojump_1·z_ojump_2
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oCin ---
+  原始: T=8, deg=6, vars=7
+  简化: T=8→6 (25.0%↓), m=7→6
+  耗时: 0.154s
+
+  线性变换 z = Mx ⊕ b (m=6):
+    z_oCin_0 = opcode0
+    z_oCin_1 = opcode1
+    z_oCin_2 = opcode2 ⊕ 1
+    z_oCin_3 = opcode3
+    z_oCin_4 = opcode4
+    z_oCin_5 = opext0 ⊕ 1
+
+  g(z) =
+    z_oCin_3·z_oCin_4 ⊕ z_oCin_0·z_oCin_2·z_oCin_3 ⊕ z_oCin_2·z_oCin_3·z_oCin_4 ⊕ z_oCin_0·z_oCin_1·z_oCin_3·z_oCin_4 ⊕ z_oCin_0·z_oCin_2·z_oCin_3·z_oCin_4 ⊕ z_oCin_0·z_oCin_1·z_oCin_2·z_oCin_3·z_oCin_4·z_oCin_5
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oinvA ---
+  原始: T=12, deg=7, vars=7
+  简化: T=12→3 (75.0%↓), m=7→7
+  耗时: 0.222s
+
+  线性变换 z = Mx ⊕ b (m=7):
+    z_oinvA_0 = opcode0
+    z_oinvA_1 = opcode1 ⊕ opcode4 ⊕ 1
+    z_oinvA_2 = opcode2 ⊕ 1
+    z_oinvA_3 = opcode3
+    z_oinvA_4 = opcode4 ⊕ 1
+    z_oinvA_5 = opext0
+    z_oinvA_6 = opext1 ⊕ 1
+
+  g(z) =
+    z_oinvA_0·z_oinvA_1·z_oinvA_2·z_oinvA_3·z_oinvA_4 ⊕ z_oinvA_0·z_oinvA_1·z_oinvA_2·z_oinvA_3·z_oinvA_5·z_oinvA_6 ⊕ z_oinvA_0·z_oinvA_1·z_oinvA_2·z_oinvA_3·z_oinvA_4·z_oinvA_5·z_oinvA_6
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oinvB ---
+  原始: T=6, deg=7, vars=7
+  简化: T=6→4 (33.3%↓), m=7→7
+  耗时: 0.221s
+
+  线性变换 z = Mx ⊕ b (m=7):
+    z_oinvB_0 = opcode0
+    z_oinvB_1 = opcode1
+    z_oinvB_2 = opcode2 ⊕ opcode4 ⊕ 1
+    z_oinvB_3 = opcode3
+    z_oinvB_4 = opcode4
+    z_oinvB_5 = opext0
+    z_oinvB_6 = opext1
+
+  g(z) =
+    z_oinvB_2·z_oinvB_3·z_oinvB_4 ⊕ z_oinvB_0·z_oinvB_1·z_oinvB_2·z_oinvB_3 ⊕ z_oinvB_0·z_oinvB_1·z_oinvB_3·z_oinvB_4·z_oinvB_5·z_oinvB_6 ⊕ z_oinvB_0·z_oinvB_1·z_oinvB_2·z_oinvB_3·z_oinvB_4·z_oinvB_5·z_oinvB_6
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- osign ---
+  原始: T=1, deg=0, vars=7
+  简化: T=1→1 (0.0%↓), m=7→0
+  耗时: 0.000s
+
+  线性变换 z = Mx ⊕ b (m=0):
+
+  g(z) =
+    1
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- omemwrite ---
+  原始: T=12, deg=4, vars=7
+  简化: T=12→1 (91.7%↓), m=7→4
+  耗时: 0.036s
+
+  线性变换 z = Mx ⊕ b (m=4):
+    z_omemwrite_0 = opcode0 ⊕ opcode1 ⊕ 1
+    z_omemwrite_1 = opcode2 ⊕ 1
+    z_omemwrite_2 = opcode3 ⊕ 1
+    z_omemwrite_3 = opcode4
+
+  g(z) =
+    z_omemwrite_0·z_omemwrite_1·z_omemwrite_2·z_omemwrite_3
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+--- oselwb ---
+  原始: T=8, deg=5, vars=7
+  简化: T=8→1 (87.5%↓), m=7→5
+  耗时: 0.069s
+
+  线性变换 z = Mx ⊕ b (m=5):
+    z_oselwb_0 = opcode0
+    z_oselwb_1 = opcode1 ⊕ 1
+    z_oselwb_2 = opcode2 ⊕ 1
+    z_oselwb_3 = opcode3 ⊕ 1
+    z_oselwb_4 = opcode4
+
+  g(z) =
+    z_oselwb_0·z_oselwb_1·z_oselwb_2·z_oselwb_3·z_oselwb_4
+
+  验证: 0/100 错误
+
+--------------------------------------------------
+
+  汇总: T₀=232 → T₁=88 (62.1%↓)

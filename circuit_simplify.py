@@ -110,13 +110,14 @@ class CircuitSimplify:
         g, M, b = cs.result('om_0')
     """
 
-    def __init__(self, threshold=4096, verbose=False):
+    def __init__(self, threshold=4096, verbose=False, xor_semantics=False):
         self.nodes = {}
         self.n = 0
         self.inputs = []
         self.outputs = []
         self.threshold = threshold
         self.verbose = verbose
+        self.xor_semantics = xor_semantics
         self.stats = {'simplify_calls': 0, 'simplify_time': 0.0}
 
     def add_input(self, name, n):
@@ -249,6 +250,14 @@ class CircuitSimplify:
             self.nodes[name] = self.nodes[expr].copy()
             return
 
+        # 常数: osign = 1/0
+        if expr == '0':
+            self.nodes[name] = TNode({}, [[0] * self.n], [0], self.n)
+            return
+        if expr == '1':
+            self.nodes[name] = TNode({0: 1}, [[0] * self.n], [0], self.n)
+            return
+
         # NOT: n65 = !i0
         mn = re.match(r'!(\w+)$', expr)
         if mn:
@@ -262,23 +271,64 @@ class CircuitSimplify:
             self._and(name, ma.group(1), ma.group(2))
             return
 
-        # OR: out = a + b
+        # XOR 或 OR: out = a + b
         mo = re.match(r'(\w+)\s*\+\s*(\w+)$', expr)
         if mo:
             name_A, name_B = mo.group(1), mo.group(2)
             self._ensure_simplified(name_A)
             self._ensure_simplified(name_B)
             A, B = self.nodes[name_A], self.nodes[name_B]
-            if same_matrix(A.M, B.M):
-                h = anf_or(A.g, B.g)
-                if len(h) > self.threshold:
-                    g_s, M_new, b_new = self._compact_and_simplify(h, A.m, A.M, A.b)
-                    self._stats_simplify(g_s.T(), len(h), A.m, g_s.n)
-                    self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)
+
+            if self.xor_semantics:
+                # XOR = GF(2) addition
+                # 常数特例
+                if not A.g:
+                    self.nodes[name] = B.copy()
+                    return
+                if not B.g:
+                    self.nodes[name] = A.copy()
+                    return
+                if A.g == {0: 1}:
+                    self.nodes[name] = TNode(anf_not(B.g), B.M, B.b, B.n)
+                    return
+                if B.g == {0: 1}:
+                    self.nodes[name] = TNode(anf_not(A.g), A.M, A.b, A.n)
+                    return
+
+                if same_matrix(A.M, B.M):
+                    h = anf_xor(A.g, B.g)
+                    h_T = len(h)
+                    if h_T > self.threshold:
+                        g_s, M_new, b_new = self._compact_and_simplify(h, A.m, A.M, A.b)
+                        self._stats_simplify(g_s.T(), h_T, A.m, g_s.n)
+                        self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)
+                    else:
+                        self.nodes[name] = TNode(h, A.M, A.b, A.n)
                 else:
-                    self.nodes[name] = TNode(h, A.M, A.b, A.n)
+                    mA, mB = A.m, B.m
+                    M_stacked = A.M + B.M
+                    b_stacked = A.b + B.b
+                    gB_shifted = {mk << mA: cv for mk, cv in B.g.items()}
+                    h = anf_xor(A.g, gB_shifted)
+                    h_T = len(h)
+                    if h_T > self.threshold:
+                        g_s, M_new, b_new = self._compact_and_simplify(h, mA + mB, M_stacked, b_stacked)
+                        self._stats_simplify(g_s.T(), h_T, mA + mB, g_s.n)
+                        self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)
+                    else:
+                        self.nodes[name] = TNode(h, M_stacked, b_stacked, A.n)
             else:
-                raise NotImplementedError("OR with different M not implemented")
+                # OR semantics (original)
+                if same_matrix(A.M, B.M):
+                    h = anf_or(A.g, B.g)
+                    if len(h) > self.threshold:
+                        g_s, M_new, b_new = self._compact_and_simplify(h, A.m, A.M, A.b)
+                        self._stats_simplify(g_s.T(), len(h), A.m, g_s.n)
+                        self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)
+                    else:
+                        self.nodes[name] = TNode(h, A.M, A.b, A.n)
+                else:
+                    raise NotImplementedError("OR with different M not implemented")
             return
 
         raise ValueError(f"语法错误: {name} = {expr}")
