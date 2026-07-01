@@ -126,15 +126,45 @@ class CircuitSimplify:
 
     # ---- 内部 AND 实现 ----
 
+    def _compact_and_simplify(self, terms, m, M, b):
+        """压缩变量空间后 simplify，返回 (g_s, M_s, b_s)"""
+        used = set()
+        for mask in terms:
+            if mask == 0:
+                continue
+            t = mask
+            while t:
+                lsb = t & -t
+                used.add((lsb.bit_length() - 1))
+                t ^= lsb
+        if 0 < len(used) < m:
+            sorted_used = sorted(used)
+            old_to_new = {old: new for new, old in enumerate(sorted_used)}
+            compact_g = {}
+            for mask, v in terms.items():
+                new_mask = 0
+                for old_k in sorted_used:
+                    if (mask >> old_k) & 1:
+                        new_mask |= (1 << old_to_new[old_k])
+                compact_g[new_mask] = compact_g.get(new_mask, 0) ^ v
+            compact_g = {k: v for k, v in compact_g.items() if v}
+            compact_M = np.array([M[idx] for idx in sorted_used], dtype=np.int64)
+            compact_b = [b[idx] for idx in sorted_used]
+            g_s, M_s, b_s = simplify(SparseANF(compact_g, len(sorted_used)), verbose=False)
+            M_new, b_new = compose(M_s.tolist(), b_s.tolist(),
+                                    compact_M.tolist(), compact_b)
+            return g_s, M_new, b_new
+        else:
+            g_s, M_s, b_s = simplify(SparseANF(terms, m), verbose=False)
+            return g_s, M_s.tolist(), b_s.tolist()
+
     def _ensure_simplified(self, name):
         """简化并更新存储的节点（原地修改 nodes dict）"""
         node = self.nodes[name]
         if len(node.g) < self.threshold:
             return
-        # 也简化达到阈值的节点：避免后续 AND 产生巨量结果
-        g_s, M_s, b_s = simplify(SparseANF(node.g, node.m), verbose=False)
+        g_s, M_new, b_new = self._compact_and_simplify(node.g, node.m, node.M, node.b)
         self._stats_simplify(g_s.T(), len(node.g), node.m, g_s.n)
-        M_new, b_new = compose(M_s.tolist(), b_s.tolist(), node.M, node.b)
         self.nodes[name] = TNode(g_s.terms, M_new, b_new, node.n)
 
     def _and(self, name, name_A, name_B):
@@ -149,9 +179,8 @@ class CircuitSimplify:
             h = anf_and(A.g, B.g)
             h_T = len(h)
             if h_T > self.threshold:
-                g_s, M_s, b_s = simplify(SparseANF(h, A.m), verbose=False)
+                g_s, M_new, b_new = self._compact_and_simplify(h, A.m, A.M, A.b)
                 self._stats_simplify(g_s.T(), h_T, A.m, g_s.n)
-                M_new, b_new = compose(M_s.tolist(), b_s.tolist(), A.M, A.b)
                 self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)
             else:
                 self.nodes[name] = TNode(h, A.M, A.b, A.n)
@@ -167,9 +196,8 @@ class CircuitSimplify:
         h_T = len(h)
 
         if h_T > self.threshold:
-            g_s, M_s, b_s = simplify(SparseANF(h, mA + mB), verbose=False)
+            g_s, M_new, b_new = self._compact_and_simplify(h, mA + mB, M_stacked, b_stacked)
             self._stats_simplify(g_s.T(), h_T, mA + mB, g_s.n)
-            M_new, b_new = compose(M_s.tolist(), b_s.tolist(), M_stacked, b_stacked)
             self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)
         else:
             self.nodes[name] = TNode(h, M_stacked, b_stacked, A.n)
@@ -244,9 +272,8 @@ class CircuitSimplify:
             if same_matrix(A.M, B.M):
                 h = anf_or(A.g, B.g)
                 if len(h) > self.threshold:
-                    g_s, M_s, b_s = simplify(SparseANF(h, A.m), verbose=False)
+                    g_s, M_new, b_new = self._compact_and_simplify(h, A.m, A.M, A.b)
                     self._stats_simplify(g_s.T(), len(h), A.m, g_s.n)
-                    M_new, b_new = compose(M_s.tolist(), b_s.tolist(), A.M, A.b)
                     self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)
                 else:
                     self.nodes[name] = TNode(h, A.M, A.b, A.n)
@@ -261,8 +288,7 @@ class CircuitSimplify:
     def result(self, name):
         """获取简化结果 (g, M, b)"""
         node = self.nodes[name]
-        g_s, M_s, b_s = simplify(SparseANF(node.g, node.m), verbose=False)
-        M_f, b_f = compose(M_s.tolist(), b_s.tolist(), node.M, node.b)
+        g_s, M_f, b_f = self._compact_and_simplify(node.g, node.m, node.M, node.b)
         return g_s, M_f, b_f
 
     def result_raw(self, name):
