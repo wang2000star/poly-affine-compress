@@ -174,7 +174,7 @@ class SparseANF:
     # ---- core: substitute z = Mx⊕b into f(x) to get g(z) ----
 
     def substitute_affine(self, M: np.ndarray, b: np.ndarray,
-                          verify: bool = True) -> "SparseANF":
+                          verify: bool = True, n_tests: int = 20) -> "SparseANF":
         """PURE ALGEBRAIC substitution: define z = Mx⊕b, compute g(z) = f(x).
 
         M is ANY m×n matrix (any rank), b is ANY m-vector.
@@ -224,7 +224,7 @@ class SparseANF:
         g = SparseANF({k: v for k, v in g_terms.items() if v}, m)
 
         if verify and m < self.n:
-            self._verify_substitution(g, M, b)
+            self._verify_substitution(g, M, b, n_tests=n_tests)
 
         return g
 
@@ -552,7 +552,7 @@ def search_affine_simplification(
             b = np.zeros((1, 1), dtype=np.uint8)
             b[0] = bc
             try:
-                g = f.substitute_affine(M, b)
+                g = f.substitute_affine(M, b, n_tests=40)
                 results.append((1, g.T(), M, b, g))
             except ValueError:
                 pass
@@ -572,7 +572,7 @@ def search_affine_simplification(
             continue
         b = np.zeros((m, 1), dtype=np.uint8)
         try:
-            g = f.substitute_affine(M, b)
+            g = f.substitute_affine(M, b, n_tests=40)
             results.append((m, g.T(), M, b, g))
         except ValueError:
             pass
@@ -592,7 +592,7 @@ def search_affine_simplification(
                 continue
             b = np.array([[rng.randint(0, 1)] for _ in range(m)], dtype=np.uint8)
             try:
-                g = f.substitute_affine(M, b)
+                g = f.substitute_affine(M, b, n_tests=40)
                 results.append((m, g.T(), M, b, g))
             except ValueError:
                 pass
@@ -943,7 +943,7 @@ def simplify(
     b = ((M2 @ b) % 2).reshape(-1, 1) ^ b2
     g = g2
 
-    if g.n > 3 and g.T() > 0:
+    if g.n > 3 and g.n <= 20 and g.T() > 0:
         try:
             results = search_affine_simplification(
                 g, max_m=min(g.n, 10), top_k=80, verbose=verbose, n_random=30)
@@ -951,11 +951,18 @@ def simplify(
             results = []
         if results and results[0][1] < g.T():
             m_w, T_w, M_w, b_w, g_w = results[0]
-            if verbose:
-                print(f"  Walsh: T={T_w}/{g.T()} ({(g.T()-T_w)/g.T()*100:.1f}%↓)")
-            M = (M_w @ M) % 2
-            b = ((M_w @ b) % 2).reshape(-1, 1) ^ b_w
-            g = g_w
+            try:
+                # 验证 Walsh 结果正确性（用 100 个随机测试筛除假阳性）
+                g_check = g.substitute_affine(M_w, b_w, verify=True, n_tests=100)
+                if g_check.T() == g_w.T():
+                    if verbose:
+                        print(f"  Walsh: T={T_w}/{g.T()} ({(g.T()-T_w)/g.T()*100:.1f}%↓)")
+                    M = (M_w @ M) % 2
+                    b = ((M_w @ b) % 2).reshape(-1, 1) ^ b_w
+                    g = g_w
+            except ValueError:
+                if verbose:
+                    print(f"  Walsh: T={T_w} 被拒（验证不通过）")
 
     if verbose:
         pct = (orig_T - g.T()) / orig_T * 100
