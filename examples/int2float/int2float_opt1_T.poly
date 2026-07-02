@@ -1,4 +1,6 @@
-# T(g) values: 7 outputs, total T=1613
+# T(g) values: 7 outputs
+# 原始并集T: 1613
+# 优化并集T: 1613
 oM0 T=255
 oM1 T=383
 oM2 T=351

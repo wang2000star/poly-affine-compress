@@ -1,4 +1,6 @@
-# T(g) values: 256 outputs, total T=6561
+# T(g) values: 256 outputs
+# 原始并集T: 6561
+# 优化并集T: 6561
 osel10 T=128
 osel11 T=64
 osel12 T=64

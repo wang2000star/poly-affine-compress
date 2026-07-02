@@ -1,4 +1,6 @@
-# T(g) values: 32 outputs, total T=32
+# T(g) values: 32 outputs
+# 原始并集T: 12304
+# 优化并集T: 32
 om_9 T=1
 om_8 T=1
 om_7 T=1

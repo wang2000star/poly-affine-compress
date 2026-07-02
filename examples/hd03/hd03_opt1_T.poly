@@ -1,4 +1,6 @@
-# T(g) values: 8 outputs, total T=518
+# T(g) values: 8 outputs
+# 原始并集T: 518
+# 优化并集T: 518
 om_7 T=257
 om_6 T=129
 om_5 T=65

@@ -1,4 +1,6 @@
-# T(g) values: 26 outputs, total T=232
+# T(g) values: 26 outputs
+# 原始并集T: 232
+# 优化并集T: 232
 oseloregdst0 T=9
 oseloregdst1 T=10
 oselopB0 T=12

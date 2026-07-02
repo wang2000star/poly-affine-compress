@@ -1,4 +1,6 @@
-# T(g) values: 11 outputs, total T=621
+# T(g) values: 11 outputs
+# 原始并集T: 4303
+# 优化并集T: 621
 ocoeff0 T=98
 ocoeff1 T=90
 ocoeff2 T=92
