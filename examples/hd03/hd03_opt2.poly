@@ -2,7 +2,7 @@
   策略 2（各自变换）: hd03.txt
 ======================================================================
 
-  原始输入: i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15
+  原始输入: i9, i8, i7, i6, i5, i4, i3, i2, i15, i14, i13, i12, i11, i10, i1, i0
   输出函数: 8 个
 
   ΣT: 518 → 57 (89.0%↓)
@@ -21,115 +21,115 @@
 
   各输出详情:
 
-  om_0: T=3 → 2, m=16→3
+  om_7: T=257 → 16, m=16→16
     线性变换 z = Mx ⊕ b:
-      z_om_0_0 = i0
-      z_om_0_1 = i1 ⊕ i9
-      z_om_0_2 = i8
-    g(z) = z_om_0_1 ⊕ z_om_0_0·z_om_0_2
-
-  om_1: T=5 → 4, m=16→5
-    线性变换 z = Mx ⊕ b:
-      z_om_1_0 = i0
-      z_om_1_1 = i1
-      z_om_1_2 = i2 ⊕ i10
-      z_om_1_3 = i8
-      z_om_1_4 = i9
-    g(z) = z_om_1_2 ⊕ z_om_1_1·z_om_1_4 ⊕ z_om_1_0·z_om_1_1·z_om_1_3 ⊕ z_om_1_0·z_om_1_3·z_om_1_4
-
-  om_2: T=9 → 5, m=16→7
-    线性变换 z = Mx ⊕ b:
-      z_om_2_0 = i0
-      z_om_2_1 = i1
-      z_om_2_2 = i2 ⊕ i10
-      z_om_2_3 = i3 ⊕ i10 ⊕ i11
-      z_om_2_4 = i8
-      z_om_2_5 = i9
-      z_om_2_6 = i10
-    g(z) = z_om_2_3 ⊕ z_om_2_2·z_om_2_6 ⊕ z_om_2_1·z_om_2_2·z_om_2_5 ⊕ z_om_2_0·z_om_2_1·z_om_2_2·z_om_2_4 ⊕ z_om_2_0·z_om_2_2·z_om_2_4·z_om_2_5
-
-  om_3: T=17 → 6, m=16→9
-    线性变换 z = Mx ⊕ b:
-      z_om_3_0 = i0
-      z_om_3_1 = i1
-      z_om_3_2 = i2 ⊕ i10
-      z_om_3_3 = i3 ⊕ i11
-      z_om_3_4 = i4 ⊕ i11 ⊕ i12
-      z_om_3_5 = i8
-      z_om_3_6 = i9
-      z_om_3_7 = i10
-      z_om_3_8 = i10 ⊕ i11
-    g(z) = z_om_3_4 ⊕ z_om_3_3·z_om_3_8 ⊕ z_om_3_2·z_om_3_3·z_om_3_7 ⊕ z_om_3_1·z_om_3_2·z_om_3_3·z_om_3_6 ⊕ z_om_3_0·z_om_3_1·z_om_3_2·z_om_3_3·z_om_3_5 ⊕ z_om_3_0·z_om_3_2·z_om_3_3·z_om_3_5·z_om_3_6
-
-  om_4: T=33 → 7, m=16→11
-    线性变换 z = Mx ⊕ b:
-      z_om_4_0 = i0
-      z_om_4_1 = i1
-      z_om_4_2 = i2 ⊕ i10
-      z_om_4_3 = i3 ⊕ i11
-      z_om_4_4 = i4 ⊕ i12
-      z_om_4_5 = i5 ⊕ i12 ⊕ i13
-      z_om_4_6 = i8
-      z_om_4_7 = i9
-      z_om_4_8 = i10
-      z_om_4_9 = i10 ⊕ i11
-      z_om_4_10 = i11 ⊕ i12
-    g(z) = z_om_4_5 ⊕ z_om_4_4·z_om_4_10 ⊕ z_om_4_3·z_om_4_4·z_om_4_9 ⊕ z_om_4_2·z_om_4_3·z_om_4_4·z_om_4_8 ⊕ z_om_4_1·z_om_4_2·z_om_4_3·z_om_4_4·z_om_4_7 ⊕ z_om_4_0·z_om_4_1·z_om_4_2·z_om_4_3·z_om_4_4·z_om_4_6 ⊕ z_om_4_0·z_om_4_2·z_om_4_3·z_om_4_4·z_om_4_6·z_om_4_7
-
-  om_5: T=65 → 8, m=16→13
-    线性变换 z = Mx ⊕ b:
-      z_om_5_0 = i0
-      z_om_5_1 = i1
-      z_om_5_2 = i2 ⊕ i10
-      z_om_5_3 = i3 ⊕ i11
-      z_om_5_4 = i4 ⊕ i12
-      z_om_5_5 = i5 ⊕ i13
-      z_om_5_6 = i6 ⊕ i13 ⊕ i14
-      z_om_5_7 = i8
-      z_om_5_8 = i9
-      z_om_5_9 = i10
-      z_om_5_10 = i10 ⊕ i11
-      z_om_5_11 = i11 ⊕ i12
-      z_om_5_12 = i12 ⊕ i13
-    g(z) = z_om_5_6 ⊕ z_om_5_5·z_om_5_12 ⊕ z_om_5_4·z_om_5_5·z_om_5_11 ⊕ z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_10 ⊕ z_om_5_2·z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_9 ⊕ z_om_5_1·z_om_5_2·z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_8 ⊕ z_om_5_0·z_om_5_1·z_om_5_2·z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_7 ⊕ z_om_5_0·z_om_5_2·z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_7·z_om_5_8
+      z_om_7_0 = i9
+      z_om_7_1 = i8
+      z_om_7_2 = i7 ⊕ i15
+      z_om_7_3 = i6 ⊕ i14
+      z_om_7_4 = i5 ⊕ i13
+      z_om_7_5 = i4 ⊕ i12
+      z_om_7_6 = i3 ⊕ i11
+      z_om_7_7 = i2 ⊕ i10
+      z_om_7_8 = i15 ⊕ 1
+      z_om_7_9 = i14
+      z_om_7_10 = i13
+      z_om_7_11 = i12
+      z_om_7_12 = i11
+      z_om_7_13 = i10
+      z_om_7_14 = i1
+      z_om_7_15 = i0
+    g(z) = 1 ⊕ z_om_7_8 ⊕ z_om_7_2·z_om_7_8 ⊕ z_om_7_2·z_om_7_9 ⊕ z_om_7_2·z_om_7_3·z_om_7_9 ⊕ z_om_7_2·z_om_7_3·z_om_7_10 ⊕ z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_10 ⊕ z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_11 ⊕ z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_11 ⊕ z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_12 ⊕ z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_12 ⊕ z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_13 ⊕ z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_13 ⊕ z_om_7_0·z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_14 ⊕ z_om_7_0·z_om_7_1·z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_15 ⊕ z_om_7_1·z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_14·z_om_7_15
 
   om_6: T=129 → 9, m=16→15
     线性变换 z = Mx ⊕ b:
-      z_om_6_0 = i0
-      z_om_6_1 = i1
-      z_om_6_2 = i2 ⊕ i10
-      z_om_6_3 = i3 ⊕ i11
-      z_om_6_4 = i4 ⊕ i12
-      z_om_6_5 = i5 ⊕ i13
-      z_om_6_6 = i6 ⊕ i14
-      z_om_6_7 = i7 ⊕ i14 ⊕ i15
-      z_om_6_8 = i8
-      z_om_6_9 = i9
-      z_om_6_10 = i10
-      z_om_6_11 = i10 ⊕ i11
-      z_om_6_12 = i11 ⊕ i12
-      z_om_6_13 = i12 ⊕ i13
-      z_om_6_14 = i13 ⊕ i14
-    g(z) = z_om_6_7 ⊕ z_om_6_6·z_om_6_14 ⊕ z_om_6_5·z_om_6_6·z_om_6_13 ⊕ z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_12 ⊕ z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_11 ⊕ z_om_6_2·z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_10 ⊕ z_om_6_1·z_om_6_2·z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_9 ⊕ z_om_6_0·z_om_6_1·z_om_6_2·z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_8 ⊕ z_om_6_0·z_om_6_2·z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_8·z_om_6_9
+      z_om_6_0 = i9
+      z_om_6_1 = i8
+      z_om_6_2 = i7 ⊕ i15 ⊕ i14
+      z_om_6_3 = i6 ⊕ i14
+      z_om_6_4 = i5 ⊕ i13
+      z_om_6_5 = i4 ⊕ i12
+      z_om_6_6 = i3 ⊕ i11
+      z_om_6_7 = i2 ⊕ i10
+      z_om_6_8 = i14 ⊕ i13
+      z_om_6_9 = i13 ⊕ i12
+      z_om_6_10 = i12 ⊕ i11
+      z_om_6_11 = i11 ⊕ i10
+      z_om_6_12 = i10
+      z_om_6_13 = i1
+      z_om_6_14 = i0
+    g(z) = z_om_6_2 ⊕ z_om_6_3·z_om_6_8 ⊕ z_om_6_3·z_om_6_4·z_om_6_9 ⊕ z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_10 ⊕ z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_11 ⊕ z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_7·z_om_6_12 ⊕ z_om_6_0·z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_7·z_om_6_13 ⊕ z_om_6_0·z_om_6_1·z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_7·z_om_6_14 ⊕ z_om_6_1·z_om_6_3·z_om_6_4·z_om_6_5·z_om_6_6·z_om_6_7·z_om_6_13·z_om_6_14
 
-  om_7: T=257 → 16, m=16→16
+  om_5: T=65 → 8, m=16→13
     线性变换 z = Mx ⊕ b:
-      z_om_7_0 = i0
-      z_om_7_1 = i1
-      z_om_7_2 = i2 ⊕ i10
-      z_om_7_3 = i3 ⊕ i11
-      z_om_7_4 = i4 ⊕ i12
-      z_om_7_5 = i5 ⊕ i13
-      z_om_7_6 = i6 ⊕ i14
-      z_om_7_7 = i7 ⊕ i15
-      z_om_7_8 = i8
-      z_om_7_9 = i9
-      z_om_7_10 = i10
-      z_om_7_11 = i11
-      z_om_7_12 = i12
-      z_om_7_13 = i13
-      z_om_7_14 = i14
-      z_om_7_15 = i15 ⊕ 1
-    g(z) = 1 ⊕ z_om_7_15 ⊕ z_om_7_7·z_om_7_14 ⊕ z_om_7_7·z_om_7_15 ⊕ z_om_7_6·z_om_7_7·z_om_7_13 ⊕ z_om_7_6·z_om_7_7·z_om_7_14 ⊕ z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_12 ⊕ z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_13 ⊕ z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_11 ⊕ z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_12 ⊕ z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_10 ⊕ z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_11 ⊕ z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_10 ⊕ z_om_7_1·z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_9 ⊕ z_om_7_0·z_om_7_1·z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_8 ⊕ z_om_7_0·z_om_7_2·z_om_7_3·z_om_7_4·z_om_7_5·z_om_7_6·z_om_7_7·z_om_7_8·z_om_7_9
+      z_om_5_0 = i9
+      z_om_5_1 = i8
+      z_om_5_2 = i6 ⊕ i14 ⊕ i13
+      z_om_5_3 = i5 ⊕ i13
+      z_om_5_4 = i4 ⊕ i12
+      z_om_5_5 = i3 ⊕ i11
+      z_om_5_6 = i2 ⊕ i10
+      z_om_5_7 = i13 ⊕ i12
+      z_om_5_8 = i12 ⊕ i11
+      z_om_5_9 = i11 ⊕ i10
+      z_om_5_10 = i10
+      z_om_5_11 = i1
+      z_om_5_12 = i0
+    g(z) = z_om_5_2 ⊕ z_om_5_3·z_om_5_7 ⊕ z_om_5_3·z_om_5_4·z_om_5_8 ⊕ z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_9 ⊕ z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_6·z_om_5_10 ⊕ z_om_5_0·z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_6·z_om_5_11 ⊕ z_om_5_0·z_om_5_1·z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_6·z_om_5_12 ⊕ z_om_5_1·z_om_5_3·z_om_5_4·z_om_5_5·z_om_5_6·z_om_5_11·z_om_5_12
+
+  om_4: T=33 → 7, m=16→11
+    线性变换 z = Mx ⊕ b:
+      z_om_4_0 = i9
+      z_om_4_1 = i8
+      z_om_4_2 = i5 ⊕ i13 ⊕ i12
+      z_om_4_3 = i4 ⊕ i12
+      z_om_4_4 = i3 ⊕ i11
+      z_om_4_5 = i2 ⊕ i10
+      z_om_4_6 = i12 ⊕ i11
+      z_om_4_7 = i11 ⊕ i10
+      z_om_4_8 = i10
+      z_om_4_9 = i1
+      z_om_4_10 = i0
+    g(z) = z_om_4_2 ⊕ z_om_4_3·z_om_4_6 ⊕ z_om_4_3·z_om_4_4·z_om_4_7 ⊕ z_om_4_3·z_om_4_4·z_om_4_5·z_om_4_8 ⊕ z_om_4_0·z_om_4_3·z_om_4_4·z_om_4_5·z_om_4_9 ⊕ z_om_4_0·z_om_4_1·z_om_4_3·z_om_4_4·z_om_4_5·z_om_4_10 ⊕ z_om_4_1·z_om_4_3·z_om_4_4·z_om_4_5·z_om_4_9·z_om_4_10
+
+  om_3: T=17 → 6, m=16→9
+    线性变换 z = Mx ⊕ b:
+      z_om_3_0 = i9
+      z_om_3_1 = i8
+      z_om_3_2 = i4 ⊕ i12 ⊕ i11
+      z_om_3_3 = i3 ⊕ i11
+      z_om_3_4 = i2 ⊕ i10
+      z_om_3_5 = i11 ⊕ i10
+      z_om_3_6 = i10
+      z_om_3_7 = i1
+      z_om_3_8 = i0
+    g(z) = z_om_3_2 ⊕ z_om_3_3·z_om_3_5 ⊕ z_om_3_3·z_om_3_4·z_om_3_6 ⊕ z_om_3_0·z_om_3_3·z_om_3_4·z_om_3_7 ⊕ z_om_3_0·z_om_3_1·z_om_3_3·z_om_3_4·z_om_3_8 ⊕ z_om_3_1·z_om_3_3·z_om_3_4·z_om_3_7·z_om_3_8
+
+  om_2: T=9 → 5, m=16→7
+    线性变换 z = Mx ⊕ b:
+      z_om_2_0 = i9
+      z_om_2_1 = i8
+      z_om_2_2 = i3 ⊕ i11 ⊕ i10
+      z_om_2_3 = i2 ⊕ i10
+      z_om_2_4 = i10
+      z_om_2_5 = i1
+      z_om_2_6 = i0
+    g(z) = z_om_2_2 ⊕ z_om_2_3·z_om_2_4 ⊕ z_om_2_0·z_om_2_3·z_om_2_5 ⊕ z_om_2_0·z_om_2_1·z_om_2_3·z_om_2_6 ⊕ z_om_2_1·z_om_2_3·z_om_2_5·z_om_2_6
+
+  om_1: T=5 → 4, m=16→5
+    线性变换 z = Mx ⊕ b:
+      z_om_1_0 = i9
+      z_om_1_1 = i8
+      z_om_1_2 = i2 ⊕ i10
+      z_om_1_3 = i1
+      z_om_1_4 = i0
+    g(z) = z_om_1_2 ⊕ z_om_1_0·z_om_1_3 ⊕ z_om_1_0·z_om_1_1·z_om_1_4 ⊕ z_om_1_1·z_om_1_3·z_om_1_4
+
+  om_0: T=3 → 2, m=16→3
+    线性变换 z = Mx ⊕ b:
+      z_om_0_0 = i9 ⊕ i1
+      z_om_0_1 = i8
+      z_om_0_2 = i0
+    g(z) = z_om_0_0 ⊕ z_om_0_1·z_om_0_2
 
 ======================================================================

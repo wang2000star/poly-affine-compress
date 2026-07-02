@@ -157,7 +157,8 @@ class CircuitSimplify:
             return g_s, M_new, b_new
         else:
             g_s, M_s, b_s = simplify(SparseANF(terms, m), verbose=False)
-            return g_s, M_s.tolist(), b_s.tolist()
+            M_new, b_new = compose(M_s.tolist(), b_s.tolist(), M, b)
+            return g_s, M_new, b_new
 
     def _ensure_simplified(self, name):
         """简化并更新存储的节点（原地修改 nodes dict）"""
@@ -196,7 +197,7 @@ class CircuitSimplify:
         h = anf_and(A.g, gB_shifted)
         h_T = len(h)
 
-        if h_T > self.threshold:
+        if h_T > self.threshold or mA + mB > 128:
             g_s, M_new, b_new = self._compact_and_simplify(h, mA + mB, M_stacked, b_stacked)
             self._stats_simplify(g_s.T(), h_T, mA + mB, g_s.n)
             self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)
@@ -245,6 +246,9 @@ class CircuitSimplify:
         return self
 
     def _parse_stmt(self, name, expr):
+        # 去除外层括号: (a * b) -> a * b
+        while expr.startswith('(') and expr.endswith(')'):
+            expr = expr[1:-1].strip()
         # 直通: om_0 = i0
         if expr in self.nodes:
             self.nodes[name] = self.nodes[expr].copy()
@@ -311,7 +315,7 @@ class CircuitSimplify:
                     gB_shifted = {mk << mA: cv for mk, cv in B.g.items()}
                     h = anf_xor(A.g, gB_shifted)
                     h_T = len(h)
-                    if h_T > self.threshold:
+                    if h_T > self.threshold or mA + mB > 128:
                         g_s, M_new, b_new = self._compact_and_simplify(h, mA + mB, M_stacked, b_stacked)
                         self._stats_simplify(g_s.T(), h_T, mA + mB, g_s.n)
                         self.nodes[name] = TNode(g_s.terms, M_new, b_new, A.n)

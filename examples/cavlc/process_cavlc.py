@@ -271,7 +271,7 @@ def main():
         lines2.append(f"    线性变换 z = Mx ⊕ b:")
         for i in range(m):
             terms = [inputs[j] for j in range(n) if int(M_arr[i][j]) % 2]
-            const = int(b_arr[i]) % 2 if i < len(b_arr) else 0
+            const = int(b_arr.ravel()[i]) % 2 if i < len(b_arr) else 0
             if const:
                 terms.append("1")
             lines2.append(f"      {z_names[i]} = {' ⊕ '.join(terms) if terms else '0'}")

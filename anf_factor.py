@@ -852,8 +852,9 @@ def simplify_by_complement(
             g = f
         b = best_b
     else:
-        # ---- greedy: flip bits one at a time ----
-        best_g = f
+        # ---- greedy: flip bits one at a time (O(T) per flip) ----
+        # Maintain cur_terms = f(x⊕b_vec) incrementally, avoiding _expand_monomial
+        cur_terms: dict[int, int] = dict(f.terms)
         best_b = np.zeros((n, 1), dtype=np.uint8)
         b_vec = np.zeros((n, 1), dtype=np.uint8)
         best_T = f.T()
@@ -867,22 +868,40 @@ def simplify_by_complement(
             improved = False
             for i in range(n):
                 b_vec[i] ^= 1  # flip bit i
-                g = f.substitute_affine(M, b_vec)
-                if g.T() < best_T:
-                    best_T = g.T()
+                # Incremental: for each monomial containing i, toggle m\{i}
+                saved = dict(cur_terms)
+                toggled = 0
+                for m, v in saved.items():
+                    if (m >> i) & 1:
+                        m_without = m ^ (1 << i)
+                        cur_terms[m_without] = cur_terms.get(m_without, 0) ^ v
+                        if cur_terms[m_without] == 0:
+                            del cur_terms[m_without]
+                            toggled -= 1
+                        else:
+                            toggled += 1
+                cur_T = len(cur_terms)
+
+                if cur_T < best_T:
+                    best_T = cur_T
                     best_b = b_vec.copy()
-                    best_g = g
                     improved = True
                     if verbose:
                         pct = (f.T() - best_T) / f.T() * 100
                         print(f"  iter {it}: flip[{i}] → T={best_T}/{f.T()} ({pct:.1f}%↓)")
                 else:
-                    b_vec[i] ^= 1  # flip back
+                    # Restore and flip back
+                    cur_terms = saved
+                    b_vec[i] ^= 1
             it += 1
             if it > 2 * n:
                 break
 
-        g = best_g
+        # Build g from best_b (only once, via substitute_affine)
+        if best_T < f.T():
+            g = f.substitute_affine(M, best_b)
+        else:
+            g = f
         b = best_b
 
     # ---- drop unused variables ----
