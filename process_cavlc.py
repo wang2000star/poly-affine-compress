@@ -244,13 +244,13 @@ def main():
     lines2.append("=" * 70)
 
     # Write files
-    with open(f"{out_dir}/cavlc_opt1.txt", 'w', encoding='utf-8') as f:
+    with open(f"{out_dir}/cavlc_opt1.poly", 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines1))
-    print(f"\n  → cavlc_opt1.txt")
+    print(f"\n  → cavlc_opt1.poly")
 
-    with open(f"{out_dir}/cavlc_opt2.txt", 'w', encoding='utf-8') as f:
+    with open(f"{out_dir}/cavlc_opt2.poly", 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines2))
-    print(f"  → cavlc_opt2.txt")
+    print(f"  → cavlc_opt2.poly")
 
     print(f"\n完成: ΣT {total_T0} → {total_T1} ({pct2:.1f}%↓)")
     print(f"      union T {orig_union} → {final_union_1}")
