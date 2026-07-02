@@ -130,30 +130,33 @@ def main():
         for k in sorted(t_dist_orig):
             lines1.append(f"    T={k}: {t_dist_orig[k]} 个输出")
         lines1.append("")
-        lines1.append("  g(z) = f(x), z = x (恒等变换):")
+        lines1.append("  g(z) = f(x), z = x (恒等变换), 展开 ANF:")
         lines1.append("")
-        lines1.append("  注: 以下用 * 表示 AND, ! 表示 NOT (即 !z = 1⊕z)")
-        lines1.append("  展开后为 XOR-of-monomials ANF")
-        lines1.append("")
-        # Show pattern: for each output, reconstruct literal-AND from ANF
-        # Positive literals: z_i present in ALL monomials
-        # Negative literals: z_i absent from some monomial (corresponds to !z_i = 1⊕z_i)
         for name in outputs:
             anf = funcs[name]
             if not anf:
                 lines1.append(f"  {name}(z) = 0")
                 continue
-            # Find positive bits: those set in ALL monomial masks
-            pos_mask = (1 << n) - 1
-            for mask in anf:
-                pos_mask &= mask
-            literals = []
-            for i in range(n):
-                if pos_mask & (1 << i):
-                    literals.append(f"z_{i}")
+            parts = []
+            for mask in sorted(anf, key=lambda m: (bin(m).count('1'), m)):
+                if mask == 0:
+                    parts.append("1")
                 else:
-                    literals.append(f"!z_{i}")
-            lines1.append(f"  {name}(z) = {' * '.join(literals)}")
+                    monom = [f"z_{j}" for j in range(n) if mask & (1 << j)]
+                    parts.append("·".join(monom))
+            # Build line with wrapping (~80 chars)
+            prefix = f"  {name}(z) = "
+            indent = " " * (len(name) + 12)
+            line = prefix
+            for i, p in enumerate(parts):
+                sep = " ⊕ " if line != prefix else ""
+                candidate = f"{line}{sep}{p}"
+                if len(candidate) > 80 and line != prefix:
+                    lines1.append(line.rstrip())
+                    line = f"{indent}{p}"
+                else:
+                    line = candidate
+            lines1.append(f"{line}  ({len(anf)} 项)")
         lines1.append("")
 
     lines1.append("")
