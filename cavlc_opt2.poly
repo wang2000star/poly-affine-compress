@@ -5,11 +5,11 @@
   原始输入: ocoeffs0, ocoeffs1, ocoeffs2, ocoeffs3, ocoeffs4, ctable0, ctable1, ctable2, ingones0, ingones1
   输出函数: 11 个
 
-  ΣT: 4303 → 621 (85.6%↓)
+  ΣT: 4303 → 607 (85.9%↓)
 
   T 分布（简化后）:
+    T=0: 1 个输出
     T=4: 2 个输出
-    T=14: 1 个输出
     T=48: 1 个输出
     T=59: 1 个输出
     T=60: 1 个输出
@@ -159,18 +159,9 @@
       z_oclen3_9 = ingones1
     g(z) = z_oclen3_4·z_oclen3_5·z_oclen3_7 ⊕ z_oclen3_4·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_7 ⊕ z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_5·z_oclen3_7 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_1·z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7·z_oclen3_8 ⊕ z_oclen3_1·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8 ⊕ z_oclen3_1·z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_7·z_oclen3_9 ⊕ z_oclen3_1·z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7·z_oclen3_9 ⊕ z_oclen3_1·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_9 ⊕ z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_7 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_8 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_7·z_oclen3_8 ⊕ z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7·z_oclen3_8 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8 ⊕ z_oclen3_1·z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_9 ⊕ z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_7·z_oclen3_9 ⊕ z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_9 ⊕ z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_1·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_8 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_7·z_oclen3_8 ⊕ z_oclen3_0·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_4·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_1·z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_1·z_oclen3_2·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9 ⊕ z_oclen3_0·z_oclen3_2·z_oclen3_3·z_oclen3_4·z_oclen3_5·z_oclen3_6·z_oclen3_7·z_oclen3_8·z_oclen3_9
 
-  oclen4: T=224 → 14, m=10→10
+  oclen4: T=224 → 0, m=10→1
     线性变换 z = Mx ⊕ b:
-      z_oclen4_0 = ocoeffs0 ⊕ 1
-      z_oclen4_1 = ocoeffs1 ⊕ 1
-      z_oclen4_2 = ocoeffs2
-      z_oclen4_3 = ocoeffs3
-      z_oclen4_4 = ocoeffs4 ⊕ 1
-      z_oclen4_5 = ctable0 ⊕ 1
-      z_oclen4_6 = ctable1 ⊕ 1
-      z_oclen4_7 = ctable2 ⊕ 1
-      z_oclen4_8 = ingones0
-      z_oclen4_9 = ingones1
-    g(z) = z_oclen4_0·z_oclen4_1·z_oclen4_5·z_oclen4_6·z_oclen4_7 ⊕ z_oclen4_0·z_oclen4_1·z_oclen4_2·z_oclen4_5·z_oclen4_6·z_oclen4_7 ⊕ z_oclen4_0·z_oclen4_1·z_oclen4_3·z_oclen4_5·z_oclen4_6·z_oclen4_7 ⊕ z_oclen4_0·z_oclen4_1·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7 ⊕ z_oclen4_2·z_oclen4_3·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7 ⊕ z_oclen4_0·z_oclen4_1·z_oclen4_2·z_oclen4_3·z_oclen4_5·z_oclen4_6·z_oclen4_7 ⊕ z_oclen4_0·z_oclen4_1·z_oclen4_2·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7 ⊕ z_oclen4_0·z_oclen4_1·z_oclen4_3·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7 ⊕ z_oclen4_1·z_oclen4_2·z_oclen4_3·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7·z_oclen4_8 ⊕ z_oclen4_1·z_oclen4_2·z_oclen4_3·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7·z_oclen4_9 ⊕ z_oclen4_0·z_oclen4_1·z_oclen4_2·z_oclen4_3·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7·z_oclen4_8 ⊕ z_oclen4_0·z_oclen4_1·z_oclen4_2·z_oclen4_3·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7·z_oclen4_9 ⊕ z_oclen4_0·z_oclen4_2·z_oclen4_3·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7·z_oclen4_8·z_oclen4_9 ⊕ z_oclen4_1·z_oclen4_2·z_oclen4_3·z_oclen4_4·z_oclen4_5·z_oclen4_6·z_oclen4_7·z_oclen4_8·z_oclen4_9
+      z_oclen4_0 = ocoeffs2 ⊕ ocoeffs4 ⊕ 1
+    g(z) = 0
 
 ======================================================================

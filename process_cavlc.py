@@ -77,27 +77,29 @@ def main():
     # 策略 1: 共享变换
     # ==============================
     print(f"\n策略 1（共享变换）...")
+
+    # Phase 1: complement search
     best_comp, best_union = 0, orig_union
     for comp in range(1 << n):
         cur = []
-        M = np.eye(n, dtype=np.int64)
-        b = np.array([(comp >> j) & 1 for j in range(n)], dtype=np.int64).reshape(-1, 1)
+        Mc = np.eye(n, dtype=np.int64)
+        bc = np.array([(comp >> j) & 1 for j in range(n)], dtype=np.int64).reshape(-1, 1)
         for f in func_list:
-            cur.append(f.substitute_affine(M, b, verify=False))
+            cur.append(f.substitute_affine(Mc, bc, verify=False))
         u = compute_union_T(cur)
         if u < best_union:
             best_union, best_comp = u, comp
-    print(f"  最佳 complement: {best_comp:010b}")
-    print(f"  union T: {orig_union} → {best_union}")
+    print(f"  最佳 complement: {best_comp:010b}, union T: {orig_union} → {best_union}")
 
-    # Greedy merge phase
+    # Build accumulated M (m×n), b (m)
+    M1 = np.eye(n, dtype=np.int64)
+    b1 = np.array([(best_comp >> j) & 1 for j in range(n)], dtype=np.int64)
+
     cur_funcs = [SparseANF(dict(funcs[name]), n) for name in outputs]
     if best_comp:
-        M_best = np.eye(n, dtype=np.int64)
-        b_best = np.array([(best_comp >> j) & 1 for j in range(n)], dtype=np.int64).reshape(-1, 1)
-        cur_funcs = [f.substitute_affine(M_best, b_best, verify=False) for f in cur_funcs]
+        cur_funcs = [f.substitute_affine(np.eye(n), b1.reshape(-1, 1), verify=False) for f in cur_funcs]
 
-    M_s = np.eye(n, dtype=np.int64)
+    # Phase 2: greedy merge
     improved = True
     merge_iter = 0
     while improved and merge_iter < 50:
@@ -118,15 +120,37 @@ def main():
                     best_mu, best_i, best_j = u, i, j
         if best_mu < cur_u:
             cur_funcs = _apply_merge_to_all(cur_funcs, best_i, best_j, n)
-            M_s[best_i] = (M_s[best_i] + M_s[best_j]) % 2
+            # Update accumulated transform
+            for col in range(n):
+                M1[best_i][col] = (M1[best_i][col] + M1[best_j][col]) % 2
+            b1[best_i] = (b1[best_i] + b1[best_j]) % 2
             improved = True
             merge_iter += 1
 
-    final_union_1 = compute_union_T(cur_funcs)
-    print(f"  greedy merge ({merge_iter} iter): union T = {final_union_1}")
+    # Drop unused variables
+    used = sorted(set(
+        i for f in cur_funcs for mask in f.terms
+        for i in range(n) if mask & (1 << i)
+    ))
+    m1 = len(used)
+    if m1 < n:
+        M1 = M1[used]
+        b1 = b1[used]
+        new_funcs = []
+        for f in cur_funcs:
+            new_terms = {}
+            for mask, coeff in f.terms.items():
+                new_mask = 0
+                for dst, src in enumerate(used):
+                    if mask & (1 << src):
+                        new_mask |= 1 << dst
+                new_terms[new_mask] = coeff
+            new_funcs.append(SparseANF(new_terms, m1))
+        cur_funcs = new_funcs
 
-    # Compute ΣT after strategy 1
+    final_union_1 = compute_union_T(cur_funcs)
     sum_T_1 = sum(f.T() for f in cur_funcs)
+    print(f"  greedy merge ({merge_iter} iter): m={n}→{m1}, union T = {final_union_1}")
     print(f"  ΣT after strategy 1 = {sum_T_1}")
 
     # ==============================
@@ -175,8 +199,10 @@ def main():
     print(f"  验证: {errors}/{len(outputs)*20} 错误")
 
     # ==============================
-    # 输出文件: 策略 1
+    # 输出文件: 策略 1（共享变换）
     # ==============================
+    z_names_1 = [f"z_{i}" for i in range(m1)]
+
     lines1 = []
     lines1.append("=" * 70)
     lines1.append("  策略 1（共享变换）: cavlc.txt")
@@ -191,12 +217,23 @@ def main():
     lines1.append("  简化过程:")
     lines1.append(f"    最佳 complement: {best_comp:010b}")
     lines1.append(f"    greedy merge: {merge_iter} 次")
+    lines1.append(f"    最终变量数: m={m1}")
     lines1.append("")
-    # Show per-output T after strategy 1
-    lines1.append("  各输出 T（策略 1 后）:")
+    lines1.append(f"  共享线性变换 z = Mx ⊕ b (m={m1}):")
+    for i in range(m1):
+        terms = [inputs[j] for j in range(n) if M1[i][j] % 2]
+        const = b1[i] % 2
+        if const:
+            terms.append("1")
+        lines1.append(f"    {z_names_1[i]} = {' ⊕ '.join(terms) if terms else '0'}")
+    lines1.append("")
+    lines1.append("  各输出 g(z)（策略 1 后）:")
+    lines1.append("")
     for name, f in zip(outputs, cur_funcs):
-        lines1.append(f"    {name}: T={f.T()}")
-    lines1.append("")
+        lines1.append(f"  {name}: T={len(funcs[name])} → {f.T()}")
+        g_str = anf_dict_to_str(f.terms, z_names_1)
+        lines1.append(f"    {g_str}")
+        lines1.append("")
     lines1.append("=" * 70)
 
     # ==============================
