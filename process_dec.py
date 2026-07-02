@@ -130,30 +130,30 @@ def main():
         for k in sorted(t_dist_orig):
             lines1.append(f"    T={k}: {t_dist_orig[k]} 个输出")
         lines1.append("")
-        lines1.append("  g(z) = f(x), z = x (恒等变换), 展开 ANF:")
+        lines1.append("  ANF 展开（恒等变换, 原始变量名）:")
         lines1.append("")
         for name in outputs:
             anf = funcs[name]
             if not anf:
-                lines1.append(f"  {name}(z) = 0")
+                lines1.append(f"  {name} = 0")
                 continue
             parts = []
             for mask in sorted(anf, key=lambda m: (bin(m).count('1'), m)):
                 if mask == 0:
                     parts.append("1")
                 else:
-                    monom = [f"z_{j}" for j in range(n) if mask & (1 << j)]
+                    monom = [inputs[j] for j in range(n) if mask & (1 << j)]
                     parts.append("·".join(monom))
             # Build line with wrapping (~80 chars)
-            prefix = f"  {name}(z) = "
-            indent = " " * (len(name) + 12)
+            prefix = f"  {name} = "
+            indent = " " * (len(name) + 2)
             line = prefix
             for i, p in enumerate(parts):
                 sep = " ⊕ " if line != prefix else ""
                 candidate = f"{line}{sep}{p}"
                 if len(candidate) > 80 and line != prefix:
                     lines1.append(line.rstrip())
-                    line = f"{indent}{p}"
+                    line = f"{indent}⊕ {p}"
                 else:
                     line = candidate
             lines1.append(f"{line}  ({len(anf)} 项)")
