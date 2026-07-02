@@ -176,8 +176,8 @@ class CircuitSimplify:
         A = self.nodes[name_A]
         B = self.nodes[name_B]
 
-        # 情况 1: M 相同 → 同空间 AND
-        if same_matrix(A.M, B.M):
+        # 情况 1: M 相同且 b 相同 → 同空间 AND
+        if same_matrix(A.M, B.M) and A.b == B.b:
             h = anf_and(A.g, B.g)
             h_T = len(h)
             if h_T > self.threshold:
