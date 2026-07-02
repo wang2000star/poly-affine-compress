@@ -55,9 +55,12 @@ def simplify_output(cs, name, inputs):
     return g_s, M_x.tolist(), b_x.tolist()
 
 
-def write_T_file(path, outputs, g_terms_list, total_T):
+def write_T_file(path, outputs, g_terms_list, total_T, original_T=None):
     """Write T(g) summary file."""
-    lines = [f"# T(g) values: {len(outputs)} outputs, total T={total_T}"]
+    lines = [f"# T(g) values: {len(outputs)} outputs"]
+    if original_T is not None:
+        lines.append(f"# 原始并集T: {original_T}")
+    lines.append(f"# 优化并集T: {total_T}")
     for name, terms in zip(outputs, g_terms_list):
         T = len(terms)
         lines.append(f"{name} T={T}")
@@ -96,6 +99,7 @@ def process(cs, inputs, outputs, out_dir, inst_name):
             output_map.append(name)
 
     is_single = (non_const_count <= 1)
+    raw_total_T = sum(t[0].T() for t in raw_triples if t is not None)
 
     def _write_opt(suffix, triples):
         """Write output files for one strategy.  triples: list of (g, M, b) or None."""
@@ -104,7 +108,7 @@ def process(cs, inputs, outputs, out_dir, inst_name):
             write_transformation(f"{out_dir}/{inst_name}_{suffix}_trans.poly", inputs, [[0]*n], [0])
             all_g = [{} for _ in outputs]
             write_expressions(f"{out_dir}/{inst_name}_{suffix}_expr.poly", outputs, all_g)
-            write_T_file(f"{out_dir}/{inst_name}_{suffix}_T.poly", outputs, all_g, 0)
+            write_T_file(f"{out_dir}/{inst_name}_{suffix}_T.poly", outputs, all_g, 0, raw_total_T)
             return
 
         g_list = [t[0] for t, _ in valid]
@@ -125,7 +129,7 @@ def process(cs, inputs, outputs, out_dir, inst_name):
         total_T = sum(len(g) for g in all_g)
         write_transformation(f"{out_dir}/{inst_name}_{suffix}_trans.poly", inputs, merged_M, merged_b)
         write_expressions(f"{out_dir}/{inst_name}_{suffix}_expr.poly", outputs, all_g)
-        write_T_file(f"{out_dir}/{inst_name}_{suffix}_T.poly", outputs, all_g, total_T)
+        write_T_file(f"{out_dir}/{inst_name}_{suffix}_T.poly", outputs, all_g, total_T, raw_total_T)
 
     # If only one non-constant output, opt1 == opt2, skip opt2
     _write_opt("opt1", raw_triples)

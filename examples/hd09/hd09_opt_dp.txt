@@ -1,0 +1,2 @@
+INORDER = i9 i8 i7 i6 i5 i4 i31 i30 i3 i29 i28 i27 i26 i25 i24 i23 i22 i21 i20 i2 i19 i18 i17 i16 i15 i14 i13 i12 i11 i10 i1 i0;
+OUTORDER = om_9 om_8 om_7 om_6 om_5 om_4 om_31 om_30 om_3 om_29 om_28 om_27 om_26 om_25 om_24 om_23 om_22 om_21 om_20 om_2 om_19 om_18 om_17 om_16 om_15 om_14 om_13 om_12 om_11 om_10 om_1 om_0;
