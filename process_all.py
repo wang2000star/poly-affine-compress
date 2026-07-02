@@ -2,9 +2,14 @@
 Process all circuit instances → unified output format.
 
 Output per instance:
-  {inst}_opt{i}_trans.poly    — shared transformation (z = Mx⊕b)
-  {inst}_opt{i}_expr.poly     — expressions (output = g(z))
-  {inst}_opt{i}_T.poly         — T(g) summary per output
+  {inst}_opt1_trans.poly   — transformation (z = Mx⊕b)
+  {inst}_opt1_expr.poly    — expressions (output = g(z))
+  {inst}_opt1_T.poly       — T(g) summary per output
+
+When >1 actual (non-constant) output, also writes opt2:
+  {inst}_opt2_trans.poly   — per-output simplify then merged transformation
+  {inst}_opt2_expr.poly
+  {inst}_opt2_T.poly
 
 z_i naming is global across all outputs.
 Identical (M_row, b) pairs share the same z-index.
@@ -17,7 +22,7 @@ from anf_factor import SparseANF, simplify as anf_simplify
 from format_poly import merge_transformations, write_transformation, write_expressions
 
 
-def parse_circuit(txt_path, threshold=128):
+def parse_circuit(txt_path, threshold=4096):
     with open(txt_path) as f:
         text = f.read()
     text = re.sub(
@@ -68,6 +73,7 @@ def process(cs, inputs, outputs, out_dir, inst_name):
     raw_triples = []      # (g: SparseANF, M: list, b: list) from parser
     opt2_triples = []     # same shape from per-output simplify
     output_map = []       # name for each result slot
+    non_const_count = 0
 
     for name in outputs:
         node = cs.nodes[name]
@@ -77,22 +83,24 @@ def process(cs, inputs, outputs, out_dir, inst_name):
             r = simplify_output(cs, name, inputs)
             if r is not None:
                 opt2_triples.append(r)
-                print(f"  {name}: T={r[0].T()}, m={r[0].n}")
+                non_const_count += 1
+                T_str = f"T={r[0].T()}, m={r[0].n}"
             else:
                 opt2_triples.append(None)
+                T_str = "T=0"
+            print(f"  {name}: {T_str}")
             output_map.append(name)
         else:
             raw_triples.append(None)
             opt2_triples.append(None)
             output_map.append(name)
 
-    def _write_opt(suffix, triples, results_3tuple_list):
-        """Write output files for one strategy.
-        triples: list of (g, M, b) or None
-        """
+    is_single = (non_const_count <= 1)
+
+    def _write_opt(suffix, triples):
+        """Write output files for one strategy.  triples: list of (g, M, b) or None."""
         valid = [(t, nm) for t, nm in zip(triples, output_map) if t is not None]
         if not valid:
-            # All outputs zero
             write_transformation(f"{out_dir}/{inst_name}_{suffix}_trans.poly", inputs, [[0]*n], [0])
             all_g = [{} for _ in outputs]
             write_expressions(f"{out_dir}/{inst_name}_{suffix}_expr.poly", outputs, all_g)
@@ -119,8 +127,10 @@ def process(cs, inputs, outputs, out_dir, inst_name):
         write_expressions(f"{out_dir}/{inst_name}_{suffix}_expr.poly", outputs, all_g)
         write_T_file(f"{out_dir}/{inst_name}_{suffix}_T.poly", outputs, all_g, total_T)
 
-    _write_opt("opt1", raw_triples, None)
-    _write_opt("opt2", opt2_triples, None)
+    # If only one non-constant output, opt1 == opt2, skip opt2
+    _write_opt("opt1", raw_triples)
+    if not is_single:
+        _write_opt("opt2", opt2_triples)
 
 
 # ===== Instance runner =====
@@ -134,7 +144,7 @@ def run_instance(inst_name, out_dir, timeout=300):
     print(f"\n{'='*60}\n  {inst_name}\n{'='*60}")
     t0 = time.time()
     try:
-        inputs, outputs, cs = parse_circuit(txt_path, threshold=128)
+        inputs, outputs, cs = parse_circuit(txt_path, threshold=4096)
         process(cs, inputs, outputs, out_dir, inst_name)
     except Exception as e:
         import traceback
@@ -165,18 +175,18 @@ def sym_hd09(inputs, outputs, out_dir):
 
 
 def sym_hd10(inputs, outputs, out_dir):
-    print(f"  AND-of-ORs: ANF ~4B 项, 不可展开")
+    print(f"  多层 AND/XOR 结构, ANF ~4B 项, 不可展开")
     for suf in ['opt1', 'opt2']:
         with open(f"{out_dir}/hd10_{suf}_trans.poly", 'w') as f:
             f.write("")
         with open(f"{out_dir}/hd10_{suf}_expr.poly", 'w') as f:
             for i in range(29):
                 f.write(f"m_{i} = 0\n")
-            f.write(f"m_29 = OR(G1)*OR(G2)*OR(G3)*OR(G4)  # Gk = 8 inputs each\n")
-            f.write(f"m_30 = (OR(G3)*NOR(G4)+NOR(G3))*OR(G1)*OR(G2)\n")
-            f.write(f"m_31 = (OR(G3)*NOR(G4)*OR(G2)+NOR(G2))*OR(G1)\n")
+            f.write(f"m_29 = m_31*m_30  # complex AND/XOR cascade\n")
+            f.write(f"m_30 = (G3*!G4+G3)*G1*G2  # Gk = 8 inputs each\n")
+            f.write(f"m_31 = (G3*!G4*G2+!G2)*G1\n")
         with open(f"{out_dir}/hd10_{suf}_T.poly", 'w') as f:
-            f.write("# hd10: AND-of-ORs, ANF ~4B terms, cannot expand\n")
+            f.write("# hd10: complex AND/XOR structure, ANF ~4B terms, cannot expand\n")
 
 
 def sym_hd11(inputs, outputs, out_dir):
@@ -204,7 +214,7 @@ def sym_hd12(inputs, outputs, out_dir):
         with open(f"{out_dir}/hd12_{suf}_expr.poly", 'w') as f:
             for i in range(26):
                 f.write(f"m_{i} = 0\n")
-            f.write(f"m_26 = NOR(i_2..i_33)\n")
+            f.write(f"m_26 = !i_2&!i_3&...&!i_33\n")
             f.write(f"m_27 = (position MSB priority encoding)\n")
             f.write(f"m_28 = (position bit 3 priority encoding)\n")
             f.write(f"m_29 = (position bit 2 priority encoding)\n")
@@ -231,24 +241,51 @@ def sym_router(inputs, outputs, out_dir):
             f.write("# outport1 T=2, all others T=0 or 1\n")
 
 
-# ===== Main =====
+def sym_dsort(inputs, outputs, out_dir):
+    print(f"  排序网络, n=48, 546 XOR 运算, 跨空间 XOR 无法解析")
+    for suf in ['opt1', 'opt2']:
+        with open(f"{out_dir}/dsort_{suf}_trans.poly", 'w') as f:
+            f.write("")
+        with open(f"{out_dir}/dsort_{suf}_expr.poly", 'w') as f:
+            f.write("# dsort: 48-input sorting network\n")
+            f.write("# 546 XOR operations cause cross-M stacking, parser cannot handle\n")
+        with open(f"{out_dir}/dsort_{suf}_T.poly", 'w') as f:
+            f.write("# dsort: sorting network, cannot parse\n")
 
-INSTANCES = [
-    ('hd01', 'hd01'), ('hd02', 'hd02'), ('hd03', 'hd03'), ('hd04', 'hd04'),
+
+# ===== Main =====
+# Ordered by difficulty (input × actual_output × eq × (*+1))
+
+PARSER_INSTANCES = [
+    'hd08',        #  8×1×39×18     =   5,928
+    'hd07',        #  8×6×34×13     =  22,848
+    'hd03',        # 16×8×66×27     = 236,544
+    'hd04',        # 16×8×166×76    = 1,636,096
+    'ctrl',        #  7×26×183×107  = 3,597,048
+    'dec',         #  8×256×314×304 = 196,136,960
+    'int2float',   # 11×7×388×213   = 6,393,464
+    'hd01',        # 32×32×121×87   = 10,903,552
+    'hd02',        # 32×32×231×76   = 18,213,888
+    'cavlc',       # 10×11×1221×655 = 88,107,360
 ]
 
 SYMBOLIC = [
-    ('hd09', 'hd09', sym_hd09), ('hd10', 'hd10', sym_hd10),
-    ('hd11', 'hd11', sym_hd11), ('hd12', 'hd12', sym_hd12),
-    ('router', 'router', sym_router),
+    ('hd10', sym_hd10),     #  32×3×104×35  =   359,424
+    ('hd12', sym_hd12),     #  32×6×259×116 = 5,818,176
+    ('hd09', sym_hd09),     #  32×16×296×167= 25,460,736
+    ('hd11', sym_hd11),     #  32×4×680×388 = 33,858,560
+    ('router', sym_router), #  60×3×370×209 = 13,986,000
+    ('dsort', sym_dsort),   #  48×48×1540×782 (546 XORs, parser fails)
 ]
 
 if __name__ == '__main__':
     base = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples')
-    for name, d in INSTANCES:
-        run_instance(name, os.path.join(base, d))
-    for name, d, fn in SYMBOLIC:
-        out_dir = os.path.join(base, d)
+
+    for name in PARSER_INSTANCES:
+        run_instance(name, os.path.join(base, name))
+
+    for name, fn in SYMBOLIC:
+        out_dir = os.path.join(base, name)
         with open(os.path.join(out_dir, f"{name}.txt")) as f:
             text = f.read()
         inp = re.search(r'INORDER\s*=\s*([^;]+);', text).group(1).strip().split()

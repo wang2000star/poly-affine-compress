@@ -254,11 +254,11 @@ class CircuitSimplify:
             self.nodes[name] = self.nodes[expr].copy()
             return
 
-        # 常数: osign = 1/0
-        if expr == '0':
+        # 常数: osign = 1/0, false/true
+        if expr in ('0', 'false'):
             self.nodes[name] = TNode({}, [[0] * self.n], [0], self.n)
             return
-        if expr == '1':
+        if expr in ('1', 'true'):
             self.nodes[name] = TNode({0: 1}, [[0] * self.n], [0], self.n)
             return
 
