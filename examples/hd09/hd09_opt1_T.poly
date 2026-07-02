@@ -1,0 +1,3 @@
+# hd09: priority encoder, 16 non-trivial outputs
+# Each output T=1-2 in gate-level g-space
+# Cannot extract via Mx+b linear transformation

@@ -1,0 +1,2 @@
+# dsort: 48-input sorting network
+# 546 XOR operations cause cross-M stacking, parser cannot handle

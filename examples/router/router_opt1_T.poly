@@ -1,0 +1,2 @@
+# router: 3-port address decoder
+# outport1 T=2, all others T=0 or 1
