@@ -39,7 +39,7 @@ def main():
 
     # ---- Preprocess XOR expressions ----
     print("预处理 XOR 模式...")
-    text = open('/home/wangfz/bool/int2float.txt').read()
+    text = open('/home/wangfz/bool/int2float/int2float.txt').read()
     text = re.sub(
         r'\(\s*(\w+)\s*\*\s*!(\w+)\s*\)\s*\+\s*\(\s*!\1\s*\*\s*\2\s*\)',
         r'\1 + \2',
@@ -279,13 +279,13 @@ def main():
     lines2.append("=" * 70)
 
     # Write files
-    with open(f"{out_dir}/int2float_opt1.poly", 'w', encoding='utf-8') as f:
+    with open(f"{out_dir}/int2float/int2float_opt1.poly", 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines1))
-    print(f"\n  → int2float_opt1.poly")
+    print(f"\n  → int2float/int2float_opt1.poly")
 
-    with open(f"{out_dir}/int2float_opt2.poly", 'w', encoding='utf-8') as f:
+    with open(f"{out_dir}/int2float/int2float_opt2.poly", 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines2))
-    print(f"  → int2float_opt2.poly")
+    print(f"  → int2float/int2float_opt2.poly")
 
     print(f"\n完成: ΣT {total_T0} → {total_T1} ({pct2:.1f}%↓)")
     print(f"      union T {orig_union} → {final_union_1}")

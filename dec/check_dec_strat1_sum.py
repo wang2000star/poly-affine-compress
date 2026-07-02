@@ -3,7 +3,7 @@ import numpy as np
 from anf_factor import SparseANF
 from simplify_poly import parse_poly, compute_union_T, _apply_merge_to_all
 
-inputs, outputs, funcs = parse_poly('/home/wangfz/bool/dec.poly')
+inputs, outputs, funcs = parse_poly('/home/wangfz/bool/dec/dec.poly')
 n = len(inputs)
 func_list = [SparseANF(dict(funcs[name]), n) for name in outputs]
 

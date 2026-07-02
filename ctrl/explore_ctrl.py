@@ -8,7 +8,7 @@ from anf_factor import SparseANF, _apply_merge
 from simplify_poly import parse_poly, compute_union_T, anf_dict_to_str, _apply_complement_to_all, _apply_merge_to_all
 
 # 加载
-inputs, outputs, funcs = parse_poly('/home/wangfz/bool/ctrl.poly')
+inputs, outputs, funcs = parse_poly('/home/wangfz/bool/ctrl/ctrl.poly')
 n = len(inputs)
 func_list = [SparseANF(dict(funcs[name]), n) for name in outputs]
 orig_union = compute_union_T(func_list)

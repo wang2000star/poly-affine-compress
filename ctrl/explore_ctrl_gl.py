@@ -34,7 +34,7 @@ def random_invertible(n, rng):
             return M
 
 # 加载
-inputs, outputs, funcs = parse_poly('/home/wangfz/bool/ctrl.poly')
+inputs, outputs, funcs = parse_poly('/home/wangfz/bool/ctrl/ctrl.poly')
 n = len(inputs)
 base_funcs = [SparseANF(dict(funcs[name]), n) for name in outputs]
 orig_union = compute_union_T(base_funcs)

@@ -40,7 +40,7 @@ def main():
     # ---- Parse ----
     print("解析网表...")
     cs = CircuitSimplify(threshold=4096, verbose=False)
-    cs.parse(open('/home/wangfz/bool/dec.txt').read())
+    cs.parse(open('/home/wangfz/bool/dec/dec.txt').read())
     n, inputs, outputs = cs.n, cs.inputs, cs.outputs
     print(f"  输入: {len(inputs)}, 输出: {len(outputs)}")
 
@@ -161,9 +161,9 @@ def main():
 
     lines1.append("")
     lines1.append("=" * 70)
-    with open(f"{out_dir}/dec_opt1.poly", 'w', encoding='utf-8') as f:
+    with open(f"{out_dir}/dec/dec_opt1.poly", 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines1))
-    print(f"  → dec_opt1.poly")
+    print(f"  → dec/dec_opt1.poly")
 
     # 策略 2: dec_opt2.poly
     lines2 = []
@@ -209,9 +209,9 @@ def main():
     lines2.append("  ... (共 256 个输出，每个均已优化至 T=1)")
     lines2.append("")
     lines2.append("=" * 70)
-    with open(f"{out_dir}/dec_opt2.poly", 'w', encoding='utf-8') as f:
+    with open(f"{out_dir}/dec/dec_opt2.poly", 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines2))
-    print(f"  → dec_opt2.poly")
+    print(f"  → dec/dec_opt2.poly")
 
     print(f"\n完成: {total_T0} → {total_T1} ({pct2:.1f}%↓)")
     print("=" * 60)

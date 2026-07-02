@@ -45,7 +45,7 @@ def extract_anf(node, n):
 
 
 def main():
-    path = '/home/wangfz/bool/ctrl.txt'
+    path = '/home/wangfz/bool/ctrl/ctrl.txt'
     out_dir = '/home/wangfz/bool'
 
     print("=" * 60)
@@ -80,7 +80,7 @@ def main():
             print()
 
     # 写出 ctrl.poly
-    poly_path = f"{out_dir}/ctrl.poly"
+    poly_path = f"{out_dir}/ctrl/ctrl.poly"
     with open(poly_path, 'w') as f:
         f.write(f"INORDER = {' '.join(inputs)};\n")
         f.write(f"OUTORDER = {' '.join(outputs)};\n")
