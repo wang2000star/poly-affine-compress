@@ -1,0 +1,28 @@
+======================================================================
+  策略 1（共享变换）: cavlc.txt
+======================================================================
+
+  原始输入: ocoeffs0, ocoeffs1, ocoeffs2, ocoeffs3, ocoeffs4, ctable0, ctable1, ctable2, ingones0, ingones1
+  输出函数: 11 个
+
+  union T: 1019 → 232
+  ΣT: 4303 → 894
+
+  简化过程:
+    最佳 complement: 0011111111
+    greedy merge: 2 次
+
+  各输出 T（策略 1 后）:
+    ocoeff0: T=105
+    ocoeff1: T=126
+    ocoeff2: T=110
+    ocoeff3: T=114
+    ocoeff4: T=16
+    ocoeff5: T=16
+    oclen0: T=111
+    oclen1: T=104
+    oclen2: T=82
+    oclen3: T=70
+    oclen4: T=40
+
+======================================================================
