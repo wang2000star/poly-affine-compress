@@ -45,11 +45,35 @@ def main():
     for name in outputs:
         node = cs.nodes[name]
         g_dict = node.g
-        m = node.m
-        f = SparseANF(dict(g_dict), m)
-        if m > 0 and len(g_dict) > 0:
+        m_in = node.m
+        f = SparseANF(dict(g_dict), m_in)
+        if m_in > 0 and len(g_dict) > 0:
             g2, M2, b2 = anf_simplify(f, verbose=False)
-            simplified[name] = (g2, M2, b2)
+
+            # 组合变换：M_x = M2 × node.M，将 g-space 映射回 x-space
+            M_node = np.array(node.M, dtype=np.int64)
+            b_node = np.array(node.b, dtype=np.int64).flatten()
+            M2_a = np.array(M2, dtype=np.int64)
+            b2_f = np.array(b2, dtype=np.int64).flatten()
+            M_x = (M2_a @ M_node) % 2
+            b_x = ((M2_a @ b_node.reshape(-1, 1)) % 2).flatten()
+            b_x = (b_x + b2_f) % 2
+
+            # 压缩 g 中未使用的变量
+            m2 = g2.n
+            used = sorted(set(i for mask in g2.terms for i in range(m2) if mask & (1 << i)))
+            if len(used) < m2:
+                new_terms = {}
+                for mask, coeff in g2.terms.items():
+                    new_mask = 0
+                    for dst, src in enumerate(used):
+                        if mask & (1 << src):
+                            new_mask |= 1 << dst
+                    new_terms[new_mask] = coeff
+                g2 = SparseANF(new_terms, len(used))
+                M_x = np.array([M_x[i] for i in used])
+                b_x = b_x[used]
+            simplified[name] = (g2, M_x, b_x)
             total_T1 += g2.T()
         else:
             simplified[name] = None
