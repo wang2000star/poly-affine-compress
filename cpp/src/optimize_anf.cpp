@@ -25,6 +25,7 @@
 #include <cassert>
 #include <cstring>
 #include <random>
+#include <iomanip>
 
 // ============================================================
 //  Circuit representation (same as compute_raw_anf)
@@ -294,11 +295,81 @@ static void moebius_packed(uint64_t* data, int n) {
     }
 }
 
+// Parallel Möbius: each word/group is independent, partition among threads.
+// Bit-level passes (i<6): partition words.  Word-level passes (i≥6): partition groups.
+// For n=32 with n_threads=8, this reduces 21s → ~3s per output.
+static void moebius_packed_mt(uint64_t* data, int n, int n_threads) {
+    if (n <= 0) return;
+    int64_t words = (n < 6) ? 1 : (int64_t(1) << (n - 6));
+    int use_threads = std::min(n_threads, 8);  // cap at 8 (memory bandwidth bound)
+
+    for (int i = 0; i < n; i++) {
+        int64_t step = int64_t(1) << i;
+        if (step >= 64) {
+            int ws = (int)(step / 64);
+            int64_t group_words = int64_t(ws) * 2;
+            int64_t n_groups = words / group_words;
+            int n_workers = std::min(use_threads, (int)n_groups);
+
+            auto worker = [&](int tid) {
+                int64_t g_per = (n_groups + n_workers - 1) / n_workers;
+                int64_t g0 = tid * g_per;
+                int64_t g1 = std::min(g0 + g_per, n_groups);
+                for (int64_t g = g0; g < g1; g++) {
+                    int64_t w0 = g * group_words + ws;
+                    int64_t w1 = g * group_words + group_words;
+                    for (int64_t w = w0; w < w1; w++)
+                        data[w] ^= data[w - ws];
+                }
+            };
+
+            std::vector<std::thread> threads;
+            for (int t = 0; t < n_workers; t++)
+                threads.emplace_back(worker, t);
+            for (auto& th : threads) th.join();
+
+            // Remaining partial group (single-threaded)
+            int64_t rem_start = n_groups * group_words + ws;
+            for (int64_t w = rem_start; w < words; w++) {
+                if ((w / ws) & 1) data[w] ^= data[w - ws];
+            }
+        } else {
+            // Bit-level: each word is independent
+            int n_workers = std::min(use_threads, (int)words);
+            int b = (int)step;
+            uint64_t mask_lo = (1ULL << b) - 1;
+
+            auto worker = [&](int tid) {
+                int64_t w_per = (words + n_workers - 1) / n_workers;
+                int64_t w0 = tid * w_per;
+                int64_t w1 = std::min(w0 + w_per, words);
+                for (int64_t w = w0; w < w1; w++) {
+                    uint64_t val = data[w];
+                    uint64_t res = 0;
+                    for (int gb = 0; gb < 64; gb += 2 * b) {
+                        uint64_t lo = (val >> gb) & mask_lo;
+                        uint64_t hi = (val >> (gb + b)) & mask_lo;
+                        hi ^= lo;
+                        res |= lo << gb;
+                        res |= hi << (gb + b);
+                    }
+                    data[w] = res;
+                }
+            };
+
+            std::vector<std::thread> threads;
+            for (int t = 0; t < n_workers; t++)
+                threads.emplace_back(worker, t);
+            for (auto& th : threads) th.join();
+        }
+    }
+}
+
 // ============================================================
 //  Count T from ANF (after Möbius)
 // ============================================================
 
-static int64_t count_T(uint64_t* data, int n) {
+static int64_t count_T(const uint64_t* data, int n) {
     if (n <= 0) return 0;
     int64_t words = (n < 6) ? 1 : (int64_t(1) << (n - 6));
     int64_t T = 0;
@@ -397,6 +468,77 @@ static std::vector<WalshInfo> compute_walsh_correlations(
 
 // ============================================================
 //  Evaluate a single M,b candidate for ONE output
+// ============================================================
+//  GF(2) matrix rank (Gaussian elimination on m×n binary matrix)
+// ============================================================
+
+static int gf2_rank(const uint32_t* rows, int m, int n) {
+    if (m <= 0 || n <= 0) return 0;
+    std::vector<uint32_t> tmp(rows, rows + m);
+    for (int i = 0; i < m; i++) {
+        if (n < 32) tmp[i] &= (1u << n) - 1;
+    }
+    int rank = 0;
+    for (int col = n - 1; col >= 0 && rank < m; col--) {
+        int pivot = -1;
+        for (int i = rank; i < m; i++) {
+            if ((tmp[i] >> col) & 1) { pivot = i; break; }
+        }
+        if (pivot < 0) continue;
+        std::swap(tmp[rank], tmp[pivot]);
+        uint32_t pivot_val = tmp[rank];
+        for (int i = 0; i < m; i++) {
+            if (i != rank && ((tmp[i] >> col) & 1))
+                tmp[i] ^= pivot_val;
+        }
+        rank++;
+    }
+    return rank;
+}
+
+// ============================================================
+//  Verify M,b transform: check f(x) = g(Mx+b) for random x
+// ============================================================
+
+static bool verify_transform(
+    const TruthTable& tt,
+    const std::vector<uint64_t>& g_tt,   // truth table of g (BEFORE Möbius)
+    int output_idx,
+    const uint32_t* M_rows,
+    uint32_t b,
+    int m,
+    int n,
+    int n_tests)
+{
+    uint32_t M_offsets[64];
+    for (int d = 0; d < 64; d++) {
+        uint32_t z = 0;
+        for (int row = 0; row < m; row++) {
+            if (__builtin_popcount(M_rows[row] & d) & 1)
+                z |= (1u << row);
+        }
+        M_offsets[d] = z;
+    }
+
+    uint32_t mask = (n == 32) ? 0xFFFFFFFF : ((1u << n) - 1);
+    const uint64_t* f_tt = tt.tt[output_idx].data();
+
+    for (int t = 0; t < n_tests; t++) {
+        uint32_t x = (uint32_t)(((uint64_t)t * 0x9e3779b97f4a7c15ULL) & mask);
+        // compute z = Mx + b
+        uint32_t z = b;
+        for (int row = 0; row < m; row++) {
+            if (__builtin_popcount(M_rows[row] & x) & 1)
+                z ^= (1u << row);
+        }
+        uint64_t f_val = (f_tt[x >> 6] >> (x & 63)) & 1;
+        uint64_t g_val = (g_tt[z >> 6] >> (z & 63)) & 1;
+        if (f_val != g_val) return false;
+    }
+    return true;
+}
+
+
 // ============================================================
 //  Updated evaluate_Mb_single_output with coset consistency check.
 //  For m < n (non-invertible M), must verify f is constant on each
@@ -625,14 +767,26 @@ struct MbCandidate {
     uint32_t b;           // packed: bit i = b_i
     int64_t total_T;       // sum of T(g) across all outputs
     std::vector<int64_t> per_output_T;
+    std::vector<std::vector<uint64_t>> g_tt_raw;  // pre-Möbius g_tt per output (empty if not saved)
 };
 
-static MbCandidate evaluate_Mb(
+// ============================================================
+//  Evaluate M,b for bijective transform (m=n, full rank).
+//
+//  Strategy: iterate over f_tt set bits (sequential scan, cache-friendly)
+//  and map x → z = Mx+b.  Uses per-thread g_tt arrays (no atomic needed
+//  since threads write to disjoint z ranges for bijective M).
+//  Merged after all threads finish.
+// ============================================================
+
+static MbCandidate evaluate_Mb_bijective(
     const TruthTable& tt,
     const uint32_t* M_rows,
     uint32_t b,
     int m,
-    int n_threads)
+    int n,
+    int n_threads,
+    bool save_g_tt = false)
 {
     MbCandidate cand;
     cand.m = m;
@@ -640,6 +794,157 @@ static MbCandidate evaluate_Mb(
     for (int i = 0; i < m; i++) cand.M_rows[i] = M_rows[i];
     cand.total_T = 0;
     cand.per_output_T.resize(tt.n_outputs, 0);
+
+    int64_t n_words_g = (m < 6) ? 1 : (int64_t(1) << (m - 6));
+    int64_t n_words_f = tt.n_words;
+
+    // M_offsets[d] = M * d for d in [0, 64)
+    uint32_t M_offsets[64];
+    for (int d = 0; d < 64; d++) {
+        uint32_t z = 0;
+        for (int row = 0; row < m; row++) {
+            if (__builtin_popcount(M_rows[row] & d) & 1)
+                z |= (1u << row);
+        }
+        M_offsets[d] = z;
+    }
+
+    // Use limited threads for bijective path (each thread needs its own g_tt).
+    // All threads share the f_tt scan (read-only) but each writes to a private g_tt.
+    int use_threads = std::min(n_threads, 8);
+    int64_t chunk = std::max(int64_t(1), (n_words_f + use_threads - 1) / use_threads);
+
+    // Pre-alloc scratch buffers for the entire run (reused across outputs)
+    std::vector<uint64_t*> per_thread_g(use_threads, nullptr);
+    for (int t = 0; t < use_threads; t++)
+        per_thread_g[t] = (uint64_t*)calloc(n_words_g, sizeof(uint64_t));
+
+    for (int oi = 0; oi < tt.n_outputs; oi++) {
+        const uint64_t* f_tt = tt.tt[oi].data();
+
+        // Exact constant-zero check (scan all words — cheap for n≤32)
+        bool is_constant_zero = true;
+        for (int64_t w = 0; w < n_words_f && is_constant_zero; w++) {
+            if (f_tt[w] != 0) { is_constant_zero = false; }
+        }
+        if (is_constant_zero) {
+            cand.per_output_T[oi] = 0;
+            if (save_g_tt) {
+                std::vector<uint64_t> g_zero(n_words_g, 0);
+                cand.g_tt_raw.push_back(std::move(g_zero));
+            }
+            continue;
+        }
+
+        // Clear per-thread g_tt buffers: each thread clears its ENTIRE own buffer.
+        // (NOT partitioning the address space — each thread owns a full-size buffer.)
+        auto clear_fn = [&](int tid) {
+            memset(per_thread_g[tid], 0, n_words_g * sizeof(uint64_t));
+        };
+        {
+            std::vector<std::thread> clear_thr;
+            for (int t = 0; t < use_threads; t++)
+                clear_thr.emplace_back(clear_fn, t);
+            for (auto& th : clear_thr) th.join();
+        }
+
+        // Worker: process f_tt words in chunks
+        auto worker = [&](int tid) {
+            int64_t w_start = tid * chunk;
+            int64_t w_end = std::min(w_start + chunk, n_words_f);
+            uint64_t* g_local = per_thread_g[tid];
+
+            for (int64_t w = w_start; w < w_end; w++) {
+                uint64_t word = f_tt[w];
+                if (word == 0) continue;
+                int64_t base = w * 64;
+
+                uint32_t z_base = b;
+                for (int row = 0; row < m; row++) {
+                    if (__builtin_popcount(M_rows[row] & (uint32_t)base) & 1)
+                        z_base ^= (1u << row);
+                }
+
+                while (word) {
+                    int bit = __builtin_ctzll(word);
+                    word &= word - 1;
+                    uint32_t z = z_base ^ M_offsets[bit];
+                    g_local[z >> 6] |= (1ULL << (z & 63));
+                }
+            }
+        };
+
+        {
+            std::vector<std::thread> threads;
+            for (int t = 0; t < use_threads; t++)
+                threads.emplace_back(worker, t);
+            for (auto& th : threads) th.join();
+        }
+
+        // Merge: OR all per-thread g_tt into thread 0's array (parallel)
+        if (use_threads > 1) {
+            auto merge_fn = [&](int tid) {
+                int64_t ms = tid * chunk;
+                int64_t me = std::min(ms + chunk, n_words_g);
+                uint64_t* dst = per_thread_g[0];
+                for (int t = 1; t < use_threads; t++) {
+                    uint64_t* src = per_thread_g[t];
+                    for (int64_t w = ms; w < me; w++)
+                        dst[w] |= src[w];
+                }
+            };
+            std::vector<std::thread> merge_thr;
+            for (int t = 0; t < use_threads; t++)
+                merge_thr.emplace_back(merge_fn, t);
+            for (auto& th : merge_thr) th.join();
+        }
+
+        // Save pre-Möbius g_tt if requested (for verification)
+        if (save_g_tt) {
+            std::vector<uint64_t> g_copy(n_words_g, 0);
+            memcpy(g_copy.data(), per_thread_g[0], n_words_g * sizeof(uint64_t));
+            cand.g_tt_raw.push_back(std::move(g_copy));
+        }
+
+        moebius_packed_mt(per_thread_g[0], m, n_threads);
+        int64_t T = count_T(per_thread_g[0], m);
+        cand.per_output_T[oi] = T;
+        cand.total_T += T;
+    }
+
+    // Free scratch buffers
+    for (int t = 0; t < use_threads; t++)
+        free(per_thread_g[t]);
+
+    return cand;
+}
+
+static MbCandidate evaluate_Mb(
+    const TruthTable& tt,
+    const uint32_t* M_rows,
+    uint32_t b,
+    int m,
+    int n_threads,
+    bool save_g_tt = false)
+{
+    MbCandidate cand;
+    cand.m = m;
+    cand.b = b;
+    for (int i = 0; i < m; i++) cand.M_rows[i] = M_rows[i];
+    cand.total_T = 0;
+    cand.per_output_T.resize(tt.n_outputs, 0);
+
+    // For m=n: use bijective evaluation (fast XOR path, needed for save_g_tt)
+    // When n > 20, always use bijective path.
+    // For n ≤ 20, use bijective path when save_g_tt is requested.
+    if (m == tt.n && (tt.n > 20 || save_g_tt)) {
+        int rank = gf2_rank(M_rows, m, tt.n);
+        if (rank < m) {
+            cand.total_T = INT64_MAX;  // singular M — skip
+            return cand;
+        }
+        return evaluate_Mb_bijective(tt, M_rows, b, m, tt.n, n_threads, save_g_tt);
+    }
 
     bool any_inconsistent = false;
     for (int oi = 0; oi < tt.n_outputs; oi++) {
@@ -802,6 +1107,9 @@ static RawANFInfo compute_raw_anf_info(TruthTable& tt) {
         info.sum_T += info.per_output_T[oi];
         if (max_deg > info.overall_max_deg) info.overall_max_deg = max_deg;
     }
+    // Restore truth table from ANF (Möbius is self-inverse)
+    for (int oi = 0; oi < tt.n_outputs; oi++)
+        moebius_packed(tt.tt[oi].data(), tt.n);
     return info;
 }
 
@@ -874,38 +1182,52 @@ static MbCandidate hill_climb(
 
 
 // ============================================================
-//  Save raw ANF to .poly file
+//  Save raw ANF to _expr.poly file
 // ============================================================
-//  Format: one monomial per line (GF(2), so coefficient=1 implicit).
-//  Monomial = product of input variable names separated by ' * '.
-//  Lines starting with '#' are comments.
+//  Format:  output_name = term1 + term2 + ...
+//  Terms are monomials: var1 * var2 * ...
+//  '0' means constant false, '1' means constant true.
 // ============================================================
 
 static void save_raw_anf(
     const TruthTable& tt,
     const Circuit& circ,
     const std::vector<int>& output_indices,
-    const std::string& prefix)
+    const std::string& fname)
 {
+    std::ofstream f(fname);
+    if (!f) {
+        std::cerr << "  ERROR: cannot write " << fname << "\n";
+        return;
+    }
+
+    std::string circ_name = circ.inputs.empty() ? "circuit" : circ.inputs[0].substr(0, circ.inputs[0].find('_'));
+    f << "# Raw ANF for circuit (n=" << tt.n << ", k=" << tt.n_outputs << " outputs)\n";
+    f << "# Variables:";
+    for (auto& inp : circ.inputs) f << " " << inp;
+    f << "\n";
+
+    const auto& inputs = circ.inputs;
+    int64_t n_words = tt.n_words;
+    int total_terms = 0;
+
     for (int oi = 0; oi < tt.n_outputs; oi++) {
         std::string out_name = circ.outputs[output_indices[oi]];
-        std::string fname = prefix + "_" + out_name + ".poly";
-        std::ofstream f(fname);
-        if (!f) {
-            std::cerr << "  ERROR: cannot write " << fname << "\n";
+        f << out_name << " = ";
+
+        const uint64_t* data = tt.tt[oi].data();
+        int count = 0;
+
+        // Check for constant 0 (all zeros)
+        bool all_zero = true;
+        for (int64_t w = 0; w < n_words && all_zero; w++) {
+            if (data[w] != 0) all_zero = false;
+        }
+        if (all_zero) {
+            f << "0\n";
             continue;
         }
 
-        f << "# Raw ANF for " << out_name << " (n=" << tt.n << ")\n";
-        f << "# " << tt.n << " variables\n";
-
-        // Möbius was already applied to compute raw ANF.
-        // We iterate over the truth table and output monomials for set bits.
-        const uint64_t* data = tt.tt[oi].data();
-        int64_t n_words = tt.n_words;
-        const auto& inputs = circ.inputs;
-
-        int count = 0;
         for (int64_t w = 0; w < n_words; w++) {
             uint64_t word = data[w];
             while (word) {
@@ -913,10 +1235,10 @@ static void save_raw_anf(
                 word &= word - 1;
                 int64_t pos = (w << 6) | bit;
 
-                // Decode monomial: bit i of pos indicates variable i
-                // Skip constant term (pos == 0)
+                if (count > 0) f << " + ";
+
                 if (pos == 0) {
-                    f << "1\n";  // constant term
+                    f << "1";
                     count++;
                     continue;
                 }
@@ -929,13 +1251,167 @@ static void save_raw_anf(
                         first = false;
                     }
                 }
-                f << "\n";
                 count++;
             }
         }
-        f << "# Total terms: " << count << "\n";
-        std::cout << "  Saved ANF: " << fname << " (" << count << " terms)\n";
+        f << "\n";
+        total_terms += count;
     }
+    std::cout << "  Saved ANF: " << fname << " (" << total_terms << " terms)\n";
+}
+
+// ============================================================
+//  Save term counts to _T.poly
+// ============================================================
+
+static int64_t count_union_T(const TruthTable& tt) {
+    int64_t n_words = tt.n_words;
+    std::vector<uint64_t> union_data(n_words, 0);
+    for (int oi = 0; oi < tt.n_outputs; oi++) {
+        for (int64_t w = 0; w < n_words; w++)
+            union_data[w] |= tt.tt[oi][w];
+    }
+    return count_T(union_data.data(), tt.n);
+}
+
+static void save_raw_T(
+    const TruthTable& tt,
+    const Circuit& circ,
+    const std::vector<int>& output_indices,
+    const std::string& fname,
+    int64_t sum_T)
+{
+    std::ofstream f(fname);
+    if (!f) {
+        std::cerr << "  ERROR: cannot write " << fname << "\n";
+        return;
+    }
+
+    int64_t union_T = count_union_T(tt);
+
+    f << "# Raw ANF term counts for circuit (n=" << tt.n
+      << ", k=" << tt.n_outputs << " outputs)\n";
+    f << "# sum T = " << sum_T << "\n";
+    f << "# union T = " << union_T << "\n";
+    for (int oi = 0; oi < tt.n_outputs; oi++) {
+        int64_t T = count_T(tt.tt[oi].data(), tt.n);
+        f << circ.outputs[output_indices[oi]] << ": T=" << T << "\n";
+    }
+    std::cout << "  Saved T: " << fname << " (sum=" << sum_T << ", union=" << union_T << ")\n";
+}
+
+// ============================================================
+//  Save optimized ANF (z-space) to _expr.poly
+// ============================================================
+
+static void save_opt_anf(
+    const std::vector<std::vector<uint64_t>>& g_tt_raw,  // pre-Möbius per output
+    const Circuit& circ,
+    const std::vector<int>& output_indices,
+    int m,
+    const std::string& fname)
+{
+    std::ofstream f(fname);
+    if (!f) {
+        std::cerr << "  ERROR: cannot write " << fname << "\n";
+        return;
+    }
+
+    f << "# opt1 ANF (z-space, m=" << m << ")\n";
+    int64_t n_words_g = (m < 6) ? 1 : (int64_t(1) << (m - 6));
+    int total_terms = 0;
+
+    for (int oi = 0; oi < (int)g_tt_raw.size(); oi++) {
+        std::string out_name = circ.outputs[output_indices[oi]];
+        f << out_name << " = ";
+
+        // Copy and apply Möbius to get ANF
+        std::vector<uint64_t> anf(g_tt_raw[oi]);
+        moebius_packed(anf.data(), m);
+
+        int count = 0;
+        for (int64_t w = 0; w < n_words_g; w++) {
+            uint64_t word = anf[w];
+            while (word) {
+                int bit = __builtin_ctzll(word);
+                word &= word - 1;
+                int64_t pos = (w << 6) | bit;
+                if (count > 0) f << " + ";
+                if (pos == 0) { f << "1"; count++; continue; }
+                bool first = true;
+                for (int j = 0; j < m; j++) {
+                    if ((pos >> j) & 1) {
+                        if (!first) f << " * ";
+                        f << "z_" << j;
+                        first = false;
+                    }
+                }
+                count++;
+            }
+        }
+        if (count == 0) f << "0";
+        f << "\n";
+        total_terms += count;
+    }
+    std::cout << "  Saved ANF: " << fname << " (" << total_terms << " terms)\n";
+}
+
+// ============================================================
+//  Save optimized term counts + union T to _T.poly
+// ============================================================
+
+static void save_opt_T(
+    const std::vector<std::vector<uint64_t>>& g_tt_raw,
+    const Circuit& circ,
+    const std::vector<int>& output_indices,
+    int m,
+    const std::string& fname)
+{
+    std::ofstream f(fname);
+    if (!f) {
+        std::cerr << "  ERROR: cannot write " << fname << "\n";
+        return;
+    }
+
+    int64_t n_words_g = (m < 6) ? 1 : (int64_t(1) << (m - 6));
+    int64_t sum_T = 0;
+    std::vector<int64_t> per_T;
+
+    // Apply Möbius to each output and compute T + union
+    std::vector<uint64_t> union_data(n_words_g, 0);
+    for (int oi = 0; oi < (int)g_tt_raw.size(); oi++) {
+        std::vector<uint64_t> anf(g_tt_raw[oi]);
+        moebius_packed(anf.data(), m);
+        int64_t T = count_T(anf.data(), m);
+        per_T.push_back(T);
+        sum_T += T;
+        for (int64_t w = 0; w < n_words_g; w++)
+            union_data[w] |= anf[w];
+    }
+    int64_t union_T = count_T(union_data.data(), m);
+
+    f << "# opt1 T(g) (m=" << m << ")\n";
+    f << "# sum T = " << sum_T << "\n";
+    f << "# union T = " << union_T << "\n";
+    for (int oi = 0; oi < (int)g_tt_raw.size(); oi++)
+        f << circ.outputs[output_indices[oi]] << ": T=" << per_T[oi] << "\n";
+    std::cout << "  Saved T: " << fname << " (sum=" << sum_T << ", union=" << union_T << ")\n";
+}
+
+// ============================================================
+//  Pack output vector from truth table for a given x
+// ============================================================
+
+static uint64_t pack_output_vector(
+    const TruthTable& tt,
+    uint32_t x)
+{
+    uint64_t result = 0;
+    for (int oi = 0; oi < tt.n_outputs; oi++) {
+        uint64_t bit = (tt.tt[oi][x >> 6] >> (x & 63)) & 1;
+        result |= (bit << oi);
+    }
+    return result;
 }
 
 
@@ -948,10 +1424,12 @@ struct SearchParams {
     int walsh_single_top = 30;   // top K Walsh bits for single-row candidates
     int multi_max_rows = 10;     // max rows for multi-row Walsh candidates
     int n_random = 40;           // number of random M,b candidates
+    int n32_random = 0;          // n=32 random m=n candidates (full rank only)
     int n_hill_climb = 10;       // number of top candidates to hill climb from
     int n_threads = 104;
     bool verbose = true;
-    std::string anf_out_prefix;  // if non-empty, save ANFs (n ≤ 16 only)
+    std::string anf_out_prefix;  // if non-empty, save raw ANF to PREFIX.poly (n ≤ 16)
+    std::string save_results_prefix;  // if non-empty, save best candidate results to PREFIX_*
 };
 
 static void run_search(
@@ -978,94 +1456,195 @@ static void run_search(
     std::cout << "  Time: " << dt << " s\n";
 
     // Phase 2: Compute raw ANF baseline (Möbius transform on truth table)
-    std::cout << "\nPhase 2: Raw ANF baseline...\n";
-    // Need a copy since Möbius is in-place
-    TruthTable tt_copy = tt;
-    auto raw = compute_raw_anf_info(tt_copy);
-    std::cout << "  Sum T = " << raw.sum_T << "\n";
-    std::cout << "  Max deg = " << raw.overall_max_deg << "\n";
-    for (int oi = 0; oi < tt.n_outputs; oi++) {
-        std::cout << "    " << circ.outputs[output_indices[oi]]
-                  << ": T=" << raw.per_output_T[oi]
-                  << ", m=" << raw.per_output_deg[oi] << "\n";
+    // Skipped for n > 20 (Möbius on 2^32 = 16 GB data is too slow single-threaded)
+    RawANFInfo raw;
+    if (n > 20) {
+        std::cout << "\nPhase 2: Skipping raw ANF baseline (n=" << n << " > 20, too expensive)\n";
+        raw.sum_T = int64_t(1) << n;  // worst-case estimate
+        raw.overall_max_deg = n;
+        raw.per_output_T.assign(tt.n_outputs, int64_t(1) << n);
+        raw.per_output_deg.assign(tt.n_outputs, n);
+    } else {
+        std::cout << "\nPhase 2: Raw ANF baseline...\n";
+        TruthTable tt_copy_baseline = tt;
+        raw = compute_raw_anf_info(tt_copy_baseline);
+        std::cout << "  Sum T = " << raw.sum_T << "\n";
+        std::cout << "  Max deg = " << raw.overall_max_deg << "\n";
+        for (int oi = 0; oi < tt.n_outputs; oi++) {
+            std::cout << "    " << circ.outputs[output_indices[oi]]
+                      << ": T=" << raw.per_output_T[oi]
+                      << ", m=" << raw.per_output_deg[oi] << "\n";
+        }
     }
 
-    // Save raw ANF to .poly files if requested and n ≤ 16
+    // Save raw ANF to _expr.poly + _T.poly if requested (n ≤ 16)
     if (!params.anf_out_prefix.empty() && n <= 16) {
-        save_raw_anf(tt_copy, circ, output_indices, params.anf_out_prefix);
+        std::string prefix = params.anf_out_prefix;
+        // Copy tt, apply Möbius to get ANF data
+        TruthTable tt_copy(tt);
+        for (int oi = 0; oi < tt_copy.n_outputs; oi++)
+            moebius_packed(tt_copy.tt[oi].data(), tt_copy.n);
+        save_raw_anf(tt_copy, circ, output_indices, prefix + "_expr.poly");
+        save_raw_T(tt_copy, circ, output_indices, prefix + "_T.poly", raw.sum_T);
     }
 
-    // Phase 3: Compute Walsh correlations
-    std::cout << "\nPhase 3: Computing Walsh correlations...\n";
-    auto walsh = compute_walsh_correlations(tt, params.n_threads);
-    for (int oi = 0; oi < tt.n_outputs; oi++) {
-        std::cout << "  Output " << circ.outputs[output_indices[oi]] << " top-5 bits: ";
-        // Get top 5 bits by |W_i|
-        std::vector<std::pair<int, int64_t>> bits;
-        for (int i = 0; i < n; i++)
-            bits.emplace_back(i, walsh[oi].walsh_mag[i]);
-        std::sort(bits.begin(), bits.end(),
-            [](auto& a, auto& b) { return a.second > b.second; });
-        for (int j = 0; j < std::min(5, (int)bits.size()); j++)
-            std::cout << bits[j].first << "(" << bits[j].second << ") ";
-        std::cout << "\n";
-    }
+    // Phase 3: Compute Walsh correlations (for n ≤ 32: used for permutation search)
+    std::vector<WalshInfo> walsh;
+    if (n <= 32) {
+        std::cout << "\nPhase 3: Computing Walsh correlations...\n";
+        walsh = compute_walsh_correlations(tt, params.n_threads);
+        for (int oi = 0; oi < tt.n_outputs; oi++) {
+            std::cout << "  Output " << circ.outputs[output_indices[oi]] << " top-5 bits: ";
+            std::vector<std::pair<int, int64_t>> bits;
+            for (int i = 0; i < n; i++)
+                bits.emplace_back(i, walsh[oi].walsh_mag[i]);
+            std::sort(bits.begin(), bits.end(),
+                [](auto& a, auto& b) { return a.second > b.second; });
+            for (int j = 0; j < std::min(5, (int)bits.size()); j++)
+                std::cout << bits[j].first << "(" << bits[j].second << ") ";
+            std::cout << "\n";
+        }
 
-    auto t_walsh = std::chrono::steady_clock::now();
-    std::cout << "  Walsh time: " << std::chrono::duration<double>(t_walsh - t1).count() << " s\n";
+        auto t_walsh = std::chrono::steady_clock::now();
+        std::cout << "  Walsh time: " << std::chrono::duration<double>(t_walsh - t1).count() << " s\n";
+    } else {
+        std::cout << "\nPhase 3: Skipping Walsh correlations (n=" << n << " > 32)\n";
+    }
 
     // Phase 4: Generate and evaluate candidates
     std::cout << "\nPhase 4: Searching for M,b...\n";
 
-    CandidateGenerator gen(n, params.max_m, walsh);
     std::vector<MbCandidate> results;
 
-    // 4a: Single-row Walsh candidates
-    std::cout << "  4a: Single-row Walsh (" << params.walsh_single_top * 2 << " candidates)\n";
-    auto single_rows = gen.gen_walsh_single_rows(params.walsh_single_top);
-    for (auto& [row, b] : single_rows) {
-        uint32_t M[32] = {0};
-        M[0] = row;
-        auto cand = evaluate_Mb(tt, M, b, 1, params.n_threads);
-        results.push_back(cand);
+    // 4a-c: Walsh-guided + random candidates (for n ≤ 20, full search; for n=21-32, permutation search only)
+    if (n <= 20) {
+        CandidateGenerator gen(n, params.max_m, walsh);
+
+        // 4a: Single-row Walsh candidates
+        std::cout << "  4a: Single-row Walsh (" << params.walsh_single_top * 2 << " candidates)\n";
+        auto single_rows = gen.gen_walsh_single_rows(params.walsh_single_top);
+        for (auto& [row, b] : single_rows) {
+            uint32_t M[32] = {0};
+            M[0] = row;
+            auto cand = evaluate_Mb(tt, M, b, 1, params.n_threads);
+            results.push_back(cand);
+        }
+
+        // 4b: Multi-row Walsh candidates (linear combinations)
+        std::cout << "  4b: Multi-row Walsh (" << params.multi_max_rows
+                  << " progressive + pair combinations)\n";
+        auto multi_rows = gen.gen_multi_row(params.multi_max_rows);
+        for (auto& [rows, b] : multi_rows) {
+            int m = (int)rows.size();
+            uint32_t M[32] = {0};
+            for (int j = 0; j < m; j++) M[j] = rows[j];
+            auto cand = evaluate_Mb(tt, M, b, m, params.n_threads);
+            results.push_back(cand);
+        }
+
+        // 4c: Random M,b
+        std::cout << "  4c: Random M,b (" << params.n_random << " candidates)\n";
+        auto random_cands = gen.gen_random(params.n_random, params.max_m);
+        for (auto& [rows, b] : random_cands) {
+            int m = (int)rows.size();
+            uint32_t M[32] = {0};
+            for (int j = 0; j < m; j++) M[j] = rows[j];
+            auto cand = evaluate_Mb(tt, M, b, m, params.n_threads);
+            results.push_back(cand);
+        }
+
+        auto t_search0 = std::chrono::steady_clock::now();
+        double walsh_time = std::chrono::duration<double>(t_search0 - t1).count();
+        std::cout << "  Search time: " << walsh_time << " s\n";
+    } else if (n <= 32 && !walsh.empty()) {
+        // n=21-32: permutation search via Walsh (unit-vector rows only, no small-m random)
+        CandidateGenerator gen(n, params.max_m, walsh);
+
+        // 4a: Single-row Walsh (unit vectors)
+        std::cout << "  4a: Single-row Walsh (" << params.walsh_single_top * 2 << " candidates)\n";
+        auto single_rows = gen.gen_walsh_single_rows(params.walsh_single_top);
+        for (auto& [row, b] : single_rows) {
+            uint32_t M[32] = {0};
+            M[0] = row;
+            auto cand = evaluate_Mb(tt, M, b, 1, params.n_threads);
+            results.push_back(cand);
+        }
+
+        // 4b: Multi-row Walsh (progressive permutation matrices)
+        std::cout << "  4b: Multi-row Walsh (progressive m=1.." << std::min(20, n)
+                  << " + XOR pairs)\n";
+        auto multi_rows = gen.gen_multi_row(std::min(20, n));
+        for (auto& [rows, b] : multi_rows) {
+            int m = (int)rows.size();
+            uint32_t M[32] = {0};
+            for (int j = 0; j < m; j++) M[j] = rows[j];
+            auto cand = evaluate_Mb(tt, M, b, m, params.n_threads);
+            results.push_back(cand);
+        }
+
+        std::cout << "  (skipping Phase 4c small-m random for n=" << n << ")\n";
     }
 
-    // 4b: Multi-row Walsh candidates (linear combinations)
-    std::cout << "  4b: Multi-row Walsh (" << params.multi_max_rows
-              << " progressive + pair combinations)\n";
-    auto multi_rows = gen.gen_multi_row(params.multi_max_rows);
-    for (auto& [rows, b] : multi_rows) {
-        int m = (int)rows.size();
-        uint32_t M[32] = {0};
-        for (int j = 0; j < m; j++) M[j] = rows[j];
-        auto cand = evaluate_Mb(tt, M, b, m, params.n_threads);
-        results.push_back(cand);
+    // 4d: n32 random m=n candidates (for n > 20)
+    if (params.n32_random > 0 && n > 20) {
+        std::cout << "  4d: n32 random m=n candidates (" << params.n32_random << ")\n";
+        std::mt19937_64 rng_n32(42);
+        int generated = 0;
+        int attempts = 0;
+        const int MAX_ATTEMPTS = params.n32_random * 20;
+
+        auto t_n32_0 = std::chrono::steady_clock::now();
+
+        while (generated < params.n32_random && attempts < MAX_ATTEMPTS) {
+            attempts++;
+
+            // Generate random m=n M matrix
+            uint32_t M[32] = {0};
+            for (int r = 0; r < n; r++) {
+                for (int i = 0; i < n; i++) {
+                    if (rng_n32() & 1) M[r] |= (1u << i);
+                }
+            }
+
+            // Generate random b vector
+            uint32_t b = 0;
+            for (int r = 0; r < n; r++) {
+                if (rng_n32() & 1) b |= (1u << r);
+            }
+
+            // Skip singular M (fast rank check)
+            if (gf2_rank(M, n, n) < n) continue;
+
+            // Use evaluate_Mb (which dispatches to evaluate_Mb_bijective for m=n, n>20)
+            auto t_eval0 = std::chrono::steady_clock::now();
+            auto cand = evaluate_Mb(tt, M, b, n, params.n_threads);
+            auto t_eval1 = std::chrono::steady_clock::now();
+
+            results.push_back(cand);
+            generated++;
+
+            double eval_time = std::chrono::duration<double>(t_eval1 - t_eval0).count();
+            double compression = (double)raw.sum_T / std::max(int64_t(1), cand.total_T);
+            std::cout << "    n32 #" << generated << "/" << params.n32_random
+                      << " (attempt " << attempts << ")"
+                      << ": T=" << cand.total_T
+                      << " (compression " << compression << "×)"
+                      << " time=" << eval_time << "s\n";
+        }
+
+        auto t_n32_1 = std::chrono::steady_clock::now();
+        std::cout << "    n32 random time: " << std::chrono::duration<double>(t_n32_1 - t_n32_0).count() << " s\n";
     }
 
-    // 4c: Random M,b
-    std::cout << "  4c: Random M,b (" << params.n_random << " candidates)\n";
-    auto random_cands = gen.gen_random(params.n_random, params.max_m);
-    for (auto& [rows, b] : random_cands) {
-        int m = (int)rows.size();
-        uint32_t M[32] = {0};
-        for (int j = 0; j < m; j++) M[j] = rows[j];
-        auto cand = evaluate_Mb(tt, M, b, m, params.n_threads);
-        results.push_back(cand);
-    }
-
-    auto t_search = std::chrono::steady_clock::now();
-    std::cout << "  Search time: " << std::chrono::duration<double>(t_search - t_walsh).count() << " s\n";
-
-    // 4d: Hill climbing from top candidates (only for m=n ≤ 16 — practical)
-    if (params.n_hill_climb > 0 && n <= 16) {
+    // 4e: Hill climbing from top candidates (only m=n, skips candidates where m != n)
+    if (params.n_hill_climb > 0) {
         // Sort current results to find top candidates
         std::sort(results.begin(), results.end(),
             [](auto& a, auto& b) { return a.total_T < b.total_T; });
 
         int n_climb = std::min(params.n_hill_climb, (int)results.size());
-        std::cout << "  4d: Hill climbing from top " << n_climb << " candidates (+ identity)\n";
+        std::cout << "  4e: Hill climbing from top " << n_climb << " candidates (+ identity)\n";
 
-        // Also always try from identity
         auto t_hc0 = std::chrono::steady_clock::now();
 
         for (int ci = 0; ci < n_climb; ci++) {
@@ -1131,8 +1710,8 @@ static void run_search(
         }
     }
 
-    // Phase 6: For the best candidate, compute full ANF of g
-    if (!results.empty() && results[0].total_T < raw.sum_T) {
+    // Phase 6: For the best candidate, compute full ANF of g and verify
+    if (!results.empty() && results[0].total_T < INT64_MAX) {
         auto& best = results[0];
         std::cout << "\nBest candidate: m=" << best.m << ", T=" << best.total_T << "\n";
 
@@ -1155,6 +1734,139 @@ static void run_search(
             }
             std::cout << "\n";
         }
+
+        // Verify: re-evaluate best candidate saving pre-Möbius g_tt, then call verify_transform
+        bool all_verified = true;
+        MbCandidate verified_cand;
+        verified_cand.m = best.m;
+        verified_cand.b = best.b;
+        for (int i = 0; i < best.m; i++) verified_cand.M_rows[i] = best.M_rows[i];
+        verified_cand.total_T = best.total_T;
+        verified_cand.per_output_T = best.per_output_T;
+
+        if (best.m == n) {
+            std::cout << "Verifying best candidate (5000 random tests per output)...\n";
+            verified_cand = evaluate_Mb(tt, best.M_rows, best.b, best.m, params.n_threads, true);
+            for (int oi = 0; oi < tt.n_outputs; oi++) {
+                bool ok = verify_transform(tt, verified_cand.g_tt_raw[oi], oi,
+                    best.M_rows, best.b, best.m, n, 5000);
+                std::cout << "  " << circ.outputs[output_indices[oi]]
+                          << (ok ? " ✅ Verified (5000 tests)" : " ❌ FAILED") << "\n";
+                if (!ok) all_verified = false;
+            }
+        } else {
+            std::cout << "Skipping verification (non-bijective m=" << best.m << " < n=" << n << ")\n";
+        }
+        if (all_verified) {
+            std::cout << "✅ All outputs verified!\n";
+        }
+
+        // Save results to files if requested
+        if (!params.save_results_prefix.empty()) {
+            std::string prefix = params.save_results_prefix;
+
+            // (a) Save transform: _trans.poly
+            std::string fname_trans = prefix + "_trans.poly";
+            std::ofstream f_trans(fname_trans);
+            if (f_trans) {
+                f_trans << "# opt1 transform z = Mx + b (GF(2))\n";
+                f_trans << "# m=" << best.m << ", n=" << n << "\n";
+                for (int row = 0; row < best.m; row++) {
+                    f_trans << "z_" << row << " = ";
+                    bool first = true;
+                    for (int i = 0; i < n; i++) {
+                        if ((best.M_rows[row] >> i) & 1) {
+                            if (!first) f_trans << " + ";
+                            f_trans << circ.inputs[i];
+                            first = false;
+                        }
+                    }
+                    if ((best.b >> row) & 1) {
+                        if (!first) f_trans << " + ";
+                        f_trans << "1";
+                    } else if (first) {
+                        f_trans << "0";  // z_i = 0 (constant false)
+                    }
+                    f_trans << "\n";
+                }
+                std::cout << "  Saved: " << fname_trans << "\n";
+            }
+
+            // (b) Save optimized ANF + T if we have g_tt_raw
+            if (!verified_cand.g_tt_raw.empty()) {
+                save_opt_anf(verified_cand.g_tt_raw, circ, output_indices, best.m,
+                             prefix + "_expr.poly");
+                save_opt_T(verified_cand.g_tt_raw, circ, output_indices, best.m,
+                           prefix + "_T.poly");
+            }
+
+            // (c) Save verification data: _verify.txt with hex test vectors
+            std::string fname_ver = prefix + "_verify.txt";
+            std::ofstream f_ver(fname_ver);
+            if (f_ver) {
+                f_ver << "# Verification for (n=" << n << ", k=" << tt.n_outputs << " outputs)\n";
+                f_ver << "# Strategy: opt1\n";
+                f_ver << "# Transform: z = Mx + b (m=" << best.m << ")\n";
+                f_ver << "# Tests: 5000\n\n";
+
+                int n_tests = 5000;
+                uint32_t mask = (n == 32) ? 0xFFFFFFFF : ((1u << n) - 1);
+                int hex_bytes = (tt.n_outputs + 7) / 8;
+                int n_mismatch = 0;
+                int first_mismatch_oi = -1;
+
+                f_ver << "# x  f(x)  g(z)";
+                if (hex_bytes > 1) f_ver << "  (hex, " << hex_bytes << " bytes)";
+                f_ver << "\n";
+
+                for (int t = 0; t < n_tests; t++) {
+                    uint32_t x = (uint32_t)(((uint64_t)t * 0x9e3779b97f4a7c15ULL) & mask);
+                    // Compute z = Mx + b
+                    uint32_t z = best.b;
+                    for (int row = 0; row < best.m; row++) {
+                        if (__builtin_popcount(best.M_rows[row] & x) & 1)
+                            z ^= (1u << row);
+                    }
+
+                    uint64_t f_vec = pack_output_vector(tt, x);
+                    uint64_t g_vec = 0;
+                    for (int oi = 0; oi < tt.n_outputs; oi++) {
+                        const auto& g_tt = verified_cand.g_tt_raw[oi];
+                        uint64_t bit = (g_tt[z >> 6] >> (z & 63)) & 1;
+                        g_vec |= (bit << oi);
+                    }
+
+                    if (hex_bytes <= 1) {
+                        f_ver << std::hex << std::setw(2) << std::setfill('0') << (int)x << "  "
+                              << std::setw(2) << (int)f_vec << "  "
+                              << std::setw(2) << (int)g_vec << std::dec << "\n";
+                    } else {
+                        f_ver << std::hex << std::setw(2 * hex_bytes) << std::setfill('0') << x << "  "
+                              << std::setw(2 * hex_bytes) << f_vec << "  "
+                              << std::setw(2 * hex_bytes) << g_vec << std::dec << "\n";
+                    }
+
+                    if (f_vec != g_vec) {
+                        n_mismatch++;
+                        if (first_mismatch_oi < 0) {
+                            uint64_t diff = f_vec ^ g_vec;
+                            first_mismatch_oi = __builtin_ctzll(diff);
+                        }
+                    }
+                }
+
+                f_ver << "\n";
+                if (n_mismatch == 0) {
+                    f_ver << "✅ All outputs verified! (5000 tests, 0 mismatches)\n";
+                } else {
+                    f_ver << "❌ " << n_mismatch << " mismatches out of " << n_tests << " tests\n";
+                    f_ver << "   First mismatch at output: "
+                          << circ.outputs[output_indices[first_mismatch_oi]] << "\n";
+                }
+                std::cout << "  Saved: " << fname_ver
+                          << " (" << n_mismatch << "/" << n_tests << " mismatches)\n";
+            }
+        }
     }
 
     double total_time = std::chrono::duration<double>(
@@ -1172,8 +1884,11 @@ int main(int argc, char** argv) {
         std::cerr << "  --max-m N      max z variables to search (default 12)\n";
         std::cerr << "  --walsh-k N    top K Walsh bits (default 30)\n";
         std::cerr << "  --random N     random candidates (default 40)\n";
+        std::cerr << "  --n32-random N n>20 full-rank random m=n candidates (default 0)\n";
         std::cerr << "  --hill-climb N hill climb from top N candidates (default 10)\n";
-        std::cerr << "  --anf-out PREF save raw ANF to PREFIX_OUTPUT.poly (n≤16 only)\n";
+        std::cerr << "  --anf-out PREF save raw ANF to PREFIX_expr.poly + PREFIX_T.poly (n≤16 only)\n";
+        std::cerr << "  --save-results PREFIX  save best candidate: PREFIX_best_trans.txt,\n";
+        std::cerr << "                          PREFIX_best_anf.poly, PREFIX_verify.txt\n";
         return 1;
     }
 
@@ -1206,10 +1921,14 @@ int main(int argc, char** argv) {
             params.walsh_single_top = std::stoi(argv[++a]);
         else if (arg == "--random" && a + 1 < argc)
             params.n_random = std::stoi(argv[++a]);
+        else if (arg == "--n32-random" && a + 1 < argc)
+            params.n32_random = std::stoi(argv[++a]);
         else if (arg == "--hill-climb" && a + 1 < argc)
             params.n_hill_climb = std::stoi(argv[++a]);
         else if (arg == "--anf-out" && a + 1 < argc)
             params.anf_out_prefix = argv[++a];
+        else if (arg == "--save-results" && a + 1 < argc)
+            params.save_results_prefix = argv[++a];
     }
 
     run_search(circ, output_indices, params);
