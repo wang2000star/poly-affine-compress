@@ -1,7 +1,0 @@
-# Raw ANF for om_3 (n=8)
-# 8 variables
-i3 * i1
-i3 * i2 * i1
-i3 * i0
-i3 * i1 * i0
-# Total terms: 4
