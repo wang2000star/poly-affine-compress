@@ -1,10 +1,10 @@
 # T(g) values: 7 outputs
 # 原始并集T: 1613
-# 优化并集T: 139
+# 优化并集T: 141
 oM0 T=26
 oM1 T=35
 oM2 T=35
-oM3 T=1
+oM3 T=3
 oE0 T=23
 oE1 T=16
 oE2 T=3

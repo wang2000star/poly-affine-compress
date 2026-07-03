@@ -971,8 +971,9 @@ def simplify(
         if results and results[0][1] < g.T():
             m_w, T_w, M_w, b_w, g_w = results[0]
             try:
-                # 验证 Walsh 结果正确性（用 100 个随机测试筛除假阳性）
-                g_check = g.substitute_affine(M_w, b_w, verify=True, n_tests=100)
+                # 验证 Walsh 结果正确性（n ≤ 16 穷举，否则高置信度随机）
+                n_verify = 1 << g.n if g.n <= 16 else 100000
+                g_check = g.substitute_affine(M_w, b_w, verify=True, n_tests=n_verify)
                 if g_check.T() == g_w.T():
                     if verbose:
                         print(f"  Walsh: T={T_w}/{g.T()} ({(g.T()-T_w)/g.T()*100:.1f}%↓)")
