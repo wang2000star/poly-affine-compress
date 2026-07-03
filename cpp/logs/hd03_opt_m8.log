@@ -1,0 +1,88 @@
+--- Circuit ---
+  Inputs: 16, Outputs to optimize: 8
+Phase 1: Computing truth table...
+  Truth table: 2^16 = 65536 inputs, 1024 batches, 8 output(s), 104 thread(s)
+  Time: 0.00557149 s
+
+Phase 2: Raw ANF baseline...
+  Sum T = 518
+  Max deg = 9
+    om_7: T=257, m=9
+    om_6: T=129, m=8
+    om_5: T=65, m=7
+    om_4: T=33, m=6
+    om_3: T=17, m=5
+    om_2: T=9, m=4
+    om_1: T=5, m=3
+    om_0: T=3, m=2
+
+Phase 3: Computing Walsh correlations...
+  Output om_7 top-5 bits: 8(129) 9(129) 10(129) 11(129) 12(129) 
+  Output om_6 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_5 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_4 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_3 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_2 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_1 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_0 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Walsh time: 0.0576087 s
+
+Phase 4: Searching for M,b...
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (500 candidates)
+  Search time: 16.4337 s
+
+========================================
+  Results (598 candidates evaluated)
+  Raw ANF Sum T = 518
+========================================
+  1. m=3 T=0 (compression 518×) M=[01111000..; 01110100..; 01100110..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  2. m=4 T=0 (compression 518×) M=[10100001..; 11010010..; 11000111..; 00111000..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  3. m=2 T=0 (compression 518×) M=[10001110..; 10010000..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  4. m=5 T=0 (compression 518×) M=[01100001..; 01111110..; 00011010..; 00100111..; 10111100..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  5. m=2 T=0 (compression 518×) M=[01101101..; 00110010..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  6. m=7 T=0 (compression 518×) M=[00010011..; 11011101..; 11001101..; 11010111..; 00110001..; 11011011..; 11001010..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  7. m=1 T=0 (compression 518×) M=[10010001..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  8. m=4 T=0 (compression 518×) M=[10101110..; 01100000..; 10000110..; 00100000..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  9. m=7 T=0 (compression 518×) M=[10100111..; 11101001..; 10000011..; 11100000..; 00010001..; 01010000..; 00101000..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  10. m=4 T=0 (compression 518×) M=[10011111..; 01110101..; 10010111..; 10011010..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  11. m=3 T=0 (compression 518×) M=[10100000..; 00110001..; 00110011..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  12. m=7 T=0 (compression 518×) M=[10111001..; 00110100..; 11100000..; 11100101..; 01111001..; 11011011..; 01001100..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  13. m=1 T=0 (compression 518×) M=[10101010..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  14. m=4 T=0 (compression 518×) M=[00110011..; 01101111..; 01011100..; 00000011..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  15. m=5 T=0 (compression 518×) M=[10110011..; 01111011..; 01100110..; 00001111..; 10001010..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  16. m=2 T=0 (compression 518×) M=[10100111..; 00011010..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  17. m=7 T=0 (compression 518×) M=[11010011..; 11111111..; 11000111..; 00100001..; 01001111..; 00110100..; 11001001..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  18. m=1 T=0 (compression 518×) M=[10011010..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  19. m=1 T=0 (compression 518×) M=[01110110..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+  20. m=6 T=0 (compression 518×) M=[00100000..; 00000001..; 10101110..; 11101100..; 10111111..; 10110110..]
+    Per-output T: om_7=0 om_6=0 om_5=0 om_4=0 om_3=0 om_2=0 om_1=0 om_0=0
+
+Best candidate: m=3, T=0
+// Transform z = Mx + b (GF(2)):
+// m=3, n=16
+// z_0 = i8 + i7 + i6 + i5 + i15 + i14 + i13 + i10 + i1 + 1
+// z_1 = i8 + i7 + i6 + i4 + i12 + i10 + 1
+// z_2 = i8 + i7 + i4 + i3 + i14 + i11
+
+Total time: 16.4991 s

@@ -1,0 +1,122 @@
+--- Circuit ---
+  Inputs: 7, Outputs to optimize: 26
+Phase 1: Computing truth table...
+  Truth table: 2^7 = 128 inputs, 2 batches, 26 output(s), 104 thread(s)
+  Time: 0.000174825 s
+
+Phase 2: Raw ANF baseline...
+  Sum T = 232
+  Max deg = 7
+    oseloregdst0: T=9, m=5
+    oseloregdst1: T=10, m=5
+    oselopB0: T=12, m=4
+    oselopB1: T=10, m=5
+    oaluop0: T=12, m=7
+    oaluop1: T=6, m=5
+    oaluop2: T=7, m=5
+    oaluopext0: T=9, m=5
+    oaluopext1: T=9, m=5
+    oaluopext2: T=10, m=5
+    oaluopext3: T=10, m=5
+    ohalt: T=32, m=5
+    oregwrite: T=15, m=5
+    oselpcopA: T=4, m=4
+    oselpcopB: T=8, m=4
+    obeqz: T=8, m=5
+    obnez: T=4, m=5
+    obgez: T=2, m=5
+    obltz: T=4, m=5
+    ojump: T=4, m=3
+    oCin: T=8, m=6
+    oinvA: T=12, m=7
+    oinvB: T=6, m=7
+    osign: T=1, m=0
+    omemwrite: T=12, m=4
+    oselwb: T=8, m=5
+
+Phase 3: Computing Walsh correlations...
+  Output oseloregdst0 top-5 bits: 6(18) 3(10) 4(10) 1(6) 2(6) 
+  Output oseloregdst1 top-5 bits: 6(10) 1(6) 3(6) 0(2) 2(2) 
+  Output oselopB0 top-5 bits: 2(8) 6(8) 0(4) 1(4) 3(4) 
+  Output oselopB1 top-5 bits: 6(22) 4(14) 3(10) 1(6) 2(6) 
+  Output oaluop0 top-5 bits: 6(8) 0(6) 1(4) 4(4) 5(2) 
+  Output oaluop1 top-5 bits: 1(12) 6(12) 2(4) 3(4) 4(4) 
+  Output oaluop2 top-5 bits: 6(26) 2(10) 3(10) 4(10) 0(2) 
+  Output oaluopext0 top-5 bits: 6(10) 2(6) 0(2) 1(2) 3(2) 
+  Output oaluopext1 top-5 bits: 1(10) 6(10) 2(6) 0(2) 3(2) 
+  Output oaluopext2 top-5 bits: 6(10) 0(2) 1(2) 2(2) 3(2) 
+  Output oaluopext3 top-5 bits: 6(26) 2(10) 4(10) 0(2) 1(2) 
+  Output ohalt top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output oregwrite top-5 bits: 6(42) 4(18) 1(6) 3(6) 0(2) 
+  Output oselpcopA top-5 bits: 0(4) 2(4) 3(4) 4(4) 6(4) 
+  Output oselpcopB top-5 bits: 0(4) 2(4) 3(4) 4(4) 6(4) 
+  Output obeqz top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output obnez top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output obgez top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output obltz top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output ojump top-5 bits: 2(8) 3(8) 4(8) 6(8) 0(0) 
+  Output oCin top-5 bits: 3(11) 6(11) 0(3) 4(3) 1(1) 
+  Output oinvA top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output oinvB top-5 bits: 3(9) 6(9) 4(5) 2(3) 0(1) 
+  Output osign top-5 bits: 6(64) 0(0) 1(0) 2(0) 3(0) 
+  Output omemwrite top-5 bits: 2(4) 3(4) 4(4) 6(4) 0(0) 
+  Output oselwb top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Walsh time: 0.00330742 s
+
+Phase 4: Searching for M,b...
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (500 candidates)
+  Search time: 2.08894 s
+
+========================================
+  Results (563 candidates evaluated)
+  Raw ANF Sum T = 232
+========================================
+  1. m=1 T=3 (compression 77.3333×) M=[0100100..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  2. m=1 T=3 (compression 77.3333×) M=[0110000..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  3. m=1 T=3 (compression 77.3333×) M=[1001010..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  4. m=1 T=3 (compression 77.3333×) M=[1110010..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  5. m=1 T=3 (compression 77.3333×) M=[0011000..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  6. m=1 T=3 (compression 77.3333×) M=[0000110..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  7. m=1 T=3 (compression 77.3333×) M=[1000010..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  8. m=1 T=3 (compression 77.3333×) M=[1101100..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  9. m=1 T=3 (compression 77.3333×) M=[0100010..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  10. m=1 T=3 (compression 77.3333×) M=[0001100..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  11. m=1 T=3 (compression 77.3333×) M=[0010100..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  12. m=1 T=3 (compression 77.3333×) M=[1110010..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  13. m=1 T=3 (compression 77.3333×) M=[1100000..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  14. m=1 T=3 (compression 77.3333×) M=[0010110..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  15. m=1 T=3 (compression 77.3333×) M=[0010010..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  16. m=1 T=3 (compression 77.3333×) M=[1000100..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  17. m=1 T=3 (compression 77.3333×) M=[1010000..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  18. m=1 T=3 (compression 77.3333×) M=[0000110..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  19. m=1 T=3 (compression 77.3333×) M=[0011000..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+  20. m=1 T=3 (compression 77.3333×) M=[0110000..]
+    Per-output T: oseloregdst0=0 oseloregdst1=0 oselopB0=0 oselopB1=0 oaluop0=1 oaluop1=0 oaluop2=0 oaluopext0=0 oaluopext1=0 oaluopext2=0 oaluopext3=0 ohalt=0 oregwrite=0 oselpcopA=0 oselpcopB=0 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=0 oCin=0 oinvA=1 oinvB=1 osign=0 omemwrite=0 oselwb=0
+
+Best candidate: m=1, T=3
+// Transform z = Mx + b (GF(2)):
+// m=1, n=7
+// z_0 = opcode1 + opcode4 + 1
+
+Total time: 2.09419 s
