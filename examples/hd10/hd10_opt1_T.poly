@@ -1,1 +1,5 @@
-# hd10: complex AND/XOR structure, ANF ~4B terms, cannot expand
+# hd10: parser-based ANF simplification results (opt1)
+# opt1 union T = 1036
+m_31 T=10
+m_30 T=1032
+m_29 T=16

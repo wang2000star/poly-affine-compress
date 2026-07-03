@@ -1,1 +1,7 @@
-# hd10: complex AND/XOR structure, ANF ~4B terms, cannot expand
+# hd10: parser-based ANF simplification results
+# opt2 union T = 16 (m_29:16, m_30:12, m_31:10, all subsets of 16 base monomials)
+# Original ANF: ~4.2B terms per output (AND of 4 ORs of 8 vars each)
+# 压缩: 4.2B → 16 (≈ 260M×)
+m_31 T=10
+m_30 T=12
+m_29 T=16
