@@ -67,6 +67,7 @@ all: CMakeFiles/anf_core.dir/all
 all: CMakeFiles/anf_simplify.dir/all
 all: CMakeFiles/anf_bench.dir/all
 all: CMakeFiles/anf_test.dir/all
+all: CMakeFiles/compute_raw_anf.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
@@ -74,6 +75,7 @@ codegen: CMakeFiles/anf_core.dir/codegen
 codegen: CMakeFiles/anf_simplify.dir/codegen
 codegen: CMakeFiles/anf_bench.dir/codegen
 codegen: CMakeFiles/anf_test.dir/codegen
+codegen: CMakeFiles/compute_raw_anf.dir/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
@@ -85,6 +87,7 @@ clean: CMakeFiles/anf_core.dir/clean
 clean: CMakeFiles/anf_simplify.dir/clean
 clean: CMakeFiles/anf_bench.dir/clean
 clean: CMakeFiles/anf_test.dir/clean
+clean: CMakeFiles/compute_raw_anf.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -214,6 +217,38 @@ CMakeFiles/anf_test.dir/codegen:
 CMakeFiles/anf_test.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_test.dir/build.make CMakeFiles/anf_test.dir/clean
 .PHONY : CMakeFiles/anf_test.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/compute_raw_anf.dir
+
+# All Build rule for target.
+CMakeFiles/compute_raw_anf.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=20,21 "Built target compute_raw_anf"
+.PHONY : CMakeFiles/compute_raw_anf.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/compute_raw_anf.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/compute_raw_anf.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/compute_raw_anf.dir/rule
+
+# Convenience name for target.
+compute_raw_anf: CMakeFiles/compute_raw_anf.dir/rule
+.PHONY : compute_raw_anf
+
+# codegen rule for target.
+CMakeFiles/compute_raw_anf.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=20,21 "Finished codegen for target compute_raw_anf"
+.PHONY : CMakeFiles/compute_raw_anf.dir/codegen
+
+# clean rule for target.
+CMakeFiles/compute_raw_anf.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/clean
+.PHONY : CMakeFiles/compute_raw_anf.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

@@ -168,6 +168,19 @@ anf_test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_test.dir/build.make CMakeFiles/anf_test.dir/build
 .PHONY : anf_test/fast
 
+#=============================================================================
+# Target rules for targets named compute_raw_anf
+
+# Build rule for target.
+compute_raw_anf: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 compute_raw_anf
+.PHONY : compute_raw_anf
+
+# fast build rule for target.
+compute_raw_anf/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/build
+.PHONY : compute_raw_anf/fast
+
 bench/bench_main.o: bench/bench_main.cpp.o
 .PHONY : bench/bench_main.o
 
@@ -191,6 +204,30 @@ bench/bench_main.s: bench/bench_main.cpp.s
 bench/bench_main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_bench.dir/build.make CMakeFiles/anf_bench.dir/bench/bench_main.cpp.s
 .PHONY : bench/bench_main.cpp.s
+
+src/compute_raw_anf.o: src/compute_raw_anf.cpp.o
+.PHONY : src/compute_raw_anf.o
+
+# target to build an object file
+src/compute_raw_anf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/src/compute_raw_anf.cpp.o
+.PHONY : src/compute_raw_anf.cpp.o
+
+src/compute_raw_anf.i: src/compute_raw_anf.cpp.i
+.PHONY : src/compute_raw_anf.i
+
+# target to preprocess a source file
+src/compute_raw_anf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/src/compute_raw_anf.cpp.i
+.PHONY : src/compute_raw_anf.cpp.i
+
+src/compute_raw_anf.s: src/compute_raw_anf.cpp.s
+.PHONY : src/compute_raw_anf.s
+
+# target to generate assembly for a file
+src/compute_raw_anf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/src/compute_raw_anf.cpp.s
+.PHONY : src/compute_raw_anf.cpp.s
 
 src/gf2_linalg.o: src/gf2_linalg.cpp.o
 .PHONY : src/gf2_linalg.o
@@ -414,9 +451,13 @@ help:
 	@echo "... anf_core"
 	@echo "... anf_simplify"
 	@echo "... anf_test"
+	@echo "... compute_raw_anf"
 	@echo "... bench/bench_main.o"
 	@echo "... bench/bench_main.i"
 	@echo "... bench/bench_main.s"
+	@echo "... src/compute_raw_anf.o"
+	@echo "... src/compute_raw_anf.i"
+	@echo "... src/compute_raw_anf.s"
 	@echo "... src/gf2_linalg.o"
 	@echo "... src/gf2_linalg.i"
 	@echo "... src/gf2_linalg.s"
