@@ -35,3 +35,7 @@ Phase 4: Searching for M,b...
   Search time: 2.64572 s
   4e: Hill climbing from top 30 candidates (+ identity)
     hill climb #0: T=56111 -> T=8642
+    hill climb #1: T=57412 -> T=10435
+    hill climb #2: T=58880 -> T=10298
+    hill climb #3: T=60068 -> T=14398
+    hill climb #4: T=60639 -> T=15216
