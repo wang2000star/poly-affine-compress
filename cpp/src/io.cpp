@@ -241,13 +241,10 @@ void save_verify(const TruthTable& tt,
 
     int n_tests = 5000;
     uint32_t mask = (n == 32) ? 0xFFFFFFFF : ((1u << n) - 1);
-    int hex_bytes = (tt.n_outputs + 7) / 8;
     int n_mismatch = 0;
     int first_mismatch_oi = -1;
 
-    f_ver << "# x  f(x)  g(z)";
-    if (hex_bytes > 1) f_ver << "  (hex, " << hex_bytes << " bytes)";
-    f_ver << "\n";
+    f_ver << "# x  f(x)  z  g(z)\n";
 
     bool has_g_data = !g_tt_raw.empty() && g_tt_raw.size() == (size_t)tt.n_outputs;
 
@@ -269,15 +266,16 @@ void save_verify(const TruthTable& tt,
             }
         }
 
-        if (hex_bytes <= 1) {
-            f_ver << std::hex << std::setw(2) << std::setfill('0') << (int)x << "  "
-                  << std::setw(2) << (int)f_vec << "  "
-                  << std::setw(2) << (int)g_vec << std::dec << "\n";
-        } else {
-            f_ver << std::hex << std::setw(2 * hex_bytes) << std::setfill('0') << x << "  "
-                  << std::setw(2 * hex_bytes) << f_vec << "  "
-                  << std::setw(2 * hex_bytes) << g_vec << std::dec << "\n";
-        }
+        auto to_bits = [](uint32_t val, int bits) -> std::string {
+            std::string s(bits, '0');
+            for (int b = bits - 1; b >= 0; b--, val >>= 1)
+                if (val & 1) s[b] = '1';
+            return s;
+        };
+        f_ver << to_bits(x, n) << "  "
+              << to_bits(f_vec, tt.n_outputs) << "  "
+              << to_bits(z, best.m) << "  "
+              << to_bits(g_vec, tt.n_outputs) << "\n";
 
         if (f_vec != g_vec) {
             n_mismatch++;

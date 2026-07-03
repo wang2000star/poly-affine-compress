@@ -33,3 +33,11 @@ target_include_directories(optimize_anf PRIVATE include)
 # Legacy: compute_raw_anf (standalone, uses old code)
 add_executable(compute_raw_anf src/compute_raw_anf.cpp)
 target_compile_options(compute_raw_anf PRIVATE -O3 -march=native -mtune=native -pthread)
+
+# Standalone verifier: read circuit + trans + expr, verify f(x) == g(Mx+b)
+add_executable(verify_anf
+    src/verify_anf.cpp
+    src/circuit.cpp
+)
+target_include_directories(verify_anf PRIVATE include)
+target_compile_options(verify_anf PRIVATE -O3 -march=native -mtune=native -pthread)

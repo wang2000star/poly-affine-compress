@@ -65,11 +65,13 @@ CMAKE_BINARY_DIR = /home/wangfz/bool/cpp/build
 # The main recursive "all" target.
 all: CMakeFiles/optimize_anf.dir/all
 all: CMakeFiles/compute_raw_anf.dir/all
+all: CMakeFiles/verify_anf.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
 codegen: CMakeFiles/optimize_anf.dir/codegen
 codegen: CMakeFiles/compute_raw_anf.dir/codegen
+codegen: CMakeFiles/verify_anf.dir/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
@@ -79,6 +81,7 @@ preinstall:
 # The main recursive "clean" target.
 clean: CMakeFiles/optimize_anf.dir/clean
 clean: CMakeFiles/compute_raw_anf.dir/clean
+clean: CMakeFiles/verify_anf.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -144,6 +147,38 @@ CMakeFiles/compute_raw_anf.dir/codegen:
 CMakeFiles/compute_raw_anf.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/clean
 .PHONY : CMakeFiles/compute_raw_anf.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/verify_anf.dir
+
+# All Build rule for target.
+CMakeFiles/verify_anf.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=15,16,17 "Built target verify_anf"
+.PHONY : CMakeFiles/verify_anf.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/verify_anf.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/verify_anf.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/verify_anf.dir/rule
+
+# Convenience name for target.
+verify_anf: CMakeFiles/verify_anf.dir/rule
+.PHONY : verify_anf
+
+# codegen rule for target.
+CMakeFiles/verify_anf.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=15,16,17 "Finished codegen for target verify_anf"
+.PHONY : CMakeFiles/verify_anf.dir/codegen
+
+# clean rule for target.
+CMakeFiles/verify_anf.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/clean
+.PHONY : CMakeFiles/verify_anf.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

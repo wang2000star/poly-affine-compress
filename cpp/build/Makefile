@@ -142,6 +142,19 @@ compute_raw_anf/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/build
 .PHONY : compute_raw_anf/fast
 
+#=============================================================================
+# Target rules for targets named verify_anf
+
+# Build rule for target.
+verify_anf: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 verify_anf
+.PHONY : verify_anf
+
+# fast build rule for target.
+verify_anf/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/build
+.PHONY : verify_anf/fast
+
 src/affine.o: src/affine.cpp.o
 .PHONY : src/affine.o
 
@@ -196,6 +209,7 @@ src/circuit.o: src/circuit.cpp.o
 # target to build an object file
 src/circuit.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/circuit.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.o
 .PHONY : src/circuit.cpp.o
 
 src/circuit.i: src/circuit.cpp.i
@@ -204,6 +218,7 @@ src/circuit.i: src/circuit.cpp.i
 # target to preprocess a source file
 src/circuit.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/circuit.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.i
 .PHONY : src/circuit.cpp.i
 
 src/circuit.s: src/circuit.cpp.s
@@ -212,6 +227,7 @@ src/circuit.s: src/circuit.cpp.s
 # target to generate assembly for a file
 src/circuit.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/circuit.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.s
 .PHONY : src/circuit.cpp.s
 
 src/compute_raw_anf.o: src/compute_raw_anf.cpp.o
@@ -406,6 +422,30 @@ src/verify.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/verify.cpp.s
 .PHONY : src/verify.cpp.s
 
+src/verify_anf.o: src/verify_anf.cpp.o
+.PHONY : src/verify_anf.o
+
+# target to build an object file
+src/verify_anf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/verify_anf.cpp.o
+.PHONY : src/verify_anf.cpp.o
+
+src/verify_anf.i: src/verify_anf.cpp.i
+.PHONY : src/verify_anf.i
+
+# target to preprocess a source file
+src/verify_anf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/verify_anf.cpp.i
+.PHONY : src/verify_anf.cpp.i
+
+src/verify_anf.s: src/verify_anf.cpp.s
+.PHONY : src/verify_anf.s
+
+# target to generate assembly for a file
+src/verify_anf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/verify_anf.cpp.s
+.PHONY : src/verify_anf.cpp.s
+
 src/walsh.o: src/walsh.cpp.o
 .PHONY : src/walsh.o
 
@@ -440,6 +480,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... compute_raw_anf"
 	@echo "... optimize_anf"
+	@echo "... verify_anf"
 	@echo "... src/affine.o"
 	@echo "... src/affine.i"
 	@echo "... src/affine.s"
@@ -473,6 +514,9 @@ help:
 	@echo "... src/verify.o"
 	@echo "... src/verify.i"
 	@echo "... src/verify.s"
+	@echo "... src/verify_anf.o"
+	@echo "... src/verify_anf.i"
+	@echo "... src/verify_anf.s"
 	@echo "... src/walsh.o"
 	@echo "... src/walsh.i"
 	@echo "... src/walsh.s"

@@ -258,7 +258,8 @@ struct RawANFResult {
 static std::optional<RawANFResult> compute_raw_anf(
     const Circuit& circ,
     const std::vector<int>& output_indices,
-    int n_threads)
+    int n_threads,
+    const std::string& out_prefix = "")
 {
     int n = circ.n_inputs;
     if (n > 32) {
@@ -350,6 +351,60 @@ static std::optional<RawANFResult> compute_raw_anf(
     }
     std::cout << "  Sum T = " << result.sum_T << "\n";
 
+    // Save raw ANF files if out_prefix specified
+    if (!out_prefix.empty() && n <= 16) {
+        // expr.poly
+        std::string expr_path = out_prefix + "_expr.poly";
+        std::ofstream fe(expr_path);
+        if (fe) {
+            fe << "# Raw ANF for circuit (n=" << n << ", k=" << n_out << " outputs)\n";
+            if (n <= 16) {
+                fe << "# Variables:";
+                for (int i = n - 1; i >= 0; i--)
+                    fe << " " << circ.inputs[i];
+                fe << "\n";
+            }
+            for (int oi = 0; oi < n_out; oi++) {
+                fe << circ.outputs[output_indices[oi]] << " = ";
+                int count = 0;
+                int64_t words = int64_t(1) << (n - 6);
+                for (int64_t w = 0; w < words; w++) {
+                    uint64_t word = tts[oi][w];
+                    while (word) {
+                        int bit = __builtin_ctzll(word);
+                        word &= word - 1;
+                        int64_t pos = (w << 6) | bit;
+                        if (count > 0) fe << " + ";
+                        if (pos == 0) { fe << "1"; count++; continue; }
+                        bool first = true;
+                        for (int j = 0; j < n; j++) {
+                            if ((pos >> j) & 1) {
+                                if (!first) fe << " * ";
+                                fe << circ.inputs[j];
+                                first = false;
+                            }
+                        }
+                        count++;
+                    }
+                }
+                if (count == 0) fe << "0";
+                fe << "\n";
+            }
+        }
+        std::cout << "  Saved: " << expr_path << "\n";
+
+        // T.poly
+        std::string T_path = out_prefix + "_T.poly";
+        std::ofstream fT(T_path);
+        if (fT) {
+            fT << "# Raw ANF term counts for circuit (n=" << n << ", k=" << n_out << " outputs)\n";
+            fT << "# sum T = " << result.sum_T << "\n";
+            for (int oi = 0; oi < n_out; oi++)
+                fT << circ.outputs[output_indices[oi]] << ": T=" << result.output_T[oi] << "\n";
+        }
+        std::cout << "  Saved: " << T_path << "\n";
+    }
+
     // Union T: OR all arrays then popcount
     // For n ≤ 24: exact (needs ≤ 256 MB bitmap)
     // For n = 25..32: exact (OR in-place on one array, needs 512 MB peak)
@@ -375,7 +430,8 @@ static std::optional<RawANFResult> compute_raw_anf(
 
 int main(int argc, char** argv) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <circuit.txt> [output_name ...]\n";
+        std::cerr << "Usage: " << argv[0] << " <circuit.txt> [output_name ...] [--out-prefix PREFIX]\n";
+        std::cerr << "  --out-prefix PREFIX  save raw ANF to PREFIX_expr.poly and PREFIX_T.poly\n";
         return 1;
     }
 
@@ -384,16 +440,20 @@ int main(int argc, char** argv) {
     if (!circ_opt) { std::cerr << "Failed to parse\n"; return 1; }
     const auto& circ = *circ_opt;
 
-    // Determine output indices
+    // Determine output indices and output prefix
     std::vector<int> output_indices;
-    if (argc > 2) {
-        for (int a = 2; a < argc; a++) {
-            std::string name = argv[a];
+    std::string out_prefix;
+    for (int a = 2; a < argc; a++) {
+        std::string arg = argv[a];
+        if (arg == "--out-prefix" && a + 1 < argc) {
+            out_prefix = argv[++a];
+        } else {
             for (int o = 0; o < (int)circ.outputs.size(); o++) {
-                if (circ.outputs[o] == name) { output_indices.push_back(o); break; }
+                if (circ.outputs[o] == arg) { output_indices.push_back(o); break; }
             }
         }
-    } else {
+    }
+    if (output_indices.empty()) {
         for (int o = 0; o < (int)circ.outputs.size(); o++)
             output_indices.push_back(o);
     }
@@ -411,7 +471,7 @@ int main(int argc, char** argv) {
               << output_indices.size() << "\n";
 
     auto t0 = std::chrono::steady_clock::now();
-    auto result = compute_raw_anf(circ, output_indices, n_threads);
+    auto result = compute_raw_anf(circ, output_indices, n_threads, out_prefix);
     auto t1 = std::chrono::steady_clock::now();
     double elapsed = std::chrono::duration<double>(t1 - t0).count();
     if (result)

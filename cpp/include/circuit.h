@@ -10,4 +10,7 @@ int count_and_gates(const Circuit& circ);
 int count_xor_gates(const Circuit& circ);
 int count_not_gates(const Circuit& circ);
 
+// Evaluate circuit at a single input x, return all output bits
+std::vector<uint8_t> eval_circuit_point(const Circuit& circ, uint32_t x);
+
 #endif

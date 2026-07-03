@@ -93,3 +93,37 @@ int count_gates(const Circuit& circ, Op op) {
 int count_and_gates(const Circuit& circ) { return count_gates(circ, Op::AND); }
 int count_xor_gates(const Circuit& circ) { return count_gates(circ, Op::XOR); }
 int count_not_gates(const Circuit& circ) { return count_gates(circ, Op::NOT); }
+
+std::vector<uint8_t> eval_circuit_point(const Circuit& circ, uint32_t x) {
+    std::vector<uint8_t> eval_buf(circ.stmts.size() + 1, 0);
+    for (int i = 0; i < (int)circ.stmts.size(); i++) {
+        const auto& st = circ.stmts[i];
+        auto get = [&](const std::string& name) -> uint8_t {
+            auto it = circ.name_to_idx.find(name);
+            if (it == circ.name_to_idx.end()) return 0;
+            int idx = it->second;
+            if (idx < 0) return (uint8_t)((x >> (-idx - 1)) & 1);
+            return eval_buf[idx];
+        };
+        uint8_t r;
+        switch (st.op) {
+            case Op::CONST0: r = 0; break;
+            case Op::CONST1: r = 1; break;
+            case Op::INPUT:  r = get(st.arg1); break;
+            case Op::NOT:    r = !get(st.arg1); break;
+            case Op::AND:    r = get(st.arg1) & get(st.arg2); break;
+            case Op::XOR:    r = get(st.arg1) ^ get(st.arg2); break;
+        }
+        eval_buf[i + 1] = r;
+    }
+    std::vector<uint8_t> result(circ.outputs.size(), 0);
+    for (int o = 0; o < (int)circ.outputs.size(); o++) {
+        auto it = circ.name_to_idx.find(circ.outputs[o]);
+        if (it != circ.name_to_idx.end()) {
+            int idx = it->second;
+            if (idx < 0) result[o] = (uint8_t)((x >> (-idx - 1)) & 1);
+            else result[o] = eval_buf[idx];
+        }
+    }
+    return result;
+}
