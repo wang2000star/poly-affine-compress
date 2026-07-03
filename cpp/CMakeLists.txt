@@ -44,6 +44,10 @@ target_link_libraries(anf_test anf_core)
 add_executable(compute_raw_anf src/compute_raw_anf.cpp)
 target_compile_options(compute_raw_anf PRIVATE -O3 -march=native -mtune=native -lpthread)
 
+# ---- ANF optimizer (truth-table based, n ≤ 32) ----
+add_executable(optimize_anf src/optimize_anf.cpp)
+target_compile_options(optimize_anf PRIVATE -O3 -march=native -mtune=native -lpthread)
+
 # ---- Build options ----
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(anf_core PRIVATE -O3 -march=native -mtune=native)

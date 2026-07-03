@@ -1,0 +1,34 @@
+# Raw ANF for oE2 (n=11)
+# 11 variables
+B2 * B3 * B4 * B5 * B6
+B7
+B2 * B3 * B4 * B5 * B6 * B7
+B8
+B2 * B3 * B4 * B5 * B6 * B8
+B7 * B8
+B2 * B3 * B4 * B5 * B6 * B7 * B8
+B9
+B2 * B3 * B4 * B5 * B6 * B9
+B7 * B9
+B2 * B3 * B4 * B5 * B6 * B7 * B9
+B8 * B9
+B2 * B3 * B4 * B5 * B6 * B8 * B9
+B7 * B8 * B9
+B2 * B3 * B4 * B5 * B6 * B7 * B8 * B9
+B10
+B2 * B3 * B4 * B5 * B6 * B10
+B7 * B10
+B2 * B3 * B4 * B5 * B6 * B7 * B10
+B8 * B10
+B2 * B3 * B4 * B5 * B6 * B8 * B10
+B7 * B8 * B10
+B2 * B3 * B4 * B5 * B6 * B7 * B8 * B10
+B9 * B10
+B2 * B3 * B4 * B5 * B6 * B9 * B10
+B7 * B9 * B10
+B2 * B3 * B4 * B5 * B6 * B7 * B9 * B10
+B8 * B9 * B10
+B2 * B3 * B4 * B5 * B6 * B8 * B9 * B10
+B7 * B8 * B9 * B10
+B2 * B3 * B4 * B5 * B6 * B7 * B8 * B9 * B10
+# Total terms: 31

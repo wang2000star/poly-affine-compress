@@ -1,0 +1,36 @@
+# Raw ANF for om_4 (n=16)
+# 16 variables
+i5
+i13
+i4 * i12
+i4 * i3 * i11
+i3 * i12 * i11
+i4 * i3 * i2 * i10
+i3 * i2 * i12 * i10
+i4 * i2 * i11 * i10
+i2 * i12 * i11 * i10
+i9 * i4 * i3 * i2 * i1
+i9 * i3 * i2 * i12 * i1
+i9 * i4 * i2 * i11 * i1
+i9 * i2 * i12 * i11 * i1
+i9 * i4 * i3 * i10 * i1
+i9 * i3 * i12 * i10 * i1
+i9 * i4 * i11 * i10 * i1
+i9 * i12 * i11 * i10 * i1
+i9 * i8 * i4 * i3 * i2 * i0
+i9 * i8 * i3 * i2 * i12 * i0
+i9 * i8 * i4 * i2 * i11 * i0
+i9 * i8 * i2 * i12 * i11 * i0
+i9 * i8 * i4 * i3 * i10 * i0
+i9 * i8 * i3 * i12 * i10 * i0
+i9 * i8 * i4 * i11 * i10 * i0
+i9 * i8 * i12 * i11 * i10 * i0
+i8 * i4 * i3 * i2 * i1 * i0
+i8 * i3 * i2 * i12 * i1 * i0
+i8 * i4 * i2 * i11 * i1 * i0
+i8 * i2 * i12 * i11 * i1 * i0
+i8 * i4 * i3 * i10 * i1 * i0
+i8 * i3 * i12 * i10 * i1 * i0
+i8 * i4 * i11 * i10 * i1 * i0
+i8 * i12 * i11 * i10 * i1 * i0
+# Total terms: 33

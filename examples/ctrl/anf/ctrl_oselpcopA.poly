@@ -1,0 +1,7 @@
+# Raw ANF for oselpcopA (n=7)
+# 7 variables
+opcode0 * opcode2
+opcode0 * opcode2 * opcode3
+opcode0 * opcode2 * opcode4
+opcode0 * opcode2 * opcode3 * opcode4
+# Total terms: 4

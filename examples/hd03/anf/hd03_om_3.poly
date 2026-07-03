@@ -1,0 +1,20 @@
+# Raw ANF for om_3 (n=16)
+# 16 variables
+i4
+i12
+i3 * i11
+i3 * i2 * i10
+i2 * i11 * i10
+i9 * i3 * i2 * i1
+i9 * i2 * i11 * i1
+i9 * i3 * i10 * i1
+i9 * i11 * i10 * i1
+i9 * i8 * i3 * i2 * i0
+i9 * i8 * i2 * i11 * i0
+i9 * i8 * i3 * i10 * i0
+i9 * i8 * i11 * i10 * i0
+i8 * i3 * i2 * i1 * i0
+i8 * i2 * i11 * i1 * i0
+i8 * i3 * i10 * i1 * i0
+i8 * i11 * i10 * i1 * i0
+# Total terms: 17

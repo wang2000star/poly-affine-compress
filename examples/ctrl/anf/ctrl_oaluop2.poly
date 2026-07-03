@@ -1,0 +1,10 @@
+# Raw ANF for oaluop2 (n=7)
+# 7 variables
+opcode3
+opcode2 * opcode3
+opcode4
+opcode2 * opcode4
+opcode0 * opcode1 * opcode3 * opcode4
+opcode2 * opcode3 * opcode4
+opcode0 * opcode1 * opcode2 * opcode3 * opcode4
+# Total terms: 7

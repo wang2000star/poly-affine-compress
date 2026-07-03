@@ -1,0 +1,8 @@
+# Raw ANF for om_1 (n=16)
+# 16 variables
+i2
+i10
+i9 * i1
+i9 * i8 * i0
+i8 * i1 * i0
+# Total terms: 5

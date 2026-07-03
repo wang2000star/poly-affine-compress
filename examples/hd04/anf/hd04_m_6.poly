@@ -1,0 +1,8 @@
+# Raw ANF for m_6 (n=16)
+# 16 variables
+i_7
+i_9 * i_8 * i_17
+i_8 * i_16
+i_9 * i_17 * i_16
+i_15
+# Total terms: 5

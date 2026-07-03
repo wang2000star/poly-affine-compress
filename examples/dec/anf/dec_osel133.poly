@@ -1,0 +1,35 @@
+# Raw ANF for osel133 (n=8)
+# 8 variables
+count0 * count5 * count7
+count0 * count1 * count5 * count7
+count0 * count2 * count5 * count7
+count0 * count1 * count2 * count5 * count7
+count0 * count3 * count5 * count7
+count0 * count1 * count3 * count5 * count7
+count0 * count2 * count3 * count5 * count7
+count0 * count1 * count2 * count3 * count5 * count7
+count0 * count4 * count5 * count7
+count0 * count1 * count4 * count5 * count7
+count0 * count2 * count4 * count5 * count7
+count0 * count1 * count2 * count4 * count5 * count7
+count0 * count3 * count4 * count5 * count7
+count0 * count1 * count3 * count4 * count5 * count7
+count0 * count2 * count3 * count4 * count5 * count7
+count0 * count1 * count2 * count3 * count4 * count5 * count7
+count0 * count5 * count6 * count7
+count0 * count1 * count5 * count6 * count7
+count0 * count2 * count5 * count6 * count7
+count0 * count1 * count2 * count5 * count6 * count7
+count0 * count3 * count5 * count6 * count7
+count0 * count1 * count3 * count5 * count6 * count7
+count0 * count2 * count3 * count5 * count6 * count7
+count0 * count1 * count2 * count3 * count5 * count6 * count7
+count0 * count4 * count5 * count6 * count7
+count0 * count1 * count4 * count5 * count6 * count7
+count0 * count2 * count4 * count5 * count6 * count7
+count0 * count1 * count2 * count4 * count5 * count6 * count7
+count0 * count3 * count4 * count5 * count6 * count7
+count0 * count1 * count3 * count4 * count5 * count6 * count7
+count0 * count2 * count3 * count4 * count5 * count6 * count7
+count0 * count1 * count2 * count3 * count4 * count5 * count6 * count7
+# Total terms: 32

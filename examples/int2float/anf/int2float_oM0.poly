@@ -1,0 +1,258 @@
+# Raw ANF for oM0 (n=11)
+# 11 variables
+B0
+B1 * B4
+B0 * B5
+B1 * B5
+B2 * B5
+B1 * B4 * B5
+B0 * B6
+B2 * B6
+B3 * B6
+B1 * B4 * B6
+B0 * B5 * B6
+B1 * B5 * B6
+B2 * B5 * B6
+B1 * B4 * B5 * B6
+B0 * B7
+B3 * B7
+B4 * B7
+B1 * B4 * B7
+B0 * B5 * B7
+B1 * B5 * B7
+B2 * B5 * B7
+B1 * B4 * B5 * B7
+B0 * B6 * B7
+B2 * B6 * B7
+B3 * B6 * B7
+B1 * B4 * B6 * B7
+B0 * B5 * B6 * B7
+B1 * B5 * B6 * B7
+B2 * B5 * B6 * B7
+B1 * B4 * B5 * B6 * B7
+B0 * B8
+B4 * B8
+B1 * B4 * B8
+B5 * B8
+B0 * B5 * B8
+B1 * B5 * B8
+B2 * B5 * B8
+B1 * B4 * B5 * B8
+B0 * B6 * B8
+B2 * B6 * B8
+B3 * B6 * B8
+B1 * B4 * B6 * B8
+B0 * B5 * B6 * B8
+B1 * B5 * B6 * B8
+B2 * B5 * B6 * B8
+B1 * B4 * B5 * B6 * B8
+B0 * B7 * B8
+B3 * B7 * B8
+B4 * B7 * B8
+B1 * B4 * B7 * B8
+B0 * B5 * B7 * B8
+B1 * B5 * B7 * B8
+B2 * B5 * B7 * B8
+B1 * B4 * B5 * B7 * B8
+B0 * B6 * B7 * B8
+B2 * B6 * B7 * B8
+B3 * B6 * B7 * B8
+B1 * B4 * B6 * B7 * B8
+B0 * B5 * B6 * B7 * B8
+B1 * B5 * B6 * B7 * B8
+B2 * B5 * B6 * B7 * B8
+B1 * B4 * B5 * B6 * B7 * B8
+B0 * B9
+B1 * B4 * B9
+B5 * B9
+B0 * B5 * B9
+B1 * B5 * B9
+B2 * B5 * B9
+B1 * B4 * B5 * B9
+B6 * B9
+B0 * B6 * B9
+B2 * B6 * B9
+B3 * B6 * B9
+B1 * B4 * B6 * B9
+B0 * B5 * B6 * B9
+B1 * B5 * B6 * B9
+B2 * B5 * B6 * B9
+B1 * B4 * B5 * B6 * B9
+B0 * B7 * B9
+B3 * B7 * B9
+B4 * B7 * B9
+B1 * B4 * B7 * B9
+B0 * B5 * B7 * B9
+B1 * B5 * B7 * B9
+B2 * B5 * B7 * B9
+B1 * B4 * B5 * B7 * B9
+B0 * B6 * B7 * B9
+B2 * B6 * B7 * B9
+B3 * B6 * B7 * B9
+B1 * B4 * B6 * B7 * B9
+B0 * B5 * B6 * B7 * B9
+B1 * B5 * B6 * B7 * B9
+B2 * B5 * B6 * B7 * B9
+B1 * B4 * B5 * B6 * B7 * B9
+B0 * B8 * B9
+B4 * B8 * B9
+B1 * B4 * B8 * B9
+B5 * B8 * B9
+B0 * B5 * B8 * B9
+B1 * B5 * B8 * B9
+B2 * B5 * B8 * B9
+B1 * B4 * B5 * B8 * B9
+B0 * B6 * B8 * B9
+B2 * B6 * B8 * B9
+B3 * B6 * B8 * B9
+B1 * B4 * B6 * B8 * B9
+B0 * B5 * B6 * B8 * B9
+B1 * B5 * B6 * B8 * B9
+B2 * B5 * B6 * B8 * B9
+B1 * B4 * B5 * B6 * B8 * B9
+B0 * B7 * B8 * B9
+B3 * B7 * B8 * B9
+B4 * B7 * B8 * B9
+B1 * B4 * B7 * B8 * B9
+B0 * B5 * B7 * B8 * B9
+B1 * B5 * B7 * B8 * B9
+B2 * B5 * B7 * B8 * B9
+B1 * B4 * B5 * B7 * B8 * B9
+B0 * B6 * B7 * B8 * B9
+B2 * B6 * B7 * B8 * B9
+B3 * B6 * B7 * B8 * B9
+B1 * B4 * B6 * B7 * B8 * B9
+B0 * B5 * B6 * B7 * B8 * B9
+B1 * B5 * B6 * B7 * B8 * B9
+B2 * B5 * B6 * B7 * B8 * B9
+B1 * B4 * B5 * B6 * B7 * B8 * B9
+B0 * B10
+B1 * B4 * B10
+B0 * B5 * B10
+B1 * B5 * B10
+B2 * B5 * B10
+B1 * B4 * B5 * B10
+B6 * B10
+B0 * B6 * B10
+B2 * B6 * B10
+B3 * B6 * B10
+B1 * B4 * B6 * B10
+B0 * B5 * B6 * B10
+B1 * B5 * B6 * B10
+B2 * B5 * B6 * B10
+B1 * B4 * B5 * B6 * B10
+B7 * B10
+B0 * B7 * B10
+B3 * B7 * B10
+B4 * B7 * B10
+B1 * B4 * B7 * B10
+B0 * B5 * B7 * B10
+B1 * B5 * B7 * B10
+B2 * B5 * B7 * B10
+B1 * B4 * B5 * B7 * B10
+B0 * B6 * B7 * B10
+B2 * B6 * B7 * B10
+B3 * B6 * B7 * B10
+B1 * B4 * B6 * B7 * B10
+B0 * B5 * B6 * B7 * B10
+B1 * B5 * B6 * B7 * B10
+B2 * B5 * B6 * B7 * B10
+B1 * B4 * B5 * B6 * B7 * B10
+B0 * B8 * B10
+B4 * B8 * B10
+B1 * B4 * B8 * B10
+B5 * B8 * B10
+B0 * B5 * B8 * B10
+B1 * B5 * B8 * B10
+B2 * B5 * B8 * B10
+B1 * B4 * B5 * B8 * B10
+B0 * B6 * B8 * B10
+B2 * B6 * B8 * B10
+B3 * B6 * B8 * B10
+B1 * B4 * B6 * B8 * B10
+B0 * B5 * B6 * B8 * B10
+B1 * B5 * B6 * B8 * B10
+B2 * B5 * B6 * B8 * B10
+B1 * B4 * B5 * B6 * B8 * B10
+B0 * B7 * B8 * B10
+B3 * B7 * B8 * B10
+B4 * B7 * B8 * B10
+B1 * B4 * B7 * B8 * B10
+B0 * B5 * B7 * B8 * B10
+B1 * B5 * B7 * B8 * B10
+B2 * B5 * B7 * B8 * B10
+B1 * B4 * B5 * B7 * B8 * B10
+B0 * B6 * B7 * B8 * B10
+B2 * B6 * B7 * B8 * B10
+B3 * B6 * B7 * B8 * B10
+B1 * B4 * B6 * B7 * B8 * B10
+B0 * B5 * B6 * B7 * B8 * B10
+B1 * B5 * B6 * B7 * B8 * B10
+B2 * B5 * B6 * B7 * B8 * B10
+B1 * B4 * B5 * B6 * B7 * B8 * B10
+B0 * B9 * B10
+B1 * B4 * B9 * B10
+B5 * B9 * B10
+B0 * B5 * B9 * B10
+B1 * B5 * B9 * B10
+B2 * B5 * B9 * B10
+B1 * B4 * B5 * B9 * B10
+B6 * B9 * B10
+B0 * B6 * B9 * B10
+B2 * B6 * B9 * B10
+B3 * B6 * B9 * B10
+B1 * B4 * B6 * B9 * B10
+B0 * B5 * B6 * B9 * B10
+B1 * B5 * B6 * B9 * B10
+B2 * B5 * B6 * B9 * B10
+B1 * B4 * B5 * B6 * B9 * B10
+B0 * B7 * B9 * B10
+B3 * B7 * B9 * B10
+B4 * B7 * B9 * B10
+B1 * B4 * B7 * B9 * B10
+B0 * B5 * B7 * B9 * B10
+B1 * B5 * B7 * B9 * B10
+B2 * B5 * B7 * B9 * B10
+B1 * B4 * B5 * B7 * B9 * B10
+B0 * B6 * B7 * B9 * B10
+B2 * B6 * B7 * B9 * B10
+B3 * B6 * B7 * B9 * B10
+B1 * B4 * B6 * B7 * B9 * B10
+B0 * B5 * B6 * B7 * B9 * B10
+B1 * B5 * B6 * B7 * B9 * B10
+B2 * B5 * B6 * B7 * B9 * B10
+B1 * B4 * B5 * B6 * B7 * B9 * B10
+B0 * B8 * B9 * B10
+B4 * B8 * B9 * B10
+B1 * B4 * B8 * B9 * B10
+B5 * B8 * B9 * B10
+B0 * B5 * B8 * B9 * B10
+B1 * B5 * B8 * B9 * B10
+B2 * B5 * B8 * B9 * B10
+B1 * B4 * B5 * B8 * B9 * B10
+B0 * B6 * B8 * B9 * B10
+B2 * B6 * B8 * B9 * B10
+B3 * B6 * B8 * B9 * B10
+B1 * B4 * B6 * B8 * B9 * B10
+B0 * B5 * B6 * B8 * B9 * B10
+B1 * B5 * B6 * B8 * B9 * B10
+B2 * B5 * B6 * B8 * B9 * B10
+B1 * B4 * B5 * B6 * B8 * B9 * B10
+B0 * B7 * B8 * B9 * B10
+B3 * B7 * B8 * B9 * B10
+B4 * B7 * B8 * B9 * B10
+B1 * B4 * B7 * B8 * B9 * B10
+B0 * B5 * B7 * B8 * B9 * B10
+B1 * B5 * B7 * B8 * B9 * B10
+B2 * B5 * B7 * B8 * B9 * B10
+B1 * B4 * B5 * B7 * B8 * B9 * B10
+B6 * B7 * B8 * B9 * B10
+B0 * B6 * B7 * B8 * B9 * B10
+B2 * B6 * B7 * B8 * B9 * B10
+B3 * B6 * B7 * B8 * B9 * B10
+B1 * B4 * B6 * B7 * B8 * B9 * B10
+B0 * B5 * B6 * B7 * B8 * B9 * B10
+B1 * B5 * B6 * B7 * B8 * B9 * B10
+B2 * B5 * B6 * B7 * B8 * B9 * B10
+B1 * B4 * B5 * B6 * B7 * B8 * B9 * B10
+# Total terms: 255
