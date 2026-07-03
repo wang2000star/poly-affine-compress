@@ -40,6 +40,10 @@ add_executable(anf_test test/test_main.cpp)
 target_include_directories(anf_test PRIVATE include)
 target_link_libraries(anf_test anf_core)
 
+# ---- Compute raw ANF (exhaustive, n ≤ 32) ----
+add_executable(compute_raw_anf src/compute_raw_anf.cpp)
+target_compile_options(compute_raw_anf PRIVATE -O3 -march=native -mtune=native -lpthread)
+
 # ---- Build options ----
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(anf_core PRIVATE -O3 -march=native -mtune=native)
