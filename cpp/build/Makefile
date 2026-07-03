@@ -181,6 +181,19 @@ compute_raw_anf/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/build
 .PHONY : compute_raw_anf/fast
 
+#=============================================================================
+# Target rules for targets named optimize_anf
+
+# Build rule for target.
+optimize_anf: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 optimize_anf
+.PHONY : optimize_anf
+
+# fast build rule for target.
+optimize_anf/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/build
+.PHONY : optimize_anf/fast
+
 bench/bench_main.o: bench/bench_main.cpp.o
 .PHONY : bench/bench_main.o
 
@@ -306,6 +319,30 @@ src/main.s: src/main.cpp.s
 src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/anf_simplify.dir/build.make CMakeFiles/anf_simplify.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
+
+src/optimize_anf.o: src/optimize_anf.cpp.o
+.PHONY : src/optimize_anf.o
+
+# target to build an object file
+src/optimize_anf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o
+.PHONY : src/optimize_anf.cpp.o
+
+src/optimize_anf.i: src/optimize_anf.cpp.i
+.PHONY : src/optimize_anf.i
+
+# target to preprocess a source file
+src/optimize_anf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.i
+.PHONY : src/optimize_anf.cpp.i
+
+src/optimize_anf.s: src/optimize_anf.cpp.s
+.PHONY : src/optimize_anf.s
+
+# target to generate assembly for a file
+src/optimize_anf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.s
+.PHONY : src/optimize_anf.cpp.s
 
 src/simplify.o: src/simplify.cpp.o
 .PHONY : src/simplify.o
@@ -452,6 +489,7 @@ help:
 	@echo "... anf_simplify"
 	@echo "... anf_test"
 	@echo "... compute_raw_anf"
+	@echo "... optimize_anf"
 	@echo "... bench/bench_main.o"
 	@echo "... bench/bench_main.i"
 	@echo "... bench/bench_main.s"
@@ -467,6 +505,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/optimize_anf.o"
+	@echo "... src/optimize_anf.i"
+	@echo "... src/optimize_anf.s"
 	@echo "... src/simplify.o"
 	@echo "... src/simplify.i"
 	@echo "... src/simplify.s"

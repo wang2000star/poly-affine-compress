@@ -52,4 +52,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/anf_bench.dir/DependInfo.cmake"
   "CMakeFiles/anf_test.dir/DependInfo.cmake"
   "CMakeFiles/compute_raw_anf.dir/DependInfo.cmake"
+  "CMakeFiles/optimize_anf.dir/DependInfo.cmake"
   )
