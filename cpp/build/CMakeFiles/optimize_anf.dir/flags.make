@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = 
+CXX_INCLUDES = -I/home/wangfz/bool/cpp/include
 
-CXX_FLAGS = -O3 -DNDEBUG -std=gnu++20 -O3 -march=native -mtune=native -lpthread
+CXX_FLAGS = -O3 -march=native -mtune=native -pthread -std=gnu++17
 

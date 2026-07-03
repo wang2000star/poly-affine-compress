@@ -47,10 +47,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/anf_core.dir/DependInfo.cmake"
-  "CMakeFiles/anf_simplify.dir/DependInfo.cmake"
-  "CMakeFiles/anf_bench.dir/DependInfo.cmake"
-  "CMakeFiles/anf_test.dir/DependInfo.cmake"
-  "CMakeFiles/compute_raw_anf.dir/DependInfo.cmake"
   "CMakeFiles/optimize_anf.dir/DependInfo.cmake"
+  "CMakeFiles/compute_raw_anf.dir/DependInfo.cmake"
   )

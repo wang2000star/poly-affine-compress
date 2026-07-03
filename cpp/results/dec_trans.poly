@@ -1,0 +1,10 @@
+# opt1 transform z = Mx + b (GF(2))
+# m=8, n=8
+z_0 = count0 + count2 + count4 + count6
+z_1 = count0 + count1 + count3 + count4 + count5 + count6
+z_2 = count2 + count5 + count6 + 1
+z_3 = count0 + count2 + count4 + count5
+z_4 = count0 + count2 + count4 + count7 + 1
+z_5 = count0 + count2 + count5 + count6 + count7 + 1
+z_6 = count0 + count1 + count4
+z_7 = count0 + count3 + count5 + count7

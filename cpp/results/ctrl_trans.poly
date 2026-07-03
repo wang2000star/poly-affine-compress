@@ -1,0 +1,9 @@
+# opt1 transform z = Mx + b (GF(2))
+# m=7, n=7
+z_0 = opcode3
+z_1 = opcode2 + opcode4
+z_2 = opcode0 + opcode2 + opcode3 + 1
+z_3 = opcode0 + opcode2 + opcode4 + opext0
+z_4 = opcode0 + opcode1 + opcode2 + opext1 + 1
+z_5 = opcode1 + opcode2 + opcode4 + 1
+z_6 = opcode3 + opcode4 + 1

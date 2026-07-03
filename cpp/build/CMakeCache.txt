@@ -125,7 +125,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=anf_simplify
+CMAKE_PROJECT_NAME:STATIC=optimize_anf
 
 //Value Computed by CMake
 CMAKE_PROJECT_SPDX_LICENSE:STATIC=
@@ -218,6 +218,15 @@ anf_simplify_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 anf_simplify_SOURCE_DIR:STATIC=/home/wangfz/bool/cpp
+
+//Value Computed by CMake
+optimize_anf_BINARY_DIR:STATIC=/home/wangfz/bool/cpp/build
+
+//Value Computed by CMake
+optimize_anf_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+optimize_anf_SOURCE_DIR:STATIC=/home/wangfz/bool/cpp
 
 
 ########################

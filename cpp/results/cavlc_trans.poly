@@ -1,0 +1,12 @@
+# opt1 transform z = Mx + b (GF(2))
+# m=10, n=10
+z_0 = ocoeffs0 + ocoeffs1 + ocoeffs2 + ocoeffs3 + ocoeffs4
+z_1 = ocoeffs1 + ocoeffs3 + ocoeffs4 + ctable0 + ctable2 + 1
+z_2 = ocoeffs1 + ocoeffs2 + ocoeffs4
+z_3 = ocoeffs3 + ocoeffs4 + ctable0 + ctable2
+z_4 = ocoeffs1 + ocoeffs3 + ocoeffs4 + ctable0
+z_5 = ocoeffs1 + ctable0 + ctable2
+z_6 = ocoeffs1 + ocoeffs4 + ctable1 + ctable2
+z_7 = ocoeffs4 + 1
+z_8 = ocoeffs4 + ctable2 + ingones0
+z_9 = ctable2 + ingones1

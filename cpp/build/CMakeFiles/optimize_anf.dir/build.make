@@ -72,31 +72,191 @@ include CMakeFiles/optimize_anf.dir/flags.make
 CMakeFiles/optimize_anf.dir/codegen:
 .PHONY : CMakeFiles/optimize_anf.dir/codegen
 
-CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
-CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o: /home/wangfz/bool/cpp/src/optimize_anf.cpp
-CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o -MF CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o -c /home/wangfz/bool/cpp/src/optimize_anf.cpp
+CMakeFiles/optimize_anf.dir/src/main.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/main.cpp.o: /home/wangfz/bool/cpp/src/main.cpp
+CMakeFiles/optimize_anf.dir/src/main.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/optimize_anf.dir/src/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/main.cpp.o -MF CMakeFiles/optimize_anf.dir/src/main.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/main.cpp.o -c /home/wangfz/bool/cpp/src/main.cpp
 
-CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/optimize_anf.cpp > CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.i
+CMakeFiles/optimize_anf.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/main.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/main.cpp > CMakeFiles/optimize_anf.dir/src/main.cpp.i
 
-CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/optimize_anf.cpp -o CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.s
+CMakeFiles/optimize_anf.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/main.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/main.cpp -o CMakeFiles/optimize_anf.dir/src/main.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/circuit.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/circuit.cpp.o: /home/wangfz/bool/cpp/src/circuit.cpp
+CMakeFiles/optimize_anf.dir/src/circuit.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/optimize_anf.dir/src/circuit.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/circuit.cpp.o -MF CMakeFiles/optimize_anf.dir/src/circuit.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/circuit.cpp.o -c /home/wangfz/bool/cpp/src/circuit.cpp
+
+CMakeFiles/optimize_anf.dir/src/circuit.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/circuit.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/circuit.cpp > CMakeFiles/optimize_anf.dir/src/circuit.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/circuit.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/circuit.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/circuit.cpp -o CMakeFiles/optimize_anf.dir/src/circuit.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o: /home/wangfz/bool/cpp/src/truth_table.cpp
+CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o -MF CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o -c /home/wangfz/bool/cpp/src/truth_table.cpp
+
+CMakeFiles/optimize_anf.dir/src/truth_table.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/truth_table.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/truth_table.cpp > CMakeFiles/optimize_anf.dir/src/truth_table.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/truth_table.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/truth_table.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/truth_table.cpp -o CMakeFiles/optimize_anf.dir/src/truth_table.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/moebius.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/moebius.cpp.o: /home/wangfz/bool/cpp/src/moebius.cpp
+CMakeFiles/optimize_anf.dir/src/moebius.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/optimize_anf.dir/src/moebius.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/moebius.cpp.o -MF CMakeFiles/optimize_anf.dir/src/moebius.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/moebius.cpp.o -c /home/wangfz/bool/cpp/src/moebius.cpp
+
+CMakeFiles/optimize_anf.dir/src/moebius.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/moebius.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/moebius.cpp > CMakeFiles/optimize_anf.dir/src/moebius.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/moebius.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/moebius.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/moebius.cpp -o CMakeFiles/optimize_anf.dir/src/moebius.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/walsh.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/walsh.cpp.o: /home/wangfz/bool/cpp/src/walsh.cpp
+CMakeFiles/optimize_anf.dir/src/walsh.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/optimize_anf.dir/src/walsh.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/walsh.cpp.o -MF CMakeFiles/optimize_anf.dir/src/walsh.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/walsh.cpp.o -c /home/wangfz/bool/cpp/src/walsh.cpp
+
+CMakeFiles/optimize_anf.dir/src/walsh.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/walsh.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/walsh.cpp > CMakeFiles/optimize_anf.dir/src/walsh.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/walsh.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/walsh.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/walsh.cpp -o CMakeFiles/optimize_anf.dir/src/walsh.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/gf2.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/gf2.cpp.o: /home/wangfz/bool/cpp/src/gf2.cpp
+CMakeFiles/optimize_anf.dir/src/gf2.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/optimize_anf.dir/src/gf2.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/gf2.cpp.o -MF CMakeFiles/optimize_anf.dir/src/gf2.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/gf2.cpp.o -c /home/wangfz/bool/cpp/src/gf2.cpp
+
+CMakeFiles/optimize_anf.dir/src/gf2.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/gf2.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/gf2.cpp > CMakeFiles/optimize_anf.dir/src/gf2.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/gf2.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/gf2.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/gf2.cpp -o CMakeFiles/optimize_anf.dir/src/gf2.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/anf.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/anf.cpp.o: /home/wangfz/bool/cpp/src/anf.cpp
+CMakeFiles/optimize_anf.dir/src/anf.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/optimize_anf.dir/src/anf.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/anf.cpp.o -MF CMakeFiles/optimize_anf.dir/src/anf.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/anf.cpp.o -c /home/wangfz/bool/cpp/src/anf.cpp
+
+CMakeFiles/optimize_anf.dir/src/anf.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/anf.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/anf.cpp > CMakeFiles/optimize_anf.dir/src/anf.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/anf.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/anf.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/anf.cpp -o CMakeFiles/optimize_anf.dir/src/anf.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/affine.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/affine.cpp.o: /home/wangfz/bool/cpp/src/affine.cpp
+CMakeFiles/optimize_anf.dir/src/affine.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/optimize_anf.dir/src/affine.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/affine.cpp.o -MF CMakeFiles/optimize_anf.dir/src/affine.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/affine.cpp.o -c /home/wangfz/bool/cpp/src/affine.cpp
+
+CMakeFiles/optimize_anf.dir/src/affine.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/affine.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/affine.cpp > CMakeFiles/optimize_anf.dir/src/affine.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/affine.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/affine.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/affine.cpp -o CMakeFiles/optimize_anf.dir/src/affine.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/search.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/search.cpp.o: /home/wangfz/bool/cpp/src/search.cpp
+CMakeFiles/optimize_anf.dir/src/search.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/optimize_anf.dir/src/search.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/search.cpp.o -MF CMakeFiles/optimize_anf.dir/src/search.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/search.cpp.o -c /home/wangfz/bool/cpp/src/search.cpp
+
+CMakeFiles/optimize_anf.dir/src/search.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/search.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/search.cpp > CMakeFiles/optimize_anf.dir/src/search.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/search.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/search.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/search.cpp -o CMakeFiles/optimize_anf.dir/src/search.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/io.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/io.cpp.o: /home/wangfz/bool/cpp/src/io.cpp
+CMakeFiles/optimize_anf.dir/src/io.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/optimize_anf.dir/src/io.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/io.cpp.o -MF CMakeFiles/optimize_anf.dir/src/io.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/io.cpp.o -c /home/wangfz/bool/cpp/src/io.cpp
+
+CMakeFiles/optimize_anf.dir/src/io.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/io.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/io.cpp > CMakeFiles/optimize_anf.dir/src/io.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/io.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/io.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/io.cpp -o CMakeFiles/optimize_anf.dir/src/io.cpp.s
+
+CMakeFiles/optimize_anf.dir/src/verify.cpp.o: CMakeFiles/optimize_anf.dir/flags.make
+CMakeFiles/optimize_anf.dir/src/verify.cpp.o: /home/wangfz/bool/cpp/src/verify.cpp
+CMakeFiles/optimize_anf.dir/src/verify.cpp.o: CMakeFiles/optimize_anf.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/optimize_anf.dir/src/verify.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/optimize_anf.dir/src/verify.cpp.o -MF CMakeFiles/optimize_anf.dir/src/verify.cpp.o.d -o CMakeFiles/optimize_anf.dir/src/verify.cpp.o -c /home/wangfz/bool/cpp/src/verify.cpp
+
+CMakeFiles/optimize_anf.dir/src/verify.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/optimize_anf.dir/src/verify.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wangfz/bool/cpp/src/verify.cpp > CMakeFiles/optimize_anf.dir/src/verify.cpp.i
+
+CMakeFiles/optimize_anf.dir/src/verify.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/optimize_anf.dir/src/verify.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wangfz/bool/cpp/src/verify.cpp -o CMakeFiles/optimize_anf.dir/src/verify.cpp.s
 
 # Object files for target optimize_anf
 optimize_anf_OBJECTS = \
-"CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o"
+"CMakeFiles/optimize_anf.dir/src/main.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/circuit.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/moebius.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/walsh.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/gf2.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/anf.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/affine.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/search.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/io.cpp.o" \
+"CMakeFiles/optimize_anf.dir/src/verify.cpp.o"
 
 # External object files for target optimize_anf
 optimize_anf_EXTERNAL_OBJECTS =
 
-optimize_anf: CMakeFiles/optimize_anf.dir/src/optimize_anf.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/main.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/circuit.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/moebius.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/walsh.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/gf2.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/anf.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/affine.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/search.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/io.cpp.o
+optimize_anf: CMakeFiles/optimize_anf.dir/src/verify.cpp.o
 optimize_anf: CMakeFiles/optimize_anf.dir/build.make
 optimize_anf: CMakeFiles/optimize_anf.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable optimize_anf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable optimize_anf"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/optimize_anf.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
