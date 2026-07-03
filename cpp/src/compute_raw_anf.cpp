@@ -319,20 +319,26 @@ static std::optional<RawANFResult> compute_raw_anf(
         int64_t T = 0;
         int max_deg = 0;
         int64_t words = int64_t(1) << (n - 6);
-        for (int64_t w = 0; w < words; w++) {
+        // Count T in forward pass (fast)
+        for (int64_t w = 0; w < words; w++)
+            T += __builtin_popcountll(tts[oi][w]);
+        // Compute max degree: scan from high to low for early exit.
+        // deg(packed_idx) = popcount(packed_idx).
+        // Each word w covers indices [w*64, w*64+63]. For bit b in [0,63],
+        // deg = popcount(w) + popcount(b)  (since w*64+b = (w<<6)|b).
+        // Max possible degree in word w is popcount(w) + 6.
+        for (int64_t w = words - 1; w >= 0 && max_deg < n; w--) {
             uint64_t val = tts[oi][w];
-            T += __builtin_popcountll(val);
-            // Track max degree (popcount of monomial mask).
-            // Early exit: once max_deg == n, can't go higher.
-            if (max_deg < n) {
-                while (val) {
-                    int bit = __builtin_ctzll(val);
-                    val &= val - 1;
-                    int64_t idx = w * 64 + bit;
-                    int d = __builtin_popcountll(idx);
-                    if (d > max_deg) max_deg = d;
-                    if (max_deg == n) break;
-                }
+            if (val == 0) continue;
+            // Skip if no monomial in this word can beat current max_deg
+            int base_pop = __builtin_popcountll(w);
+            if (base_pop + 6 <= max_deg) break;
+            while (val) {
+                int bit = __builtin_ctzll(val);
+                val &= val - 1;
+                int d = base_pop + __builtin_popcountll(bit);
+                if (d > max_deg) max_deg = d;
+                if (max_deg == n) break;
             }
         }
         result.output_T[oi] = T;
