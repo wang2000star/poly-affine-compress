@@ -1,0 +1,161 @@
+--- Circuit ---
+  Inputs: 7, Outputs to optimize: 26
+Phase 1: Computing truth table...
+  Truth table: 2^7 = 128 inputs, 2 batches, 26 output(s), 104 thread(s)
+  Time: 0.000142728 s
+
+Phase 2: Raw ANF baseline...
+  Sum T = 232
+  Max deg = 7
+    oseloregdst0: T=9, m=5
+    oseloregdst1: T=10, m=5
+    oselopB0: T=12, m=4
+    oselopB1: T=10, m=5
+    oaluop0: T=12, m=7
+    oaluop1: T=6, m=5
+    oaluop2: T=7, m=5
+    oaluopext0: T=9, m=5
+    oaluopext1: T=9, m=5
+    oaluopext2: T=10, m=5
+    oaluopext3: T=10, m=5
+    ohalt: T=32, m=5
+    oregwrite: T=15, m=5
+    oselpcopA: T=4, m=4
+    oselpcopB: T=8, m=4
+    obeqz: T=8, m=5
+    obnez: T=4, m=5
+    obgez: T=2, m=5
+    obltz: T=4, m=5
+    ojump: T=4, m=3
+    oCin: T=8, m=6
+    oinvA: T=12, m=7
+    oinvB: T=6, m=7
+    osign: T=1, m=0
+    omemwrite: T=12, m=4
+    oselwb: T=8, m=5
+  Saved ANF: runs/ctrl.poly (232 terms)
+
+Phase 3: Computing Walsh correlations...
+  Output oseloregdst0 top-5 bits: 6(18) 3(10) 4(10) 1(6) 2(6) 
+  Output oseloregdst1 top-5 bits: 6(10) 1(6) 3(6) 0(2) 2(2) 
+  Output oselopB0 top-5 bits: 2(8) 6(8) 0(4) 1(4) 3(4) 
+  Output oselopB1 top-5 bits: 6(22) 4(14) 3(10) 1(6) 2(6) 
+  Output oaluop0 top-5 bits: 6(7) 0(5) 1(3) 4(3) 2(1) 
+  Output oaluop1 top-5 bits: 1(12) 6(12) 2(4) 3(4) 4(4) 
+  Output oaluop2 top-5 bits: 6(26) 2(10) 3(10) 4(10) 0(2) 
+  Output oaluopext0 top-5 bits: 6(10) 2(6) 0(2) 1(2) 3(2) 
+  Output oaluopext1 top-5 bits: 1(10) 6(10) 2(6) 0(2) 3(2) 
+  Output oaluopext2 top-5 bits: 6(10) 0(2) 1(2) 2(2) 3(2) 
+  Output oaluopext3 top-5 bits: 6(26) 2(10) 4(10) 0(2) 1(2) 
+  Output ohalt top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output oregwrite top-5 bits: 6(42) 4(18) 1(6) 3(6) 0(2) 
+  Output oselpcopA top-5 bits: 0(4) 2(4) 3(4) 4(4) 6(4) 
+  Output oselpcopB top-5 bits: 0(4) 2(4) 3(4) 4(4) 6(4) 
+  Output obeqz top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output obnez top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output obgez top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output obltz top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output ojump top-5 bits: 2(8) 3(8) 4(8) 6(8) 0(0) 
+  Output oCin top-5 bits: 3(11) 6(11) 0(3) 4(3) 1(1) 
+  Output oinvA top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Output oinvB top-5 bits: 3(9) 6(9) 4(5) 2(3) 0(1) 
+  Output osign top-5 bits: 6(64) 0(0) 1(0) 2(0) 3(0) 
+  Output omemwrite top-5 bits: 2(4) 3(4) 4(4) 6(4) 0(0) 
+  Output oselwb top-5 bits: 0(2) 1(2) 2(2) 3(2) 4(2) 
+  Walsh time: 0.00306565 s
+
+Phase 4: Searching for M,b...
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (500 candidates)
+  Search time: 1.02973 s
+  4e: Hill climbing from top 30 candidates (+ identity)
+    hill climb #0: T=232 -> T=179
+    hill climb #1: T=647 -> T=173
+    hill climb #2: T=824 -> T=403
+    hill climb #3: T=910 -> T=209
+    hill climb #4: T=966 -> T=267
+    hill climb #5: T=1031 -> T=546
+    hill climb #6: T=1112 -> T=239
+    hill climb #7: T=1154 -> T=461
+    hill climb #8: T=1156 -> T=465
+    hill climb #9: T=1160 -> T=466
+    hill climb #10: T=1161 -> T=387
+    hill climb #11: T=1203 -> T=512
+    hill climb #12: T=1232 -> T=472
+    hill climb #13: T=1275 -> T=273
+    hill climb from identity: T=232 -> T=187
+    Hill climb time: 9.34069 s
+
+========================================
+  Results (578 candidates evaluated)
+  Raw ANF Sum T = 232
+========================================
+  1. m=7 T=173 (compression 1.34104×) M=[0001000..; 0010100..; 1011000..; 1010110..; 1110001..; 0110100..; 0001100..]
+    Per-output T: oseloregdst0=5 oseloregdst1=6 oselopB0=10 oselopB1=10 oaluop0=10 oaluop1=10 oaluop2=5 oaluopext0=4 oaluopext1=8 oaluopext2=6 oaluopext3=9 ohalt=4 oregwrite=15 oselpcopA=2 oselpcopB=4 obeqz=4 obnez=8 obgez=4 obltz=2 ojump=2 oCin=7 oinvA=5 oinvB=8 osign=1 omemwrite=8 oselwb=16
+  2. m=7 T=179 (compression 1.29609×) M=[0100001..; 0010100..; 0001000..; 0010000..; 0100000..; 1000000..; 0000010..]
+    Per-output T: oseloregdst0=9 oseloregdst1=6 oselopB0=6 oselopB1=8 oaluop0=12 oaluop1=8 oaluop2=5 oaluopext0=8 oaluopext1=6 oaluopext2=6 oaluopext3=9 ohalt=16 oregwrite=11 oselpcopA=4 oselpcopB=8 obeqz=8 obnez=4 obgez=2 obltz=4 ojump=4 oCin=11 oinvA=5 oinvB=8 osign=1 omemwrite=6 oselwb=4
+  3. m=7 T=187 (compression 1.24064×) M=[1000000..; 0100000..; 0010100..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=7 oseloregdst1=6 oselopB0=8 oselopB1=8 oaluop0=11 oaluop1=5 oaluop2=5 oaluopext0=6 oaluopext1=6 oaluopext2=6 oaluopext3=7 ohalt=32 oregwrite=11 oselpcopA=4 oselpcopB=8 obeqz=8 obnez=4 obgez=2 obltz=4 ojump=4 oCin=9 oinvA=10 oinvB=5 osign=1 omemwrite=6 oselwb=4
+  4. m=7 T=209 (compression 1.11005×) M=[0100000..; 1000000..; 0001000..; 0001100..; 0011101..; 0010000..; 0011010..]
+    Per-output T: oseloregdst0=7 oseloregdst1=8 oselopB0=8 oselopB1=8 oaluop0=13 oaluop1=7 oaluop2=5 oaluopext0=6 oaluopext1=8 oaluopext2=10 oaluopext3=13 ohalt=8 oregwrite=17 oselpcopA=4 oselpcopB=8 obeqz=16 obnez=8 obgez=4 obltz=8 ojump=4 oCin=7 oinvA=6 oinvB=5 osign=1 omemwrite=12 oselwb=8
+  5. m=7 T=232 (compression 1×) M=[0000001..; 0000100..; 0001000..; 0010000..; 0100000..; 1000000..; 0000010..]
+  6. m=7 T=239 (compression 0.970711×) M=[0110100..; 0001000..; 1000000..; 0001100..; 0100000..; 0011001..; 1101110..]
+  7. m=7 T=267 (compression 0.868914×) M=[0001100..; 1101100..; 0000101..; 0101100..; 0000100..; 0110100..; 0100110..]
+  8. m=7 T=273 (compression 0.849817×) M=[1110100..; 0111000..; 1000001..; 1101000..; 1100000..; 1001110..; 1010100..]
+  9. m=7 T=387 (compression 0.599483×) M=[1001110..; 0111100..; 1011010..; 1000110..; 1000000..; 0010000..; 0001101..]
+  10. m=7 T=403 (compression 0.575682×) M=[1011000..; 0001100..; 0010000..; 1010111..; 1111011..; 0100101..; 1101111..]
+  11. m=7 T=461 (compression 0.503254×) M=[0010000..; 1111011..; 0110111..; 0111011..; 0100011..; 0110100..; 1110110..]
+  12. m=7 T=465 (compression 0.498925×) M=[0010000..; 1000010..; 1110110..; 1100010..; 0100101..; 1111110..; 1011100..]
+  13. m=7 T=466 (compression 0.497854×) M=[0011000..; 0000011..; 0101000..; 1001010..; 0110111..; 0010111..; 1000100..]
+  14. m=7 T=472 (compression 0.491525×) M=[0000111..; 0100000..; 1011011..; 0010011..; 0000100..; 1110110..; 0001111..]
+  15. m=7 T=512 (compression 0.453125×) M=[0101000..; 1010000..; 1001000..; 0001010..; 0000001..; 0001110..; 1010110..]
+  16. m=7 T=546 (compression 0.424908×) M=[0111100..; 0110111..; 0010111..; 1000101..; 0100011..; 0100100..; 1001111..]
+  17. m=7 T=647 (compression 0.358578×) M=[1011000..; 1111010..; 1011100..; 0010110..; 1110001..; 1110000..; 0010100..]
+  18. m=7 T=824 (compression 0.281553×) M=[1011100..; 1000100..; 0111000..; 1011111..; 0011010..; 0000101..; 1101111..]
+  19. m=7 T=910 (compression 0.254945×) M=[1101000..; 1100010..; 1010001..; 0101110..; 0111101..; 0110000..; 1011010..]
+  20. m=7 T=966 (compression 0.240166×) M=[1011100..; 1010100..; 0000111..; 0101101..; 0010110..; 0110101..; 0100111..]
+
+Best candidate: m=7, T=173
+// Transform z = Mx + b (GF(2)):
+// m=7, n=7
+// z_0 = opcode3
+// z_1 = opcode2 + opcode4
+// z_2 = opcode0 + opcode2 + opcode3 + 1
+// z_3 = opcode0 + opcode2 + opcode4 + opext0
+// z_4 = opcode0 + opcode1 + opcode2 + opext1 + 1
+// z_5 = opcode1 + opcode2 + opcode4 + 1
+// z_6 = opcode3 + opcode4 + 1
+Verifying best candidate (5000 random tests per output)...
+  oseloregdst0 ✅ Verified (5000 tests)
+  oseloregdst1 ✅ Verified (5000 tests)
+  oselopB0 ✅ Verified (5000 tests)
+  oselopB1 ✅ Verified (5000 tests)
+  oaluop0 ✅ Verified (5000 tests)
+  oaluop1 ✅ Verified (5000 tests)
+  oaluop2 ✅ Verified (5000 tests)
+  oaluopext0 ✅ Verified (5000 tests)
+  oaluopext1 ✅ Verified (5000 tests)
+  oaluopext2 ✅ Verified (5000 tests)
+  oaluopext3 ✅ Verified (5000 tests)
+  ohalt ✅ Verified (5000 tests)
+  oregwrite ✅ Verified (5000 tests)
+  oselpcopA ✅ Verified (5000 tests)
+  oselpcopB ✅ Verified (5000 tests)
+  obeqz ✅ Verified (5000 tests)
+  obnez ✅ Verified (5000 tests)
+  obgez ✅ Verified (5000 tests)
+  obltz ✅ Verified (5000 tests)
+  ojump ✅ Verified (5000 tests)
+  oCin ✅ Verified (5000 tests)
+  oinvA ✅ Verified (5000 tests)
+  oinvB ✅ Verified (5000 tests)
+  osign ✅ Verified (5000 tests)
+  omemwrite ✅ Verified (5000 tests)
+  oselwb ✅ Verified (5000 tests)
+✅ All outputs verified!
+  Saved: runs/ctrl_best_trans.txt
+  Saved: runs/ctrl_best_anf.poly (173 terms)
+  Saved: runs/ctrl_verify.txt
+
+Total time: 10.418 s

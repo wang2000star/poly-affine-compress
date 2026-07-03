@@ -1,0 +1,38 @@
+// Best affine transform z = Mx + b (GF(2))
+// m=7, n=7
+// Total T=173
+// z_0 = opcode3
+// z_1 = opcode2 + opcode4
+// z_2 = opcode0 + opcode2 + opcode3 + 1
+// z_3 = opcode0 + opcode2 + opcode4 + opext0
+// z_4 = opcode0 + opcode1 + opcode2 + opext1 + 1
+// z_5 = opcode1 + opcode2 + opcode4 + 1
+// z_6 = opcode3 + opcode4 + 1
+
+Per-output T:
+  oseloregdst0: T=5
+  oseloregdst1: T=6
+  oselopB0: T=10
+  oselopB1: T=10
+  oaluop0: T=10
+  oaluop1: T=10
+  oaluop2: T=5
+  oaluopext0: T=4
+  oaluopext1: T=8
+  oaluopext2: T=6
+  oaluopext3: T=9
+  ohalt: T=4
+  oregwrite: T=15
+  oselpcopA: T=2
+  oselpcopB: T=4
+  obeqz: T=4
+  obnez: T=8
+  obgez: T=4
+  obltz: T=2
+  ojump: T=2
+  oCin: T=7
+  oinvA: T=5
+  oinvB: T=8
+  osign: T=1
+  omemwrite: T=8
+  oselwb: T=16

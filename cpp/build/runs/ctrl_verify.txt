@@ -1,0 +1,31 @@
+Verification of best candidate
+m=7, n=7, T=173
+
+oseloregdst0 ✅ Verified (5000 tests)
+oseloregdst1 ✅ Verified (5000 tests)
+oselopB0 ✅ Verified (5000 tests)
+oselopB1 ✅ Verified (5000 tests)
+oaluop0 ✅ Verified (5000 tests)
+oaluop1 ✅ Verified (5000 tests)
+oaluop2 ✅ Verified (5000 tests)
+oaluopext0 ✅ Verified (5000 tests)
+oaluopext1 ✅ Verified (5000 tests)
+oaluopext2 ✅ Verified (5000 tests)
+oaluopext3 ✅ Verified (5000 tests)
+ohalt ✅ Verified (5000 tests)
+oregwrite ✅ Verified (5000 tests)
+oselpcopA ✅ Verified (5000 tests)
+oselpcopB ✅ Verified (5000 tests)
+obeqz ✅ Verified (5000 tests)
+obnez ✅ Verified (5000 tests)
+obgez ✅ Verified (5000 tests)
+obltz ✅ Verified (5000 tests)
+ojump ✅ Verified (5000 tests)
+oCin ✅ Verified (5000 tests)
+oinvA ✅ Verified (5000 tests)
+oinvB ✅ Verified (5000 tests)
+osign ✅ Verified (5000 tests)
+omemwrite ✅ Verified (5000 tests)
+oselwb ✅ Verified (5000 tests)
+
+✅ All outputs verified!

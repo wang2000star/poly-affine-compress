@@ -1,0 +1,122 @@
+--- Circuit ---
+  Inputs: 10, Outputs to optimize: 11
+Phase 1: Computing truth table...
+  Truth table: 2^10 = 1024 inputs, 16 batches, 11 output(s), 104 thread(s)
+  Time: 0.000887007 s
+
+Phase 2: Raw ANF baseline...
+  Sum T = 4303
+  Max deg = 10
+    ocoeff0: T=516, m=10
+    ocoeff1: T=504, m=9
+    ocoeff2: T=500, m=9
+    ocoeff3: T=460, m=9
+    ocoeff4: T=32, m=7
+    ocoeff5: T=32, m=7
+    oclen0: T=533, m=9
+    oclen1: T=511, m=10
+    oclen2: T=527, m=10
+    oclen3: T=464, m=9
+    oclen4: T=224, m=9
+  Saved ANF: runs/cavlc.poly (4303 terms)
+
+Phase 3: Computing Walsh correlations...
+  Output ocoeff0 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0) 
+  Output ocoeff1 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0) 
+  Output ocoeff2 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0) 
+  Output ocoeff3 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0) 
+  Output ocoeff4 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0) 
+  Output ocoeff5 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0) 
+  Output oclen0 top-5 bits: 6(64) 7(64) 8(64) 9(64) 0(0) 
+  Output oclen1 top-5 bits: 6(64) 7(64) 8(64) 9(64) 0(0) 
+  Output oclen2 top-5 bits: 6(64) 7(64) 8(64) 9(64) 0(0) 
+  Output oclen3 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0) 
+  Output oclen4 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0) 
+  Walsh time: 0.00928165 s
+
+Phase 4: Searching for M,b...
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (500 candidates)
+  Search time: 1.02433 s
+  4e: Hill climbing from top 30 candidates (+ identity)
+    hill climb #0: T=4097 -> T=2939
+    hill climb #1: T=4229 -> T=3025
+    hill climb #2: T=4267 -> T=1637
+    hill climb #3: T=4303 -> T=2511
+    hill climb #4: T=4435 -> T=2211
+    hill climb #5: T=4545 -> T=3674
+    hill climb #6: T=4757 -> T=2627
+    hill climb #7: T=4791 -> T=2735
+    hill climb #8: T=4849 -> T=3363
+    hill climb #9: T=4871 -> T=2309
+    hill climb from identity: T=4303 -> T=1593
+    Hill climb time: 63.2522 s
+
+========================================
+  Results (597 candidates evaluated)
+  Raw ANF Sum T = 4303
+========================================
+  1. m=10 T=1593 (compression 2.70119×) M=[11111000..; 01011101..; 01101000..; 00011101..; 01011100..; 01000101..; 01001011..; 00001000..; 00001001..; 00000001..]
+    Per-output T: ocoeff0=210 ocoeff1=190 ocoeff2=214 ocoeff3=172 ocoeff4=52 ocoeff5=32 oclen0=201 oclen1=185 oclen2=183 oclen3=116 oclen4=38
+  2. m=10 T=1637 (compression 2.62859×) M=[00000100..; 00000010..; 11101001..; 00000001..; 10001000..; 01101100..; 01001000..; 01101000..; 01000011..; 01011010..]
+    Per-output T: ocoeff0=194 ocoeff1=230 ocoeff2=199 ocoeff3=181 ocoeff4=68 ocoeff5=72 oclen0=189 oclen1=178 oclen2=151 oclen3=139 oclen4=36
+  3. m=10 T=2211 (compression 1.94618×) M=[01010010..; 01010001..; 01010111..; 11101010..; 00101011..; 01011000..; 10000011..; 01010110..; 10001110..; 11111110..]
+    Per-output T: ocoeff0=294 ocoeff1=250 ocoeff2=266 ocoeff3=272 ocoeff4=64 ocoeff5=62 oclen0=285 oclen1=237 oclen2=233 oclen3=198 oclen4=50
+  4. m=10 T=2309 (compression 1.86358×) M=[10000011..; 00111111..; 00110111..; 11111010..; 00110100..; 00010110..; 11001110..; 00010010..; 00001010..; 11111011..]
+    Per-output T: ocoeff0=296 ocoeff1=316 ocoeff2=264 ocoeff3=250 ocoeff4=92 ocoeff5=60 oclen0=305 oclen1=289 oclen2=197 oclen3=182 oclen4=58
+  5. m=10 T=2511 (compression 1.71366×) M=[00010110..; 00010111..; 11111110..; 01001011..; 10101010..; 01000100..; 00101000..; 00011110..; 10001000..; 00000100..]
+    Per-output T: ocoeff0=344 ocoeff1=304 ocoeff2=310 ocoeff3=220 ocoeff4=30 ocoeff5=16 oclen0=347 oclen1=311 oclen2=347 oclen3=230 oclen4=52
+  6. m=10 T=2627 (compression 1.63799×) M=[11111111..; 00110101..; 10110110..; 11110000..; 11000011..; 11000001..; 00010111..; 00111001..; 00100100..; 11110111..]
+    Per-output T: ocoeff0=282 ocoeff1=324 ocoeff2=358 ocoeff3=270 ocoeff4=98 ocoeff5=66 oclen0=319 oclen1=275 oclen2=279 oclen3=264 oclen4=92
+  7. m=10 T=2735 (compression 1.57331×) M=[00100100..; 01100001..; 00100101..; 11110010..; 01011010..; 10000101..; 00101000..; 11011111..; 00111100..; 01100101..]
+    Per-output T: ocoeff0=334 ocoeff1=288 ocoeff2=348 ocoeff3=270 ocoeff4=140 ocoeff5=96 oclen0=337 oclen1=307 oclen2=303 oclen3=232 oclen4=80
+  8. m=10 T=2939 (compression 1.4641×) M=[11111101..; 10001110..; 00111111..; 11110101..; 10011100..; 01100111..; 11011011..; 00111111..; 00111110..; 11000110..]
+    Per-output T: ocoeff0=304 ocoeff1=344 ocoeff2=298 ocoeff3=274 ocoeff4=202 ocoeff5=148 oclen0=333 oclen1=301 oclen2=285 oclen3=296 oclen4=154
+  9. m=10 T=3025 (compression 1.42248×) M=[01011111..; 00110001..; 00000011..; 10110101..; 10101111..; 01110101..; 00001011..; 01011100..; 00110101..; 11100000..]
+    Per-output T: ocoeff0=368 ocoeff1=306 ocoeff2=332 ocoeff3=294 ocoeff4=158 ocoeff5=122 oclen0=419 oclen1=307 oclen2=275 oclen3=286 oclen4=158
+  10. m=10 T=3363 (compression 1.27951×) M=[01001100..; 01111101..; 10000110..; 10110111..; 11101111..; 01001101..; 10010101..; 11100010..; 11111100..; 01110101..]
+    Per-output T: ocoeff0=328 ocoeff1=348 ocoeff2=362 ocoeff3=308 ocoeff4=186 ocoeff5=222 oclen0=393 oclen1=341 oclen2=329 oclen3=344 oclen4=202
+  11. m=10 T=3674 (compression 1.1712×) M=[10011011..; 10010001..; 10001000..; 11011110..; 11111110..; 11001110..; 10101110..; 01010100..; 00001000..; 01000010..]
+    Per-output T: ocoeff0=396 ocoeff1=430 ocoeff2=438 ocoeff3=390 ocoeff4=190 ocoeff5=134 oclen0=422 oclen1=385 oclen2=381 oclen3=344 oclen4=164
+  12. m=10 T=4097 (compression 1.05028×) M=[11111100..; 00000100..; 00111111..; 11110101..; 10011100..; 10110110..; 11010011..; 01111110..; 00111110..; 11010111..]
+    Per-output T: ocoeff0=402 ocoeff1=484 ocoeff2=380 ocoeff3=392 ocoeff4=278 ocoeff5=262 oclen0=495 oclen1=379 oclen2=397 oclen3=390 oclen4=238
+  13. m=10 T=4229 (compression 1.0175×) M=[10100111..; 11111111..; 00000010..; 11110101..; 10101101..; 11101101..; 00001011..; 01011100..; 00110101..; 11101000..]
+    Per-output T: ocoeff0=402 ocoeff1=356 ocoeff2=396 ocoeff3=434 ocoeff4=336 ocoeff5=350 oclen0=435 oclen1=453 oclen2=409 oclen3=358 oclen4=300
+  14. m=10 T=4267 (compression 1.00844×) M=[01001111..; 00000110..; 10101001..; 00001101..; 10000000..; 01101101..; 11000010..; 01101001..; 11000011..; 01010010..]
+    Per-output T: ocoeff0=468 ocoeff1=418 ocoeff2=460 ocoeff3=488 ocoeff4=162 ocoeff5=264 oclen0=483 oclen1=429 oclen2=457 oclen3=458 oclen4=180
+  15. m=10 T=4303 (compression 1×) M=[00000010..; 00000001..; 00000000..; 00000000..; 10000000..; 01000000..; 00100000..; 00010000..; 00001000..; 00000100..]
+  16. m=10 T=4435 (compression 0.970237×) M=[00010111..; 11110100..; 11010011..; 10101111..; 00110001..; 01011001..; 10110011..; 01010110..; 10001111..; 11111110..]
+  17. m=10 T=4545 (compression 0.946755×) M=[10011011..; 10011000..; 11011001..; 11011110..; 11011110..; 11001110..; 11101111..; 01010100..; 00001000..; 01000010..]
+  18. m=10 T=4757 (compression 0.904562×) M=[01011111..; 11010101..; 10111111..; 11110100..; 11000011..; 11000001..; 00010111..; 00101001..; 00100100..; 11110111..]
+  19. m=10 T=4791 (compression 0.898142×) M=[00100100..; 00101101..; 01100101..; 00111110..; 01010100..; 11010101..; 00110100..; 11011011..; 10111101..; 01100101..]
+  20. m=10 T=4849 (compression 0.887399×) M=[01011101..; 01110100..; 00000111..; 10110011..; 11111111..; 01001101..; 10000101..; 11100010..; 10111111..; 01110101..]
+
+Best candidate: m=10, T=1593
+// Transform z = Mx + b (GF(2)):
+// m=10, n=10
+// z_0 = ocoeffs0 + ocoeffs1 + ocoeffs2 + ocoeffs3 + ocoeffs4
+// z_1 = ocoeffs1 + ocoeffs3 + ocoeffs4 + ctable0 + ctable2 + 1
+// z_2 = ocoeffs1 + ocoeffs2 + ocoeffs4
+// z_3 = ocoeffs3 + ocoeffs4 + ctable0 + ctable2
+// z_4 = ocoeffs1 + ocoeffs3 + ocoeffs4 + ctable0
+// z_5 = ocoeffs1 + ctable0 + ctable2
+// z_6 = ocoeffs1 + ocoeffs4 + ctable1 + ctable2
+// z_7 = ocoeffs4 + 1
+// z_8 = ocoeffs4 + ctable2 + ingones0
+// z_9 = ctable2 + ingones1
+Verifying best candidate (5000 random tests per output)...
+  ocoeff0 ✅ Verified (5000 tests)
+  ocoeff1 ✅ Verified (5000 tests)
+  ocoeff2 ✅ Verified (5000 tests)
+  ocoeff3 ✅ Verified (5000 tests)
+  ocoeff4 ❌ FAILED
+  ocoeff5 ❌ FAILED
+  oclen0 ❌ FAILED
+  oclen1 ❌ FAILED
+  oclen2 ❌ FAILED
+  oclen3 ❌ FAILED
+  oclen4 ❌ FAILED
+  Saved: runs/cavlc_best_trans.txt
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc

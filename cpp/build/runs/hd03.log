@@ -1,0 +1,36 @@
+--- Circuit ---
+  Inputs: 16, Outputs to optimize: 8
+Phase 1: Computing truth table...
+  Truth table: 2^16 = 65536 inputs, 1024 batches, 8 output(s), 104 thread(s)
+  Time: 0.00597957 s
+
+Phase 2: Raw ANF baseline...
+  Sum T = 518
+  Max deg = 9
+    om_7: T=257, m=9
+    om_6: T=129, m=8
+    om_5: T=65, m=7
+    om_4: T=33, m=6
+    om_3: T=17, m=5
+    om_2: T=9, m=4
+    om_1: T=5, m=3
+    om_0: T=3, m=2
+  Saved ANF: runs/hd03.poly (518 terms)
+
+Phase 3: Computing Walsh correlations...
+  Output om_7 top-5 bits: 8(129) 9(129) 10(129) 11(129) 12(129) 
+  Output om_6 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_5 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_4 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_3 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_2 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_1 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128) 
+  Output om_0 top-5 bits: 10(320) 11(320) 12(320) 13(320) 14(320) 
+  Walsh time: 0.0458984 s
+
+Phase 4: Searching for M,b...
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (500 candidates)
+  Search time: 2.83128 s
+  4e: Hill climbing from top 30 candidates (+ identity)

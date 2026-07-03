@@ -1,0 +1,227 @@
+# ANF for g(z) under best transform (m=7, k=26 outputs)
+# oseloregdst0
+z_0 * z_6
+z_0 * z_1 * z_6
+z_0 * z_1 * z_2 * z_6
+z_1 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oseloregdst0 total: 5 terms
+# oseloregdst1
+z_1 * z_5
+z_0 * z_1 * z_5
+z_0 * z_1 * z_6
+z_0 * z_1 * z_2 * z_6
+z_0 * z_1 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oseloregdst1 total: 6 terms
+# oselopB0
+z_0
+z_0 * z_1
+z_0 * z_5
+z_0 * z_1 * z_5
+z_1 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_0 * z_6
+z_0 * z_1 * z_2 * z_6
+z_0 * z_5 * z_6
+z_1 * z_2 * z_5 * z_6
+# oselopB0 total: 10 terms
+# oselopB1
+1
+z_0
+z_0 * z_5
+z_0 * z_1 * z_5
+z_6
+z_0 * z_6
+z_0 * z_1 * z_6
+z_0 * z_1 * z_2 * z_6
+z_0 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oselopB1 total: 10 terms
+# oaluop0
+z_2
+z_1 * z_2
+z_0 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_2 * z_6
+z_1 * z_2 * z_6
+z_0 * z_1 * z_5 * z_6
+z_0 * z_2 * z_5 * z_6
+z_0 * z_1 * z_3 * z_5 * z_6
+z_0 * z_1 * z_2 * z_3 * z_4 * z_5 * z_6
+# oaluop0 total: 10 terms
+# oaluop1
+1
+z_1
+z_5
+z_1 * z_5
+z_6
+z_1 * z_6
+z_5 * z_6
+z_1 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_4 * z_5 * z_6
+# oaluop1 total: 10 terms
+# oaluop2
+z_0
+z_1
+z_1 * z_6
+z_0 * z_1 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oaluop2 total: 5 terms
+# oaluopext0
+z_0 * z_6
+z_0 * z_2 * z_6
+z_1 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oaluopext0 total: 4 terms
+# oaluopext1
+z_1 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_0 * z_6
+z_0 * z_1 * z_6
+z_0 * z_5 * z_6
+z_1 * z_5 * z_6
+z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oaluopext1 total: 8 terms
+# oaluopext2
+z_1 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_0 * z_1 * z_6
+z_1 * z_5 * z_6
+z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oaluopext2 total: 6 terms
+# oaluopext3
+1
+z_0 * z_1
+z_1 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_6
+z_0 * z_1 * z_6
+z_0 * z_1 * z_5 * z_6
+z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oaluopext3 total: 9 terms
+# ohalt
+z_2 * z_5 * z_6
+z_0 * z_2 * z_5 * z_6
+z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# ohalt total: 4 terms
+# oregwrite
+1
+z_0 * z_1
+z_1 * z_2
+z_0 * z_1 * z_2
+z_1 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_6
+z_0 * z_6
+z_0 * z_1 * z_6
+z_1 * z_2 * z_6
+z_0 * z_1 * z_2 * z_6
+z_1 * z_5 * z_6
+z_0 * z_1 * z_5 * z_6
+z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oregwrite total: 15 terms
+# oselpcopA
+z_1 * z_2 * z_6
+z_0 * z_1 * z_2 * z_6
+# oselpcopA total: 2 terms
+# oselpcopB
+z_1 * z_6
+z_0 * z_1 * z_6
+z_1 * z_2 * z_6
+z_0 * z_1 * z_2 * z_6
+# oselpcopB total: 4 terms
+# obeqz
+z_0 * z_1 * z_2
+z_0 * z_1 * z_2 * z_5
+z_0 * z_1 * z_2 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# obeqz total: 4 terms
+# obnez
+z_0 * z_1
+z_0 * z_1 * z_2
+z_0 * z_1 * z_5
+z_0 * z_1 * z_2 * z_5
+z_0 * z_1 * z_6
+z_0 * z_1 * z_2 * z_6
+z_0 * z_1 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# obnez total: 8 terms
+# obgez
+z_0 * z_1 * z_5
+z_0 * z_1 * z_2 * z_5
+z_0 * z_1 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# obgez total: 4 terms
+# obltz
+z_0 * z_1 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5 * z_6
+# obltz total: 2 terms
+# ojump
+z_1 * z_6
+z_0 * z_1 * z_6
+# ojump total: 2 terms
+# oCin
+z_0 * z_2
+z_0 * z_1 * z_2
+z_0 * z_5 * z_6
+z_0 * z_1 * z_5 * z_6
+z_0 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_3 * z_5 * z_6
+# oCin total: 7 terms
+# oinvA
+z_0 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_0 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_3 * z_4 * z_5 * z_6
+# oinvA total: 5 terms
+# oinvB
+z_0 * z_2
+z_0 * z_1 * z_2
+z_0 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_0 * z_5 * z_6
+z_0 * z_1 * z_5 * z_6
+z_0 * z_1 * z_2 * z_3 * z_5 * z_6
+z_0 * z_1 * z_2 * z_3 * z_4 * z_5 * z_6
+# oinvB total: 8 terms
+# osign
+1
+# osign total: 1 terms
+# omemwrite
+z_1 * z_2
+z_0 * z_1 * z_2
+z_1 * z_5
+z_0 * z_1 * z_5
+z_1 * z_2 * z_6
+z_0 * z_1 * z_2 * z_6
+z_1 * z_5 * z_6
+z_0 * z_1 * z_5 * z_6
+# omemwrite total: 8 terms
+# oselwb
+z_1
+z_0 * z_1
+z_1 * z_2
+z_0 * z_1 * z_2
+z_1 * z_5
+z_0 * z_1 * z_5
+z_1 * z_2 * z_5
+z_0 * z_1 * z_2 * z_5
+z_1 * z_6
+z_0 * z_1 * z_6
+z_1 * z_2 * z_6
+z_0 * z_1 * z_2 * z_6
+z_1 * z_5 * z_6
+z_0 * z_1 * z_5 * z_6
+z_1 * z_2 * z_5 * z_6
+z_0 * z_1 * z_2 * z_5 * z_6
+# oselwb total: 16 terms
+# Total terms: 173

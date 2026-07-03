@@ -1,0 +1,12 @@
+Verification of best candidate
+m=11, n=11, T=238
+
+oM0 ✅ Verified (5000 tests)
+oM1 ✅ Verified (5000 tests)
+oM2 ✅ Verified (5000 tests)
+oM3 ✅ Verified (5000 tests)
+oE0 ✅ Verified (5000 tests)
+oE1 ✅ Verified (5000 tests)
+oE2 ❌ FAILED
+
+❌ Some outputs FAILED!
