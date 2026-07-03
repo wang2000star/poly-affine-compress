@@ -1,7 +1,0 @@
---- Circuit ---
-  Inputs: 32, Outputs to optimize: 32
-Phase 1: Computing truth table...
-  Truth table: 2^32 = 4294967296 inputs, 67108864 batches, 32 output(s), 104 thread(s)
-  Time: 86.7398 s
-
-Phase 2: Raw ANF baseline...

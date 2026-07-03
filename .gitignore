@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+cpp/build/
+cpp/results/
+cpp/optimize_anf*
