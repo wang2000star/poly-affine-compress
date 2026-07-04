@@ -3,7 +3,7 @@ source "$(dirname "$0")/../common.sh"
 INST="hd01"
 
 echo "=== Optimize hd01 (6 multi-output strategies, n=32) ==="
-CIRCUIT="$EXAMPLES_DIR/${INST}.txt"
+CIRCUIT="$PREPROCESS_DIR/$INST/$INST.eqn"
 
 P_COMMON="--random 200 --walsh-k 30 --hill-climb 5 --max-m 12"
 P_D1A_OPT2="--random 200 --walsh-k 30 --hill-climb 3 --max-m 10"

@@ -48,6 +48,7 @@ check_exe() {
 run_strategy() {
     local inst=$1 label=$2 exe=$3 circuit=$4 extra_args=$5
     local out_dir="$RESULTS_DIR/$inst/${inst}_${label}"
+    mkdir -p "$out_dir"
 
     if ! check_exe "$exe"; then return 1; fi
 
