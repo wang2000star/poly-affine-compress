@@ -233,7 +233,7 @@ void GateBuilder::_compress(SignalInfo& si, bool verbose) {
     if (verbose)
         printf("    Compress: m=%d T=%d\n", m0, T0);
 
-    // Step 1: complement selection
+    // Step 1: complement selection (only safe compression operation)
     {
         std::vector<uint32_t> comp_M;
         uint64_t comp_b = 0;
@@ -245,36 +245,10 @@ void GateBuilder::_compress(SignalInfo& si, bool verbose) {
         }
     }
 
-    // Step 2: greedy merge
-    {
-        std::vector<uint32_t> merge_rows;
-        uint64_t merge_b = 0;
-        int old_m = si.m;
-        _greedy_merge(si.g, si.m, merge_rows, merge_b);
-        if (si.m < old_m) {
-            // Compose: M_new = merge_rows @ si.M_rows
-            // merge_rows is m_new × old_m, si.M_rows is old_m × n
-            int n_vars = (int)si.M_rows.size();
-            std::vector<uint32_t> new_M_rows(si.m, 0);
-            for (int r = 0; r < si.m; r++) {
-                uint32_t row = merge_rows[r];
-                uint32_t accum = 0;
-                while (row) {
-                    int j = __builtin_ctz(row);
-                    row &= row - 1;
-                    if (j < old_m) accum ^= si.M_rows[j];
-                }
-                new_M_rows[r] = accum;
-            }
-            si.M_rows = new_M_rows;
-
-            // b_new[r] = XOR of merge_rows[r][j] & b_old[j], then XOR merge_b[r]
-            si.b = _compose_b(merge_rows, si.m, si.b, merge_b);
-
-            if (verbose)
-                printf("      Merge: m %d→%d T=%d\n", old_m, si.m, si.g.T_nonlinear());
-        }
-    }
+    // NOTE: Greedy merge is DISABLED because it's only valid when M_i == M_j
+    // and b_i == b_j (identical z-variables). In the gate builder, different
+    // z-variables almost always have different (M,b), so the merge silently
+    // changes f(x). Use direction d1a/d3 for safe variable reduction.
 
     if (verbose)
         printf("    Result: m %d→%d T %d→%d\n", m0, si.m, T0, si.g.T());

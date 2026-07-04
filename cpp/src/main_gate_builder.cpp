@@ -19,6 +19,7 @@
 #include <sstream>
 #include <algorithm>
 #include <filesystem>
+#include <climits>
 
 namespace fs = std::filesystem;
 
@@ -33,6 +34,34 @@ static std::string strip_ext(const std::string& path) {
     return (pos == std::string::npos) ? path : path.substr(0, pos);
 }
 
+// ====================================================================
+//  Per-output compression: complement selection only.
+//  Greedy merge is NOT used (see compress_output for explanation).
+// ====================================================================
+
+// Run complement selection on one output's ANF, updating b in place.
+// This is the only safe per-output compression: it XORs z_j XOR 1 into
+// selected variables to reduce T, without changing the function.
+static void compress_output(SparseANF& g, std::vector<uint32_t>& M_rows,
+                             uint64_t& b, int& m_used) {
+    if (g.T() == 0) return;
+    if (M_rows.size() <= 1) return;
+
+    // Complement selection: for each z_j, try XOR with 1 (z_j -> not z_j).
+    // This reduces T without changing m or introducing verification error.
+    std::vector<uint32_t> comp_M;  // unit-vector rows, irrelevant for M
+    uint64_t comp_b = 0;
+    g.complement_search_greedy(comp_M, comp_b);
+    b ^= comp_b;
+
+    // IMPORTANT: Greedy merge (z_i = z_i XOR z_j, then remove z_i) is DISABLED
+    // because it only produces correct results when M_i = M_j and b_i = b_j.
+    // In the gate builder's per-output z-space, different z-variables nearly
+    // always have different (M,b), so the merge silently changes f(x).
+    // Use truth-table directions d1a, d2, or d3 for safe variable reduction.
+
+    m_used = (int)M_rows.size();  // must match affine row count
+}
 
 // ====================================================================
 //  Per-output processing
@@ -99,7 +128,7 @@ static void write_affine(const std::string& path,
 
     f << s << "\n" << s << " " << (n + 1) << "\n";
 
-    // s × (n+1) matrix: [M | b] — write only m_used rows per output
+    // s x (n+1) matrix: [M | b] -- write only m_used rows per output
     for (const auto& r : results) {
         for (int ri = 0; ri < r.m_used; ri++) {
             for (int c = 0; c < n; c++) {
@@ -206,7 +235,7 @@ int main(int argc, char** argv) {
     }
 
     std::string circ_path;
-    int threshold = 4096;
+    int threshold = INT32_MAX;  // no inline compression; done per-output below
     std::string out_dir = "";
 
     // ---- Resolve project root from executable path, then chdir ----
@@ -265,6 +294,16 @@ int main(int argc, char** argv) {
 
     // Extract outputs
     auto results = process_outputs(circ, gb, true);
+
+    // Per-output compression (each output in its own z-space)
+    for (auto& r : results) {
+        if (r.g_all.T() > 0) {
+            compress_output(r.g_all, r.M_rows, r.b, r.m_used);
+        }
+    }
+    printf("  Per-output compression complete\n");
+    for (const auto& r : results)
+        printf("    %s: m=%d T=%d\n", r.name.c_str(), r.m_used, r.g_all.T());
 
     // Prepare z variable names
     std::vector<std::string> z_names;
