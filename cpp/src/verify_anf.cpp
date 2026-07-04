@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
     std::string affine_path = argv[2];
     std::string poly_path = argv[3];
 
-    int n_tests = 5000;
+    int n_tests = 100000;
     std::string output_path;
     for (int a = 4; a < argc; a++) {
         std::string arg = argv[a];
