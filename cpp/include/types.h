@@ -88,14 +88,17 @@ struct RawANFInfo {
 
 struct SearchParams {
     int max_m = 12;
-    int n_random = 40;
-    int n_hill_climb = 10;
-    int walsh_single_top = 20;
+    int n_random = 300;
+    int n_hill_climb = 20;
+    int walsh_single_top = 40;
     int multi_max_rows = 10;
     int n32_random = 0;
     int n_complement = 0;   // complement candidates (k complement vars, 0 = skip)
     int n_threads = 4;
     int walsh_k = 30;
+    bool use_dep_filter = true;    // filter pool rows by dependency set
+    bool use_progressive = true;   // progressive M construction (n≤20)
+    int progressive_max_m = 0;     // max m for progressive search (0 = auto = n)
     std::string anf_out_prefix;
     std::string save_results_prefix;
 };

@@ -468,6 +468,20 @@ static Candidate search_single_output_large(
         }
     }
 
+    // Fallback: identity transform when no valid m<n transform found
+    if (best.total_T >= INT64_MAX && n <= 24) {
+        uint32_t M_ident[32] = {0};
+        for (int r = 0; r < n; r++) M_ident[r] = (1u << r);
+        best.m = n;
+        for (int r = 0; r < n; r++) best.M_rows[r] = M_ident[r];
+        best.b = 0;
+        best.total_T = evaluate_zspace(fc, M_ident, 0, n, n, best.g_tt_raw, n_threads, output_idx, 0);
+        if (best.total_T >= 0 && best.total_T < INT64_MAX)
+            std::cout << "    [identity fallback: m=n=" << n << " T=" << best.total_T << "]\n";
+        else
+            best.total_T = INT64_MAX;
+    }
+
     return best;
 }
 
@@ -568,6 +582,20 @@ int main(int argc, char** argv) {
             total_sum_T += cand.total_T;
 
         std::cout << "    m=" << cand.m << " T=" << cand.total_T << " (" << sec << " s)\n";
+    }
+
+    // Check for any unoptimizable outputs
+    bool any_failed = false;
+    for (int oi = 0; oi < k; oi++) {
+        if (results[oi].total_T >= INT64_MAX) {
+            any_failed = true;
+            std::cout << "  ** Output " << circ.outputs[all_outputs[oi]]
+                      << ": no valid transform found **\n";
+        }
+    }
+    if (any_failed) {
+        std::cerr << "ERROR: " << k << " outputs, some have no valid transform. Exiting.\n";
+        return 1;
     }
 
     // Summary

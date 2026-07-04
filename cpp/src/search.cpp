@@ -106,17 +106,350 @@ struct CandidateGenerator {
 };
 
 // ============================================================
-//  Complement pair detection and row-pool evaluation
+//  Dependency set computation (theory-guided)
 //
-//  Build a 3n-row pool (W,E) as suggested by the user:
-//    Rows 0..n-1:   z_i = x_i          (identity, b=0)
-//    Rows n..2n-1:  z_{n+i} = x_i ⊕ 1  (complement, b=1)
-//    Rows 2n..3n-1: XOR of ≥2 input bits (b arbitrary)
+//  For each output, determine which input variables actually
+//  affect it (i.e., e_j ∉ Aut(f_i)).
 //
-//  From this pool, select any s rows as M,b.
-//  Complement pairs: if row i (single-bit e_c, b=0) AND row j (single-bit e_c, b=1)
-//  are both selected, their monomials are filtered post-Möbius.
+//  n ≤ 20: exact via truth table scan
+//  n > 20: random sampling (fallback)
 // ============================================================
+
+std::vector<uint32_t> compute_dependency_set(
+    const TruthTable& tt, int n, int n_samples)
+{
+    int k = tt.n_outputs;
+    std::vector<uint32_t> dep(k, 0);
+
+    if (n <= 20) {
+        // Exact: scan truth table
+        int64_t n_words = tt.n_words;
+        for (int j = 0; j < n; j++) {
+            uint32_t bit = (1u << j);
+            uint32_t word_offset = (j < 6) ? 0 : (1u << (j - 6));
+            int bit_in_word = j & 63;
+            uint64_t bit_mask = (1ULL << bit_in_word);
+
+            for (int oi = 0; oi < k; oi++) {
+                bool depends = false;
+                for (int64_t w = 0; w < n_words && !depends; w++) {
+                    uint64_t val = tt.tt[oi][w];
+                    uint64_t shifted;
+                    if (j < 6) {
+                        // Bit flip within same word
+                        uint64_t lo = val & ((1ULL << bit_in_word) - 1);
+                        uint64_t hi = val >> (bit_in_word + 1);
+                        shifted = (hi << bit_in_word) | lo;
+                    } else {
+                        // Bit flip across words
+                        int64_t w_pair = w ^ word_offset;
+                        if (w_pair >= n_words) continue;
+                        shifted = tt.tt[oi][w_pair];
+                    }
+                    if (val != shifted) {
+                        depends = true;
+                        dep[oi] |= bit;
+                    }
+                }
+            }
+        }
+    } else {
+        // n > 20: random sampling
+        for (int j = 0; j < n; j++) {
+            uint32_t bit = (1u << j);
+            for (int oi = 0; oi < k; oi++) {
+                for (int t = 0; t < n_samples; t++) {
+                    // Random x: use deterministic hashing
+                    uint64_t x = (uint64_t)t * 0x9e3779b97f4a7c15ULL;
+                    x = (x >> 32) ^ x;
+                    if (n < 32) x &= ((1ULL << n) - 1);
+                    uint64_t x_flip = x ^ (1ULL << j);
+                    // Read from truth table (only valid for n≤25)
+                    // For n>25, would need circuit evaluation
+                    uint64_t f_x = (tt.tt[oi][x >> 6] >> (x & 63)) & 1;
+                    uint64_t f_xf = (tt.tt[oi][x_flip >> 6] >> (x_flip & 63)) & 1;
+                    if (f_x != f_xf) {
+                        dep[oi] |= bit;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return dep;
+}
+
+// ============================================================
+//  Aut(F) computation (n ≤ 20 via Walsh power spectrum)
+//
+//  For each output:
+//    1. Compute Walsh-Hadamard transform
+//    2. Square magnitudes (power spectrum)
+//    3. Inverse Walsh → autocorrelation r(Δ)
+//    4. r(Δ) = 1 ± ε → Δ ∈ Aut(f_i)
+//    5. Intersect across all outputs → Aut(F)
+//  Output: basis vectors of Aut(F) as bitmasks
+// ============================================================
+
+std::vector<uint64_t> compute_aut_basis(
+    const TruthTable& tt, int n, int n_threads)
+{
+    int k = tt.n_outputs;
+    int64_t n_pts = int64_t(1) << n;
+    int64_t n_words = tt.n_words;
+
+    if (n > 20) {
+        // For n > 20, Aut(F) basis can't be computed via Walsh easily
+        // Return empty basis (= dim 0, no invariance)
+        return {};
+    }
+
+    // Allocate working arrays
+    std::vector<double> walsh_re(n_pts, 0.0);
+    std::vector<double> walsh_im(n_pts, 0.0);
+    std::vector<double> power(n_pts, 0.0);
+    std::vector<double> autocorr(n_pts, 0.0);
+
+    // For each output, compute autocorrelation
+    std::vector<uint64_t> aut_set(n_pts, ~0ULL); // start as all-1
+
+    for (int oi = 0; oi < k; oi++) {
+        // Initialize real part with (-1)^f(x)
+        for (int64_t i = 0; i < n_pts; i++) {
+            uint64_t bit = (tt.tt[oi][i >> 6] >> (i & 63)) & 1;
+            walsh_re[i] = bit ? -1.0 : 1.0;
+            walsh_im[i] = 0.0;
+        }
+
+        // Walsh-Hadamard transform (in-place)
+        for (int step = 1; step < n_pts; step <<= 1) {
+            for (int64_t i = 0; i < n_pts; i += step * 2) {
+                for (int64_t j = 0; j < step; j++) {
+                    double u_re = walsh_re[i + j];
+                    double u_im = walsh_im[i + j];
+                    double v_re = walsh_re[i + j + step];
+                    double v_im = walsh_im[i + j + step];
+                    walsh_re[i + j] = u_re + v_re;
+                    walsh_im[i + j] = u_im + v_im;
+                    walsh_re[i + j + step] = u_re - v_re;
+                    walsh_im[i + j + step] = u_im - v_im;
+                }
+            }
+        }
+
+        // Power spectrum S[α] = |Ŵ(α)|²
+        for (int64_t i = 0; i < n_pts; i++) {
+            power[i] = walsh_re[i] * walsh_re[i] + walsh_im[i] * walsh_im[i];
+        }
+
+        // Inverse Walsh on power spectrum → autocorrelation r(Δ)
+        // r(Δ) = (1/2ⁿ) · Σ_α S[α] · (-1)^{α·Δ}
+        // Using Walsh on power gives 2ⁿ·r(Δ) (Walsh is self-inverse up to scale)
+        for (int64_t i = 0; i < n_pts; i++) {
+            walsh_re[i] = power[i];
+            walsh_im[i] = 0.0;
+        }
+        for (int step = 1; step < n_pts; step <<= 1) {
+            for (int64_t i = 0; i < n_pts; i += step * 2) {
+                for (int64_t j = 0; j < step; j++) {
+                    double u_re = walsh_re[i + j];
+                    double u_im = walsh_im[i + j];
+                    double v_re = walsh_re[i + j + step];
+                    double v_im = walsh_im[i + j + step];
+                    walsh_re[i + j] = u_re + v_re;
+                    walsh_im[i + j] = u_im + v_im;
+                    walsh_re[i + j + step] = u_re - v_re;
+                    walsh_im[i + j + step] = u_im - v_im;
+                }
+            }
+        }
+
+        // Normalize: r(Δ) = power_walsh[Δ] / 2ⁿ
+        // And find Δ with r(Δ) close to 1
+        uint64_t aut_i = 1; // Δ=0 always included
+        for (int64_t d = 1; d < n_pts; d++) {
+            double r = walsh_re[d] / (double)n_pts;
+            // r(Δ) = 1 means perfect autocorrelation (= Δ ∈ Aut(f))
+            if (r > 0.9999) {
+                aut_i |= (1ULL << d);
+            }
+        }
+        // Intersect with other outputs
+        aut_set[oi] = aut_i;
+    }
+
+    // Intersection across all outputs
+    uint64_t aut_all = aut_set[0];
+    for (int oi = 1; oi < k; oi++) {
+        aut_all &= aut_set[oi];
+    }
+
+    // Extract basis vectors from aut_all
+    std::vector<uint64_t> basis;
+    if (aut_all == 0) return basis;
+
+    // aut_all is a bitmask: bit d = 1 means d ∈ Aut(F)
+    // We need a basis of the subspace.
+    // Convert from vector set to basis via Gaussian elimination.
+    std::vector<uint64_t> vectors;
+    uint64_t mask = aut_all;
+    while (mask) {
+        int d = __builtin_ctzll(mask);
+        mask &= mask - 1;
+        vectors.push_back((uint64_t)d);
+    }
+
+    if (vectors.empty()) return basis;
+
+    // Gaussian elimination to find basis
+    int dim = n;
+    std::vector<uint64_t> basis_mat(dim, 0);
+
+    for (uint64_t v : vectors) {
+        uint64_t vec = v;
+        for (int i = 0; i < dim; i++) {
+            if (!((vec >> i) & 1)) continue;
+            if (basis_mat[i] == 0) {
+                basis_mat[i] = vec;
+                break;
+            }
+            vec ^= basis_mat[i];
+        }
+    }
+
+    for (int i = 0; i < dim; i++) {
+        if (basis_mat[i] != 0)
+            basis.push_back(basis_mat[i]);
+    }
+
+    return basis;
+}
+
+// ============================================================
+//  Progressive M construction (theory-guided)
+//
+//  Start from identity (m=n, ker={0}, always consistent).
+//  For each candidate row w from the 3n pool:
+//    1. Check exclusivity: rank(M ∪ [w]) > rank(M)
+//    2. Find Δ: M·Δ = 0, w·Δ = 1
+//    3. Δ ∈ Aut(F)? → skip
+//    4. Evaluate M ∪ [w]; keep if T improves
+//  Then hill climb from best result.
+// ============================================================
+
+MbCandidate progressive_m_search(
+    const TruthTable& tt,
+    const std::vector<uint64_t>& aut_basis,
+    int n, int max_m, int n_threads)
+{
+    int k = tt.n_outputs;
+    int effective_max = (max_m <= 0) ? n : std::min(max_m, n);
+
+    // Start from identity (m=n)
+    std::vector<uint32_t> curr_M(n);
+    uint64_t curr_b = 0;
+    for (int i = 0; i < n; i++)
+        curr_M[i] = (1u << i);
+
+    MbCandidate best = evaluate_Mb(tt, curr_M.data(), curr_b, n, n_threads);
+
+    if (effective_max <= n) {
+        // Can't increase m, just return identity baseline
+        // Hill climb from identity is already done in run_search
+        return best;
+    }
+
+    // Build pool rows
+    int m_target = std::min(effective_max, 2 * n); // max m target
+    if (m_target <= n) return best;
+
+    // Generate complement + XOR pair candidate rows
+    struct PoolRow { uint32_t row; uint64_t b_bit; double score; };
+    std::vector<PoolRow> pool;
+
+    // Complement rows: e_i with b=1
+    for (int i = 0; i < n; i++)
+        pool.push_back({(1u << i), 1ULL, 0.0});
+
+    // XOR pair rows: e_i ⊕ e_j with b=0
+    for (int i = 0; i < std::min(n, 8); i++) {
+        for (int j = i + 1; j < std::min(n, 8); j++) {
+            pool.push_back({(1u << i) | (1u << j), 0ULL, 0.0});
+        }
+    }
+
+    // Progressive construction
+    for (auto& pr : pool) {
+        if ((int)curr_M.size() >= m_target) break;
+
+        uint32_t w = pr.row;
+        uint64_t wb = pr.b_bit;
+
+        // Step 1: exclusivity check - is w linearly independent of curr_M?
+        int r = (int)curr_M.size();
+        uint32_t test_M[33];
+        for (int i = 0; i < r; i++) test_M[i] = curr_M[i];
+        test_M[r] = w;
+        if (gf2_rank(test_M, r + 1, n) == gf2_rank(curr_M.data(), r, n))
+            continue; // w is in row space of curr_M
+
+        // Step 2: Solve M·Δ = 0, w·Δ = 1
+        // Build augmented matrix [M; w] and find nullspace basis, then a Δ
+        // For simplicity, use GF(2) rank test + random search for Δ
+        uint64_t delta = 0;
+        bool found_delta = false;
+
+        // Try single-bit Δs (e_j) as candidates
+        for (int j = 0; j < n && !found_delta; j++) {
+            uint64_t d = (1ULL << j);
+            // Check M·d = 0
+            bool m_dot_d_zero = true;
+            for (int ri = 0; ri < r && m_dot_d_zero; ri++) {
+                if (__builtin_popcount(curr_M[ri] & (uint32_t)d) & 1)
+                    m_dot_d_zero = false;
+            }
+            if (!m_dot_d_zero) continue;
+            // Check w·d = 1
+            if ((__builtin_popcount(w & (uint32_t)d) & 1)) {
+                delta = d;
+                found_delta = true;
+            }
+        }
+
+        if (!found_delta) continue;
+
+        // Step 3: Check Δ ∈ span(Aut(F))?
+        // Use Gaussian elimination: reduce delta by basis vectors
+        uint64_t d_check = delta;
+        for (uint64_t aut_vec : aut_basis) {
+            if (d_check == 0) break;
+            uint64_t bv = aut_vec;
+            if (bv == 0) continue;
+            int top = 63 - __builtin_clzll(bv);
+            if ((d_check >> top) & 1)
+                d_check ^= bv;
+        }
+        if (d_check == 0) continue; // delta ∈ Aut(F), skip
+
+        // Step 4: Evaluate candidate
+        std::vector<uint32_t> new_M = curr_M;
+        new_M.push_back(w);
+        uint64_t new_b = curr_b;
+        if (wb) new_b |= (1ULL << r); // set b bit for new row
+
+        MbCandidate cand = evaluate_Mb(tt, new_M.data(), new_b,
+                                        (int)new_M.size(), n_threads);
+        if (cand.union_T < best.union_T && cand.union_T != INT64_MAX) {
+            best = cand;
+            curr_M = new_M;
+            curr_b = new_b;
+            std::cout << "    progressive: m=" << new_M.size()
+                      << " T_union=" << cand.union_T << "\n";
+        }
+    }
+
+    return best;
+}
 
 // Detect complement pairs in M,b: pairs of single-bit rows with same bit but opposite b.
 // Returns number of pairs found, fills pair_masks with (1<<row_a)|(1<<row_b) for each.
@@ -189,7 +522,8 @@ static MbCandidate evaluate_pool_rowset(
 static void build_row_pool(int n,
     const std::vector<WalshInfo>& walsh,
     std::vector<std::pair<uint32_t, uint32_t>>& pool_rows,
-    std::vector<double>& scores)
+    std::vector<double>& scores,
+    uint32_t dep_union = 0)
 {
     pool_rows.clear();
     scores.clear();
@@ -207,8 +541,10 @@ static void build_row_pool(int n,
         [](auto& a, auto& b) { return a.score > b.score; });
 
     // Group 1: identity rows (b=0) and complement rows (b=1)
+    // Skip bits that are don't-care (not in dep_union)
     for (int i = 0; i < n; i++) {
         uint32_t row = (1u << i);
+        if (dep_union != 0 && !(dep_union & row)) continue;
         pool_rows.emplace_back(row, 0u);
         scores.push_back(bit_scores[i].score);
         pool_rows.emplace_back(row, 1u);
@@ -220,6 +556,7 @@ static void build_row_pool(int n,
     for (int a = 0; a < top_n; a++) {
         for (int b_idx = a + 1; b_idx < top_n; b_idx++) {
             uint32_t row = (1u << bit_scores[a].bit) | (1u << bit_scores[b_idx].bit);
+            if (dep_union != 0 && (row & dep_union) == 0) continue;
             double score = bit_scores[a].score + bit_scores[b_idx].score;
             pool_rows.emplace_back(row, 0u);
             scores.push_back(score);
@@ -235,7 +572,8 @@ static void add_row_pool_candidates(
     const TruthTable& tt,
     const std::vector<WalshInfo>& walsh,
     int n, int n_threads, int max_candidates,
-    std::vector<MbCandidate>& results)
+    std::vector<MbCandidate>& results,
+    uint32_t dep_union = 0)
 {
     if (walsh.empty() || max_candidates <= 0) return;
     int pool_size = 2 * n + 2 * std::min(n, 8) * (std::min(n, 8) - 1) / 2;
@@ -243,7 +581,7 @@ static void add_row_pool_candidates(
 
     std::vector<std::pair<uint32_t, uint32_t>> pool_rows;
     std::vector<double> scores;
-    build_row_pool(n, walsh, pool_rows, scores);
+    build_row_pool(n, walsh, pool_rows, scores, dep_union);
 
     // Index each bit's identity row and complement row in the pool.
     // Pool layout: first n = identity(b=0), next n = identity(b=1), then XOR-pair rows.
@@ -560,6 +898,36 @@ void run_search(const TruthTable& tt, const Circuit& circ,
         save_raw_T(tt_copy, circ, output_indices, params.anf_out_prefix + "_T.poly");
     }
 
+    // Phase 2b: Theory-guided analysis (Aut(F) basis + dependency set)
+    std::vector<uint64_t> aut_basis;
+    uint32_t dep_union = (1u << n) - 1; // default: all bits are relevant
+    if (n <= 20) {
+        auto t_aut0 = std::chrono::steady_clock::now();
+        std::cout << "\nPhase 2b: Computing Aut(F) basis...\n";
+        aut_basis = compute_aut_basis(tt, n, params.n_threads);
+        std::cout << "  dim(Aut(F)) = " << aut_basis.size() << "\n";
+        if (aut_basis.empty()) {
+            std::cout << "  (no non-trivial invariance)\n";
+        } else {
+            std::cout << "  basis vectors:";
+            for (auto& v : aut_basis) std::cout << " " << v;
+            std::cout << "\n";
+        }
+        auto t_aut1 = std::chrono::steady_clock::now();
+        std::cout << "  Aut(F) time: " << std::chrono::duration<double>(t_aut1 - t_aut0).count() << " s\n";
+
+        // Dependency set (exact for n ≤ 20)
+        if (params.use_dep_filter) {
+            auto dep_sets = compute_dependency_set(tt, n, 500);
+            dep_union = 0;
+            for (int oi = 0; oi < tt.n_outputs; oi++)
+                dep_union |= dep_sets[oi];
+            std::cout << "  Dependency union: " << __builtin_popcount(dep_union)
+                      << "/" << n << " bits ("
+                      << (n - __builtin_popcount(dep_union)) << " don't-care)\n";
+        }
+    }
+
     auto t1 = std::chrono::steady_clock::now();
 
     // Phase 3: Walsh correlations (n ≤ 32)
@@ -591,6 +959,23 @@ void run_search(const TruthTable& tt, const Circuit& circ,
     // 4a-c: Walsh-guided + random (n ≤ 20 full search; 21-32 permutation only)
     if (n <= 20) {
         CandidateGenerator gen(n, params.max_m, walsh);
+
+        // 4a-pr: Progressive M construction (theory-guided)
+        if (params.use_progressive) {
+            int prog_max_m = (params.progressive_max_m > 0) ?
+                params.progressive_max_m : std::min(n + 8, 32);
+            std::cout << "  4a-pr: Progressive M construction (max m=" << prog_max_m << ")...\n";
+            auto t_prog0 = std::chrono::steady_clock::now();
+            auto prog_cand = progressive_m_search(tt, aut_basis, n, prog_max_m, params.n_threads);
+            if (prog_cand.union_T < INT64_MAX) {
+                results.push_back(prog_cand);
+                std::cout << "    progressive result: m=" << prog_cand.m
+                          << " T_union=" << prog_cand.union_T << "\n";
+            }
+            auto t_prog1 = std::chrono::steady_clock::now();
+            std::cout << "    progressive time: "
+                      << std::chrono::duration<double>(t_prog1 - t_prog0).count() << " s\n";
+        }
 
         std::cout << "  4a: Single-row Walsh (" << (params.walsh_single_top * 2) << " candidates)\n";
         auto single_rows = gen.gen_walsh_single_rows(params.walsh_single_top);
@@ -689,7 +1074,7 @@ void run_search(const TruthTable& tt, const Circuit& circ,
     if (params.n_complement > 0 && n <= 16) {
         std::cout << "  4f: Complement candidates (" << params.n_complement << " max)\n";
         add_row_pool_candidates(tt_copy, walsh, n, params.n_threads,
-                                 params.n_complement, results);
+                                 params.n_complement, results, dep_union);
     }
 
     // 4e: Hill climbing from top candidates

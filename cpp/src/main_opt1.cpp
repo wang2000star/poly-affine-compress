@@ -21,6 +21,9 @@ int main(int argc, char** argv) {
         std::cerr << "  --n32-random N n>20 full-rank random m=n candidates (default 0)\n";
         std::cerr << "  --complement N complement candidates (n≤16, default 0)\n";
         std::cerr << "  --hill-climb N hill climb from top N candidates (default 10)\n";
+        std::cerr << "  --use-progressive 0/1  progressive M construction (default 1)\n";
+        std::cerr << "  --progressive-max-m N  max m for progressive search (default auto)\n";
+        std::cerr << "  --dep-filter 0/1  dependency-set row filtering (default 1)\n";
         std::cerr << "  --anf-out PREF save raw ANF to PREFIX_expr.poly + PREFIX_T.poly (n<=16 only)\n";
         std::cerr << "  --save-results PREFIX  save best candidate: PREFIX_trans.poly,\n";
         std::cerr << "                          PREFIX_expr.poly, PREFIX_T.poly, PREFIX_verify.txt\n";
@@ -65,6 +68,12 @@ int main(int argc, char** argv) {
             params.anf_out_prefix = argv[++a];
         else if (arg == "--save-results" && a + 1 < argc)
             params.save_results_prefix = argv[++a];
+        else if (arg == "--use-progressive" && a + 1 < argc)
+            params.use_progressive = (std::stoi(argv[++a]) != 0);
+        else if (arg == "--progressive-max-m" && a + 1 < argc)
+            params.progressive_max_m = std::stoi(argv[++a]);
+        else if (arg == "--dep-filter" && a + 1 < argc)
+            params.use_dep_filter = (std::stoi(argv[++a]) != 0);
     }
 
     // Phase 1: Compute truth table
