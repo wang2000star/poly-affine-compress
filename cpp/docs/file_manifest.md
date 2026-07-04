@@ -27,12 +27,15 @@ examples/router.txt      ? 输入    ? 输出
 
 对每个实例 `{inst}`，输出目录 `results/{inst}/` 下可能生成以下文件：
 
-### 原始指标（优化前基线）
+### 预处理文件（preprocessed/{inst}/，一次性生成，固定不变）
 
 ```
-results/{inst}/
-  {inst}_raw_anf.poly            ← 原始电路 ANF（仅 degree ≥ 2 项）
-  {inst}_raw_T.txt               ← 原始 T 值（每输出 T + sum_T）
+  {inst}.txt              ← 重命名电路（x_i, y_j, t_k）
+  {inst}_stats.txt        ← 统计（9 行纯数字）
+  {inst}_const.txt        ← 常量输出
+  {inst}_affine.mat       ← 仿射输出矩阵
+  {inst}_nonlinear.txt    ← 非线性输出
+  {inst}_raw.poly         ← 原始多项式（n≤16 仅）
 ```
 
 ### d1a_opt2 — 方向1 变体1a + 各自变换（optimize_anf.cpp）
