@@ -374,13 +374,29 @@ int main(int argc, char** argv) {
         }
 
         // ---- .poly: per-output ANF in shared z-space ----
+        int max_deg = 0;
+        std::vector<std::vector<uint64_t>> per_output_anf(k);
         if (!result.g_tt_raw.empty()) {
             save_opt_expr(result.g_tt_raw, circ, output_indices, result.m, prefix + ".poly");
+            // Compute max_deg from merged g_tt_raw
+            int64_t n_words = int64_t(1) << (result.m < 6 ? 0 : result.m - 6);
+            for (int oi = 0; oi < k; oi++) {
+                std::vector<uint64_t> anf(result.g_tt_raw[oi]);
+                if (result.m > 0) moebius_packed(anf.data(), result.m);
+                for (int64_t w = 0; w < n_words; w++) {
+                    uint64_t word = anf[w];
+                    while (word) {
+                        int bit = __builtin_ctzll(word);
+                        word &= word - 1;
+                        int deg = __builtin_popcountll((w << 6) | bit);
+                        if (deg > max_deg) max_deg = deg;
+                    }
+                }
+            }
         } else {
             // Large m: re-evaluate best per-output candidates with save_g_tt=true
             int s = result.m;
             std::vector<int> term_counts(k, 0);
-            std::vector<std::vector<uint64_t>> per_output_anf(k);
             for (int oi = 0; oi < k; oi++) {
                 if (per_output[oi].m > 0 && per_output[oi].m <= 20) {
                     TruthTable tt_oi;
@@ -431,42 +447,32 @@ int main(int argc, char** argv) {
                     }
                     off += per_output[oi].m;
                 }
+                // Compute max_deg from per-output ANF data
+                for (int oi = 0; oi < k; oi++) {
+                    auto& anf = per_output_anf[oi];
+                    if (anf.empty()) continue;
+                    int m_oi = per_output[oi].m;
+                    int64_t n_z_oi = int64_t(1) << m_oi;
+                    for (int64_t zi = 0; zi < n_z_oi; zi++) {
+                        if ((anf[zi >> 6] >> (zi & 63)) & 1) {
+                            int deg = __builtin_popcountll(zi);
+                            if (deg > max_deg) max_deg = deg;
+                        }
+                    }
+                }
                 std::cout << "  Saved poly: " << prefix << ".poly (m=" << s << ", " << k << " outputs)\n";
             }
         }
 
         // ---- _stats.txt: 5-line numeric ----
         {
-            // Compute max degree from merged g_tt_raw (Möbius transform)
-            std::vector<std::vector<uint64_t>> g_copy;
-            if (!result.g_tt_raw.empty()) {
-                g_copy = result.g_tt_raw;
-                int max_deg = 0;
-                int64_t n_words = int64_t(1) << (result.m < 6 ? 0 : result.m - 6);
-                for (int oi = 0; oi < k; oi++) {
-                    std::vector<uint64_t> anf(g_copy[oi]);
-                    if (result.m > 0) {
-                        // in-place Möbius would modify, use a copy per output
-                        moebius_packed(anf.data(), result.m);
-                    }
-                    for (int64_t w = 0; w < n_words; w++) {
-                        uint64_t word = anf[w];
-                        while (word) {
-                            int bit = __builtin_ctzll(word);
-                            word &= word - 1;
-                            int deg = __builtin_popcountll((w << 6) | bit);
-                            if (deg > max_deg) max_deg = deg;
-                        }
-                    }
-                }
-
-                std::ofstream f(prefix + "_stats.txt");
-                if (f) {
-                    f << n << "\n" << k << "\n" << result.sum_T << "\n"
-                      << result.union_T << "\n" << max_deg << "\n";
-                    std::cout << "  Saved: " << prefix << "_stats.txt (sum_T="
-                              << result.sum_T << ", union_T=" << result.union_T << ")\n";
-                }
+            // max_deg already computed above during poly writing
+            std::ofstream f(prefix + "_stats.txt");
+            if (f) {
+                f << n << "\n" << k << "\n" << result.sum_T << "\n"
+                  << result.union_T << "\n" << max_deg << "\n";
+                std::cout << "  Saved: " << prefix << "_stats.txt (sum_T="
+                          << result.sum_T << ", union_T=" << result.union_T << ")\n";
             }
         }
     }
