@@ -4,9 +4,8 @@
 #
 # Instance groups:
 #   n≤16, k_nl=1:  hd08                     → 4 opt strategies
-#   n≤16, k_nl>1:  hd07 hd03 hd04 ctrl dec
-#                  int2float cavlc           → 5 strategies (no d1a_opt2)
-#   n=32, k_nl>1:  hd10 hd01 hd02           → 6 strategies (incl. d1a_opt2)
+#   k_nl>1:        hd07 hd03 hd04 ctrl dec
+#                  int2float cavlc hd10 hd01 hd02 → 6 opt1/opt2 strategies
 #
 # Usage:
 #   ./run_all.sh              # quick test
@@ -31,15 +30,11 @@ if [ "$MODE" = "--full" ]; then
 elif [ "$MODE" = "--list" ]; then
     echo "=== Instance × Strategy Matrix ==="
     echo ""
-    echo "n≤16, k_nl=1 (4 opt):"
+    echo "k_nl=1 (4 opt):"
     echo "  hd08 → d1a_opt, d1b_opt, d2_opt, d3_opt"
     echo ""
-    echo "n≤16, k_nl>1 (5 opt1/opt2, no d1a_opt2):"
-    echo "  hd07 hd03 hd04 ctrl dec int2float cavlc"
-    echo "  → d1a_opt1, d1b_opt2, d2_opt2, d3_opt1, d3_opt2"
-    echo ""
-    echo "n=32, k_nl>1 (6 including d1a_opt2):"
-    echo "  hd10 hd01 hd02"
+    echo "k_nl>1 (6 opt1/opt2):"
+    echo "  hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02"
     echo "  → d1a_opt1, d1a_opt2, d1b_opt2, d2_opt2, d3_opt1, d3_opt2"
     exit 0
 else
@@ -148,18 +143,12 @@ echo ""
 # ---- Run strategies ----
 echo "--- Running strategies ---"
 
-# Group 1: n≤16, k_nl=1 — opt only
+# Group 1: k_nl=1 — 4 opt strategies
 run_group "hd08" "$EXAMPLES_DIR/hd08.txt" "" \
     d1a_opt d1b_opt d2_opt d3_opt
 
-# Group 2: n≤16, k_nl>1 — 5 strategies (no d1a_opt2, it crashes on n≤20)
-for inst in hd07 hd03 hd04 ctrl dec int2float cavlc; do
-    run_group "$inst" "$EXAMPLES_DIR/${inst}.txt" "" \
-        d1a_opt1 d1b_opt2 d2_opt2 d3_opt1 d3_opt2
-done
-
-# Group 3: n=32, k_nl>1 — all 6 strategies
-for inst in hd10 hd01 hd02; do
+# Group 2: k_nl>1 — 6 opt1/opt2 strategies
+for inst in hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02; do
     run_group "$inst" "$EXAMPLES_DIR/${inst}.txt" "" \
         d1a_opt1 d1a_opt2 d1b_opt2 d2_opt2 d3_opt1 d3_opt2
 done

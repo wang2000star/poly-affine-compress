@@ -499,7 +499,7 @@ static Candidate search_single_output_large(
     // 500-pt verify for screening.
     // ============================================================
     {
-        int max_m2 = std::min(7, std::min(max_m, n));
+        int max_m2 = std::min(7, std::min(max_m, K));
         for (int m_val = 2; m_val <= max_m2; m_val++) {
             std::vector<int> comb(m_val);
             for (int i = 0; i < m_val; i++) comb[i] = i;
@@ -932,6 +932,7 @@ int main(int argc, char** argv) {
 
     int n_threads = std::thread::hardware_concurrency();
     if (n_threads < 1) n_threads = 1;
+    if (n_threads > 32) n_threads = 32;
 
     std::cout << "  Max-m: " << max_m << ", Random: " << n_random
               << ", Hill-climb: " << n_hill_climb << "\n";
