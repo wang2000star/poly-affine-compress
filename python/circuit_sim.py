@@ -69,7 +69,7 @@ if __name__ == '__main__':
     nz_out = [f'om_{i}' for i in range(16)]
 
     # Key hypothesis: hd09 is a priority encoder over i0..i15
-    # with n97 = NOR(i0..i15) controlling the upper-bit path
+    # with n97 = AND of all complemented i0..i15 controlling the upper-bit path
     tests = []
     # All zero
     tests.append('0' * 32)

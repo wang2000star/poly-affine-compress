@@ -163,7 +163,7 @@ def run_instance(inst_name, out_dir, timeout=300):
 
 def sym_hd09(inputs, outputs, out_dir):
     n_in = len(inputs)
-    print(f"  优先级编码器, NOR(i0..i15) 非线性, 无法 Mx⊕b 表示")
+    print(f"  优先级编码器, 32输入深度AND/NOT级联, 无法 Mx⊕b 表示")
     for suf in ['opt1', 'opt2']:
         with open(f"{out_dir}/hd09_{suf}_trans.poly", 'w') as f:
             f.write("")

@@ -67,6 +67,7 @@ all: CMakeFiles/optimize_anf_opt1.dir/all
 all: CMakeFiles/optimize_anf_opt2.dir/all
 all: CMakeFiles/compute_raw_anf.dir/all
 all: CMakeFiles/optimize_anf_large.dir/all
+all: CMakeFiles/optimize_anf_sparse_g.dir/all
 all: CMakeFiles/verify_anf.dir/all
 .PHONY : all
 
@@ -75,6 +76,7 @@ codegen: CMakeFiles/optimize_anf_opt1.dir/codegen
 codegen: CMakeFiles/optimize_anf_opt2.dir/codegen
 codegen: CMakeFiles/compute_raw_anf.dir/codegen
 codegen: CMakeFiles/optimize_anf_large.dir/codegen
+codegen: CMakeFiles/optimize_anf_sparse_g.dir/codegen
 codegen: CMakeFiles/verify_anf.dir/codegen
 .PHONY : codegen
 
@@ -87,6 +89,7 @@ clean: CMakeFiles/optimize_anf_opt1.dir/clean
 clean: CMakeFiles/optimize_anf_opt2.dir/clean
 clean: CMakeFiles/compute_raw_anf.dir/clean
 clean: CMakeFiles/optimize_anf_large.dir/clean
+clean: CMakeFiles/optimize_anf_sparse_g.dir/clean
 clean: CMakeFiles/verify_anf.dir/clean
 .PHONY : clean
 
@@ -219,13 +222,45 @@ CMakeFiles/optimize_anf_large.dir/clean:
 .PHONY : CMakeFiles/optimize_anf_large.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/optimize_anf_sparse_g.dir
+
+# All Build rule for target.
+CMakeFiles/optimize_anf_sparse_g.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=39,40,41,42,43,44,45,46,47,48,49,50 "Built target optimize_anf_sparse_g"
+.PHONY : CMakeFiles/optimize_anf_sparse_g.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/optimize_anf_sparse_g.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 12
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_sparse_g.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/optimize_anf_sparse_g.dir/rule
+
+# Convenience name for target.
+optimize_anf_sparse_g: CMakeFiles/optimize_anf_sparse_g.dir/rule
+.PHONY : optimize_anf_sparse_g
+
+# codegen rule for target.
+CMakeFiles/optimize_anf_sparse_g.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=39,40,41,42,43,44,45,46,47,48,49,50 "Finished codegen for target optimize_anf_sparse_g"
+.PHONY : CMakeFiles/optimize_anf_sparse_g.dir/codegen
+
+# clean rule for target.
+CMakeFiles/optimize_anf_sparse_g.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/clean
+.PHONY : CMakeFiles/optimize_anf_sparse_g.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/verify_anf.dir
 
 # All Build rule for target.
 CMakeFiles/verify_anf.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=39,40,41 "Built target verify_anf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=51,52,53 "Built target verify_anf"
 .PHONY : CMakeFiles/verify_anf.dir/all
 
 # Build rule for subdir invocation for target.
@@ -242,7 +277,7 @@ verify_anf: CMakeFiles/verify_anf.dir/rule
 # codegen rule for target.
 CMakeFiles/verify_anf.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=39,40,41 "Finished codegen for target verify_anf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=51,52,53 "Finished codegen for target verify_anf"
 .PHONY : CMakeFiles/verify_anf.dir/codegen
 
 # clean rule for target.
