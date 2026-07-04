@@ -31,8 +31,8 @@ examples/router.txt      ? 输入    ? 输出
 
 ```
 results/{inst}/
-  {inst}_original_anf.poly       ← 原始电路 ANF（仅 degree ≥ 2 项）
-  {inst}_original_T.txt          ← 原始 T 值（每输出 T + sum_T）
+  {inst}_raw_anf.poly            ← 原始电路 ANF（仅 degree ≥ 2 项）
+  {inst}_raw_T.txt               ← 原始 T 值（每输出 T + sum_T）
 ```
 
 ### d1a_opt2 — 方向1 变体1a + 各自变换（optimize_anf.cpp）
