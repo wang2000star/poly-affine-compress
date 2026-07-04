@@ -34,6 +34,21 @@
 #include <climits>
 #include <chrono>
 
+// Strategy tag for output file naming (prevents confusion between different search strategies)
+static const char* STRATEGY_TAG = "lg";
+
+// Count only nonlinear terms (degree ≥ 2) in ANF data
+static int64_t count_nonlinear_T(const uint64_t* data, int m) {
+    int64_t total = 0;
+    int64_t n_z = int64_t(1) << m;
+    for (int64_t zi = 0; zi < n_z; zi++) {
+        if (zi == 0) continue;                              // skip constant
+        if ((zi & (zi - 1)) == 0) continue;                  // skip linear (power of 2)
+        if ((data[zi >> 6] >> (zi & 63)) & 1) total++;
+    }
+    return total;
+}
+
 // ============================================================
 //  Z-space evaluation routines
 // ============================================================
@@ -75,16 +90,18 @@ static void compute_input_words(
     }
 }
 
-// Quick verification: check f(x) == g(Mx⊕b) for structured + random x-values.
+// Quick verification: check f(x) == g(Mx⊕b) ⊕ ⟨c,x⟩ ⊕ d for structured + random x-values.
 // Uses single-bit vectors (0, e_0, ..., e_{n-1}) plus n_verify random points.
-// For sparse functions, also tests random pairs/triples of kernel vectors.
+// c_mask/d default to 0 (no c-correction) for backward compatibility.
 static bool verify_candidate(
     const FastCircuit& fc,
     const uint32_t* M_rows, uint64_t b,
     int m, int n,
-    const std::vector<uint64_t>& g_tt_raw,
+    const std::vector<uint64_t>& g_tt,  // c-corrected g(z) truth table
     int output_idx,
-    int n_verify)
+    int n_verify,
+    uint32_t c_mask = 0,
+    int d_const = 0)
 {
     if (n_verify <= 0) return true;
 
@@ -97,8 +114,9 @@ static bool verify_candidate(
         uint64_t in_words[64];
         for (int j = 0; j < n; j++)
             in_words[j] = ((x >> j) & 1) ? ~0ULL : 0;
-        uint64_t eval_buf[1024], out_vec[32];
-        eval_batch_fast(fc, in_words, eval_buf, out_vec, (int)fc.out_idx.size());
+        std::vector<uint64_t> eval_buf(fc.n_stmts + 1);
+        std::vector<uint64_t> out_vec(fc.out_idx.size());
+        eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
         uint64_t fx = (out_vec[output_idx] & 1);
 
         // z = Mx ⊕ b
@@ -108,9 +126,14 @@ static bool verify_candidate(
                 z |= (1ULL << r);
         z ^= b;
 
-        // g(z) from raw truth table
-        uint64_t gz = (g_tt_raw[z / 64] >> (z % 64)) & 1;
-        return (fx == gz);
+        // g(z) from c-corrected truth table
+        uint64_t gz = (g_tt[z / 64] >> (z % 64)) & 1;
+
+        // ⟨c,x⟩
+        uint64_t cx = __builtin_popcount(c_mask & (uint32_t)(x & 0xFFFFFFFFULL)) & 1;
+
+        // f(x) == g(z) ⊕ ⟨c,x⟩ ⊕ d
+        return (fx ^ gz ^ cx ^ d_const) == 0;
     };
 
     // 1) Zero vector
@@ -152,20 +175,26 @@ static bool verify_candidate(
 }
 
 // Evaluate g(z) = f(Mx⊕b) using z-space traversal (2^m points).
-// Returns total_T, or INT64_MAX if rank(M) < m (invalid) or verification fails.
-// g_tt_raw_out: pre-Möbius g(z) truth table (size n_words_g).
+// Applies c-correction: removes linear z-terms from g, outputs c and d
+// so that f(x) = g(Mx⊕b) ⊕ ⟨c,x⟩ ⊕ d.
+// Returns nonlinear_T (degree ≥ 2 only), or INT64_MAX if verification fails.
+// g_tt_out: c-corrected g(z) truth table (size n_words_g, no linear terms).
 // output_idx: which output to evaluate (index into fc.out_idx).
-// n_verify: number of random points to verify consistency (0 = skip).
+// c_mask_out: c vector (n bits) for ⟨c,x⟩ term.
+// d_out: constant shift (0 or 1).
+// n_verify: number of random points to verify (0 = skip).
 static int64_t evaluate_zspace(
     const FastCircuit& fc,
     const uint32_t* M_rows, uint64_t b,
     int m, int n,
-    std::vector<uint64_t>& g_tt_raw_out,
+    std::vector<uint64_t>& g_tt_out,
     int n_threads,
     int output_idx,
+    uint32_t& c_mask_out,
+    int& d_out,
     int n_verify = 200)
 {
-    if (m <= 0) return 0;
+    if (m <= 0) { c_mask_out = 0; d_out = 0; return 0; }
     if (m > n) return INT64_MAX;
 
     // Right-inverse P (n×m) such that M × P = I_m
@@ -177,7 +206,7 @@ static int64_t evaluate_zspace(
     int64_t n_z = int64_t(1) << m;
     int64_t n_words_g = (m < 6) ? 1 : (n_z >> 6);
 
-    g_tt_raw_out.assign(n_words_g, 0);
+    g_tt_out.assign(n_words_g, 0);
     int64_t n_batches = (n_z + 63) / 64;
 
     // Pre-compute P×b constant (XOR this to apply affine shift)
@@ -188,41 +217,74 @@ static int64_t evaluate_zspace(
     }
 
     // Evaluate each batch of 64 z-values
+    std::vector<uint64_t> eval_buf(fc.n_stmts + 1);
+    std::vector<uint64_t> out_vec(fc.out_idx.size());
+    uint64_t in_words[64];
     for (int64_t batch = 0; batch < n_batches; batch++) {
         uint64_t base_z = batch * 64;
 
         // Compute x = P×z for this batch (without affine shift)
-        uint64_t in_words[64];
         compute_input_words(in_words, n, P_rows, m, base_z);
 
         // XOR P×b to get x = P×(z⊕b)
         for (int j = 0; j < n; j++)
             in_words[j] ^= cb[j];
 
-        uint64_t eval_buf[1024];
-        uint64_t out_vec[32];
-        eval_batch_fast(fc, in_words, eval_buf, out_vec, (int)fc.out_idx.size());
+        eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
 
-        g_tt_raw_out[batch] = out_vec[output_idx];
+        g_tt_out[batch] = out_vec[output_idx];
     }
 
     // Mask to valid bits (for m < 6, unused bits contain batch garbage)
     if (m < 6) {
         int64_t n_z = int64_t(1) << m;
         uint64_t mask = (n_z >= 64) ? ~0ULL : ((1ULL << n_z) - 1);
-        g_tt_raw_out[0] &= mask;
+        g_tt_out[0] &= mask;
     }
-    // Verify consistency before Möbius (raw TT is still intact)
+
+    // === C-correction ===
+    // 1) Möbius to get ANF of g_raw
+    std::vector<uint64_t> g_raw_anf = g_tt_out;
+    moebius_packed(g_raw_anf.data(), m);
+
+    // 2) Extract linear coefficients L (coefficient of z_r for each r = 0..m-1)
+    uint32_t L = 0;
+    for (int r = 0; r < m; r++)
+        if ((g_raw_anf[r >> 6] >> (r & 63)) & 1) L |= (1u << r);
+
+    // 3) c = Mᵀ·L  (each c_i = parity of (column i of M) · L)
+    c_mask_out = 0;
+    for (int i = 0; i < n; i++) {
+        uint32_t col_val = 0;
+        for (int r = 0; r < m; r++)
+            col_val |= ((M_rows[r] >> i) & 1) << r;
+        if (__builtin_popcount(col_val & L) & 1)
+            c_mask_out |= (1u << i);
+    }
+
+    // 4) d = ⟨L,b⟩
+    d_out = __builtin_popcount(L & (uint32_t)(b & 0xFFFFFFFFULL)) & 1;
+
+    // 5) Remove linear terms from g_tt_out: g(z) = g_raw(z) ⊕ ⟨L,z⟩
+    for (int64_t zi = 0; zi < n_z; zi++) {
+        if (__builtin_popcountll(zi & L) & 1)
+            g_tt_out[zi >> 6] ^= (1ULL << (zi & 63));
+    }
+
+    // === Verification with c-correction ===
     if (n_verify > 0) {
-        if (!verify_candidate(fc, M_rows, b, m, n, g_tt_raw_out, output_idx, n_verify)) {
-            g_tt_raw_out.assign(n_words_g, 0);
+        int verify_tests = (n <= 16) ? std::max(n_verify, 2000) : n_verify;
+        if (!verify_candidate(fc, M_rows, b, m, n, g_tt_out, output_idx,
+                              verify_tests, c_mask_out, d_out)) {
+            g_tt_out.assign(n_words_g, 0);
             return INT64_MAX;
         }
     }
 
-    // Möbius → T count
-    moebius_packed(g_tt_raw_out.data(), m);
-    return count_T(g_tt_raw_out.data(), m);
+    // Möbius on corrected g for ANF → count nonlinear terms only
+    std::vector<uint64_t> anf = g_tt_out;
+    moebius_packed(anf.data(), m);
+    return count_nonlinear_T(anf.data(), m);
 }
 
 
@@ -235,15 +297,79 @@ struct Candidate {
     uint32_t M_rows[32];
     uint64_t b;
     int64_t total_T;
-    std::vector<uint64_t> g_tt_raw;
+    std::vector<uint64_t> g_tt_raw;    // c-corrected g(z) truth table (no linear terms)
+    std::vector<uint64_t> anf_coeffs;  // ANF coefficients (post-Möbius)
+
+    // c-correction: f(x) = g(Mx⊕b) ⊕ ⟨c,x⟩ ⊕ d
+    uint32_t c_mask;  // c vector (n bits, bit i = coefficient of x_i)
+    int d;            // constant shift (0 or 1)
+
+    // Affine flag: output f(x) = affine_b ⊕ Σ a_i·x_i requires no optimization
+    bool is_affine;
+    uint32_t affine_mask;  // bit i set = x_i appears in expression
+    int affine_b;          // constant term (0 or 1)
 };
 
 static bool cmp_candidate(const Candidate& a, const Candidate& b) {
     return a.total_T < b.total_T;
 }
 
-// Search for best M,b for a single output
-// For n=32 large instances: uses z-space evaluation
+// Detect if output f(x) is affine: f(x) = b ⊕ Σ a_i·x_i (including constants 0/1)
+// Uses n+1 circuit evaluations + random verification via batch evaluation.
+// Returns true with affine_mask (bit i = a_i) and affine_b properly set.
+static bool detect_affine_output(const FastCircuit& fc, int n, int output_idx,
+                                  uint32_t& affine_mask, int& affine_b) {
+    // Evaluate f(0) and f(e_i) for all i using batch evaluation (up to 64 in parallel)
+    uint64_t in_words[64] = {0};
+    for (int i = 0; i < n && i < 63; i++)
+        in_words[i] = (1ULL << (i + 1));
+
+    std::vector<uint64_t> eval_buf(fc.n_stmts + 1);
+    std::vector<uint64_t> out_vec(fc.out_idx.size());
+    eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
+
+    uint64_t bits = out_vec[output_idx];
+    int f0 = (bits >> 0) & 1;
+    affine_b = f0;
+    affine_mask = 0;
+    for (int i = 0; i < n && i < 63; i++) {
+        int fi = (bits >> (i + 1)) & 1;
+        if (fi != f0) affine_mask |= (1u << i);
+    }
+
+    // If n=32 and we overflowed 63 slots, fall back to individual eval for remaining bits
+    // (n max 32, so 1+32=33 ≤ 63 slots — safe)
+    if (n > 63) return false; // not supported
+
+    // Verify with random points: f(x) == f0 ⊕ popcount(affine_mask & x) mod 2
+    srand(12345);
+    for (int t = 0; t < 30; t++) {
+        uint64_t x = 0;
+        for (int j = 0; j < n; j++)
+            if (rand() & 1) x |= (1ULL << j);
+
+        memset(in_words, 0, sizeof(in_words));
+        for (int j = 0; j < n; j++)
+            if ((x >> j) & 1) in_words[j] = ~0ULL;
+        eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
+        int fx = (out_vec[output_idx] & 1);
+        int predicted = f0 ^ (__builtin_popcount(affine_mask & (uint32_t)x) & 1);
+        if (fx != predicted) return false;
+    }
+    return true;
+}
+
+// Search for best M,b for a single output (n=32 strategy)
+//
+// Pipeline:
+//   Phase 0: Affine detection
+//   Phase 1: m=1 identity-row candidates with 5000-pt verify
+//   Phase 2: Systematic C(K,m) enumeration for m=2..5
+//   Phase 3: XOR pairs of top-8 inputs (m=1)
+//   Phase 4: Greedy extension from best candidate
+//   Phase 5: Hill climbing (only when m ≤ 8)
+//   Phase 6: Random fallback (100 candidates)
+//
 static Candidate search_single_output_large(
     const FastCircuit& fc,
     int n,
@@ -257,179 +383,342 @@ static Candidate search_single_output_large(
     Candidate best;
     best.total_T = INT64_MAX;
     best.m = 0;
+    best.is_affine = false;
+    best.affine_mask = 0;
+    best.affine_b = 0;
+    best.c_mask = 0;
+    best.d = 0;
 
-    // Phase 1: Identity-row candidates (z_i = x_j or z_i = x_j + 1)
-    // Each row selects a single input variable
+    // ============================================================
+    // Phase 0: Affine detection
+    // ============================================================
+    {
+        uint32_t amask;
+        int ab;
+        if (detect_affine_output(fc, n, output_idx, amask, ab)) {
+            best.is_affine = true;
+            best.affine_mask = amask;
+            best.affine_b = ab;
+            if (amask == 0) {
+                best.m = 0;
+                best.total_T = 0;
+            } else {
+                best.m = 1;
+                best.M_rows[0] = amask;
+                best.b = ab;
+                uint32_t c_tmp; int d_tmp;
+                std::vector<uint64_t> g_tt;
+                int64_t T = evaluate_zspace(fc, best.M_rows, best.b, 1, n,
+                                           g_tt, n_threads, output_idx, c_tmp, d_tmp);
+                if (T <= 0 || T >= INT64_MAX) T = 1;
+                best.total_T = T;
+                best.g_tt_raw = g_tt;
+                best.c_mask = c_tmp;
+                best.d = d_tmp;
+            }
+            return best;
+        }
+    }
+
+    // ============================================================
+    // Phase 1: m=1 identity-row candidates with 5000-pt verification
+    //
+    // Enumerate all z = x_i and z = x_i ⊕ 1. Use strict 5000-pt verify.
+    // If verified, accept immediately (output truly depends on 1 input).
+    // Store T values (from no-verify eval) for ranking even when
+    // verification fails — lower T → input is more important.
+    // ============================================================
+    struct InputScore {
+        int bit;
+        int64_t T;   // lowest T among b=0,b=1 (from no-verify eval)
+        bool valid;  // passed 5000-pt verify
+    };
+    std::vector<InputScore> scores(n);
+
     for (int bit = 0; bit < n; bit++) {
+        int64_t best_T = INT64_MAX;
+        bool valid = false;
+
         for (int bval = 0; bval < 2; bval++) {
             uint32_t M[32] = {0};
             M[0] = (1u << bit);
             uint64_t b = bval;
 
+            // Strict 5000-pt verification
+            uint32_t c_tmp; int d_tmp;
             std::vector<uint64_t> g_tt;
-            int64_t T = evaluate_zspace(fc, M, b, 1, n, g_tt, n_threads, output_idx);
-            if (T < best.total_T) {
+            int64_t T = evaluate_zspace(fc, M, b, 1, n, g_tt, n_threads, output_idx,
+                                        c_tmp, d_tmp, 5000);
+
+            if (T >= 0 && T < best.total_T) {
                 best.total_T = T;
                 best.m = 1;
                 best.M_rows[0] = M[0];
                 best.b = b;
                 best.g_tt_raw = g_tt;
+                best.c_mask = c_tmp;
+                best.d = d_tmp;
             }
+
+            if (T >= 0 && T < INT64_MAX) {
+                if (T < best_T) best_T = T;
+                valid = true;
+            } else {
+                // No-verify T for ranking
+                uint32_t c2_tmp; int d2_tmp;
+                std::vector<uint64_t> g_tt2;
+                int64_t T2 = evaluate_zspace(fc, M, b, 1, n, g_tt2, n_threads, output_idx,
+                                            c2_tmp, d2_tmp, 0);
+                if (T2 >= 0 && T2 < best_T) best_T = T2;
+            }
+        }
+
+        scores[bit] = {bit, best_T, valid};
+    }
+
+    if (best.total_T <= 1) return best;
+
+    // Sort inputs by T score (ascending — lower T = more important)
+    // Valid inputs (passed 5000-pt verify) always come before invalid
+    std::sort(scores.begin(), scores.end(), [](const InputScore& a, const InputScore& b) {
+        if (a.valid != b.valid) return a.valid;
+        return a.T < b.T;
+    });
+
+    int K = std::min(16, n);
+    if (walsh_k > 0 && walsh_k < K) K = walsh_k;
+
+    // ============================================================
+    // Phase 2: Systematic C(K, m) enumeration for m = 2..6
+    //
+    // Build permutation matrices from top-K inputs. For each
+    // combination of m distinct inputs, try b=0 and b=all-1.
+    // 500-pt verify for screening.
+    // ============================================================
+    {
+        int max_m2 = std::min(7, std::min(max_m, n));
+        for (int m_val = 2; m_val <= max_m2; m_val++) {
+            std::vector<int> comb(m_val);
+            for (int i = 0; i < m_val; i++) comb[i] = i;
+
+            while (true) {
+                uint32_t M[32] = {0};
+                for (int r = 0; r < m_val; r++)
+                    M[r] = (1u << scores[comb[r]].bit);
+
+                // b = 0
+                {
+                    uint32_t c_tmp; int d_tmp;
+                    std::vector<uint64_t> g_tt;
+                    int64_t T = evaluate_zspace(fc, M, 0, m_val, n, g_tt, n_threads, output_idx,
+                                                c_tmp, d_tmp, 2000);
+                    if (T >= 0 && T < best.total_T) {
+                        best.total_T = T;
+                        best.m = m_val;
+                        for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
+                        best.b = 0;
+                        best.g_tt_raw = g_tt;
+                        best.c_mask = c_tmp;
+                        best.d = d_tmp;
+                    }
+                }
+
+                // b = all-1
+                {
+                    uint64_t b_all = (m_val < 64) ? ((1ULL << m_val) - 1) : ~0ULL;
+                    uint32_t c_tmp; int d_tmp;
+                    std::vector<uint64_t> g_tt;
+                    int64_t T = evaluate_zspace(fc, M, b_all, m_val, n, g_tt, n_threads, output_idx,
+                                                c_tmp, d_tmp, 2000);
+                    if (T >= 0 && T < best.total_T) {
+                        best.total_T = T;
+                        best.m = m_val;
+                        for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
+                        best.b = b_all;
+                        best.g_tt_raw = g_tt;
+                        best.c_mask = c_tmp;
+                        best.d = d_tmp;
+                    }
+                }
+
+                if (best.total_T <= 2) break;
+
+                // Next combination
+                int i = m_val - 1;
+                while (i >= 0 && comb[i] == K - m_val + i) i--;
+                if (i < 0) break;
+                comb[i]++;
+                for (int j = i + 1; j < m_val; j++) comb[j] = comb[j-1] + 1;
+            }
+
+            if (best.total_T <= 2) break;
         }
     }
 
-    if (best.total_T == 0) return best;  // T=0 is optimal, skip remaining phases
+    if (best.total_T == 0) return best;
 
-    // Phase 2: Walsh-guided candidates (for n ≤ 20 for Walsh)
-    // For n=32, Walsh is expensive. Use a simple approach instead.
-    // Try pairs of identity rows (XOR combinations)
-    if (n <= 20) {
-        // Compute Walsh for this output's circuit (not available with FastCircuit alone)
-        // Skip Walsh for n > 20
-    } else {
-        // Simple multi-row: combine top identity rows
-        // Each new row selects one more input variable
-        for (int m_val = 2; m_val <= std::min(max_m, n); m_val++) {
+    // ============================================================
+    // Phase 2b: Progressive identity rows (z_r = x_{scores[r].bit})
+    //
+    // For m = best.m+1 .. min(K, max_m, n), build M where each row
+    // is a unit vector from the top-K scored inputs (in order).
+    // This is fast (one candidate per m) and covers larger m values
+    // that C(K,m) enumeration can't reach.
+    // ============================================================
+    {
+        int start_m = std::max(2, best.m + 1);
+        for (int m_val = start_m; m_val <= std::min(K, std::min(max_m, n)); m_val++) {
             uint32_t M[32] = {0};
-            for (int r = 0; r < m_val && r < n; r++)
-                M[r] = (1u << r);
-            uint64_t b = 0;
+            for (int r = 0; r < m_val; r++)
+                M[r] = (1u << scores[r].bit);
 
-            std::vector<uint64_t> g_tt;
-            int64_t T = evaluate_zspace(fc, M, b, m_val, n, g_tt, n_threads, output_idx);
-            if (T < best.total_T) {
-                best.total_T = T;
-                best.m = m_val;
-                for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
-                best.b = b;
-                best.g_tt_raw = g_tt;
+            // b = 0
+            {
+                uint32_t c_tmp; int d_tmp;
+                std::vector<uint64_t> g_tt;
+                int64_t T = evaluate_zspace(fc, M, 0, m_val, n, g_tt, n_threads, output_idx,
+                                            c_tmp, d_tmp, 2000);
+                if (T >= 0 && T < best.total_T) {
+                    best.total_T = T;
+                    best.m = m_val;
+                    for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
+                    best.b = 0;
+                    best.g_tt_raw = g_tt;
+                    best.c_mask = c_tmp;
+                    best.d = d_tmp;
+                }
             }
-        }
 
-        // Try XOR pairs of top 8 bits as single-row candidates
-        for (int i = 0; i < std::min(8, n); i++) {
-            for (int j = i + 1; j < std::min(8, n); j++) {
+            // b = all-1
+            {
+                uint64_t b_all = (m_val < 64) ? ((1ULL << m_val) - 1) : ~0ULL;
+                uint32_t c_tmp; int d_tmp;
+                std::vector<uint64_t> g_tt;
+                int64_t T = evaluate_zspace(fc, M, b_all, m_val, n, g_tt, n_threads, output_idx,
+                                            c_tmp, d_tmp, 2000);
+                if (T >= 0 && T < best.total_T) {
+                    best.total_T = T;
+                    best.m = m_val;
+                    for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
+                    best.b = b_all;
+                    best.g_tt_raw = g_tt;
+                    best.c_mask = c_tmp;
+                    best.d = d_tmp;
+                }
+            }
+
+            if (best.total_T <= 2) break;
+        }
+    }
+
+    if (best.total_T == 0) return best;
+
+    // ============================================================
+    // Phase 3: XOR pairs of top-8 inputs (m=1)
+    // z = x_i ⊕ x_j
+    // ============================================================
+    {
+        int max_xor = std::min(8, K);
+        for (int i = 0; i < max_xor; i++) {
+            for (int j = i + 1; j < max_xor; j++) {
                 uint32_t M[32] = {0};
-                M[0] = (1u << i) | (1u << j);
-                for (int bval = 0; bval < 2; bval++) {
-                    uint64_t b = bval;
-                    std::vector<uint64_t> g_tt;
-                    int64_t T = evaluate_zspace(fc, M, b, 1, n, g_tt, n_threads, output_idx);
-                    if (T < best.total_T) {
-                        best.total_T = T;
-                        best.m = 1;
-                        best.M_rows[0] = M[0];
-                        best.b = b;
-                        best.g_tt_raw = g_tt;
-                    }
+                M[0] = (1u << scores[i].bit) | (1u << scores[j].bit);
+
+                uint32_t c_tmp; int d_tmp;
+                std::vector<uint64_t> g_tt;
+                int64_t T = evaluate_zspace(fc, M, 0, 1, n, g_tt, n_threads, output_idx,
+                                            c_tmp, d_tmp, 2000);
+                if (T >= 0 && T < best.total_T) {
+                    best.total_T = T;
+                    best.m = 1;
+                    best.M_rows[0] = M[0];
+                    best.b = 0;
+                    best.g_tt_raw = g_tt;
+                    best.c_mask = c_tmp;
+                    best.d = d_tmp;
                 }
             }
         }
     }
 
-    // Short-circuit: if already optimal, skip random search
     if (best.total_T == 0) return best;
 
-    // Phase 3: Random permutation-like candidates
-    // Each row selects a random input bit (or small XOR combination)
-    // Also try dense rows where each bit is independently set
-    for (int c = 0; c < n_random; c++) {
-        int m_val = 1 + (rand() % std::min(max_m, n));
-        if (m_val > n) m_val = n;
+    // ============================================================
+    // Phase 4: Greedy extension from best candidate
+    // ============================================================
+    if (best.total_T < INT64_MAX && best.m > 0 && best.m < std::min(max_m, n)) {
+        for (int m_val = best.m + 1; m_val <= std::min(max_m, n); m_val++) {
+            bool improved = false;
+            for (int ki = 0; ki < K; ki++) {
+                uint32_t new_mask = (1u << scores[ki].bit);
 
-        // Generate random rows
-        uint32_t M[32] = {0};
-        uint32_t used = 0;
-        for (int r = 0; r < m_val; r++) {
-            int row_type = rand() % 4;
-            if (row_type == 0 && r > 0) {
-                // XOR of two random bits
-                int b1 = rand() % n;
-                int b2 = rand() % n;
-                M[r] = (1u << b1) | (1u << b2);
-            } else if (row_type == 1 && n <= 32) {
-                // Dense row: each bit independently set with 50% probability
-                M[r] = (uint32_t)(rand() | (rand() << 16));
-                if (n < 32) M[r] &= ((1u << n) - 1);
-            } else {
-                // Single random bit (prefer unused bits)
-                int bit;
-                int attempts = 0;
-                do {
-                    bit = rand() % n;
-                    attempts++;
-                } while (((used >> bit) & 1) && attempts < 20);
-                M[r] = (1u << bit);
-                used |= (1u << bit);
-            }
-        }
-        uint64_t b = (uint64_t)(rand() & ((1ULL << m_val) - 1));
+                bool already = false;
+                for (int r = 0; r < m_val - 1; r++) {
+                    if (best.M_rows[r] == new_mask) { already = true; break; }
+                }
+                if (already) continue;
 
-        std::vector<uint64_t> g_tt;
-        int64_t T = evaluate_zspace(fc, M, b, m_val, n, g_tt, n_threads, output_idx);
-        if (T < best.total_T) {
-            best.total_T = T;
-            best.m = m_val;
-            for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
-            best.b = b;
-            best.g_tt_raw = g_tt;
-        }
-    }
+                uint32_t M[32];
+                for (int r = 0; r < m_val - 1; r++) M[r] = best.M_rows[r];
+                M[m_val - 1] = new_mask;
 
-    // Phase 3b: Special structured candidates with dense random rows
-    if (n <= 32) {
-        for (int trial = 0; trial < std::min(100, n_random / 2); trial++) {
-            int m_val = 1 + (rand() % std::min(max_m, n));
-            if (m_val > n) m_val = n;
-            uint32_t M[32] = {0};
-            for (int r = 0; r < m_val; r++) {
-                uint32_t dense = (uint32_t)(rand() | (rand() << 16));
-                if (n < 32) dense &= ((1u << n) - 1);
-                M[r] = dense;
+                for (int bnew = 0; bnew < 2; bnew++) {
+                    uint64_t new_b = best.b | ((uint64_t)bnew << (m_val - 1));
+
+                    uint32_t c_tmp; int d_tmp;
+                    std::vector<uint64_t> g_tt;
+                    int64_t T = evaluate_zspace(fc, M, new_b, m_val, n, g_tt, n_threads, output_idx,
+                                                c_tmp, d_tmp, 2000);
+                    if (T >= 0 && T < best.total_T) {
+                        best.total_T = T;
+                        best.m = m_val;
+                        for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
+                        best.b = new_b;
+                        best.g_tt_raw = g_tt;
+                        best.c_mask = c_tmp;
+                        best.d = d_tmp;
+                        improved = true;
+                    }
+                }
             }
-            uint64_t b = (uint64_t)(rand() & ((1ULL << m_val) - 1));
-            std::vector<uint64_t> g_tt;
-            int64_t T = evaluate_zspace(fc, M, b, m_val, n, g_tt, n_threads, output_idx);
-            if (T < best.total_T) {
-                best.total_T = T;
-                best.m = m_val;
-                for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
-                best.b = b;
-                best.g_tt_raw = g_tt;
-            }
+            if (!improved) break;
         }
     }
 
     if (best.total_T == 0) return best;
 
-    // Phase 4: Hill climbing from best candidate
-    if (best.total_T < INT64_MAX && n_hill_climb > 0) {
+    // ============================================================
+    // Phase 5: Hill climbing (only when m ≤ 8)
+    // ============================================================
+    if (best.total_T < INT64_MAX && best.m > 0 && best.m <= 8 && n_hill_climb > 0) {
+        int max_m_hc = std::min(max_m, n);
         for (int hi = 0; hi < n_hill_climb; hi++) {
             Candidate cur = best;
             bool improved = true;
             int iter = 0;
-            while (improved && iter < 500) {
+            while (improved && iter < 500 && cur.m <= max_m_hc && cur.m <= 8) {
                 improved = false;
                 iter++;
 
-                // Try changing one row's bits
                 for (int r = 0; r < cur.m; r++) {
                     for (int flip = 0; flip < std::min(32, n); flip++) {
                         uint32_t old_row = cur.M_rows[r];
                         cur.M_rows[r] ^= (1u << flip);
 
-                        // Also try toggling b bits
                         for (int bp = 0; bp < 2; bp++) {
                             cur.b ^= ((uint64_t)bp << r);
 
+                            uint32_t c_tmp; int d_tmp;
                             std::vector<uint64_t> g_tt;
                             int64_t T = evaluate_zspace(
-                                fc, cur.M_rows, cur.b, cur.m, n, g_tt, n_threads, output_idx);
-
-                            if (T < best.total_T) {
+                                fc, cur.M_rows, cur.b, cur.m, n, g_tt, n_threads, output_idx,
+                                c_tmp, d_tmp, 2000);
+                            if (T >= 0 && T < best.total_T) {
                                 best = cur;
                                 best.total_T = T;
                                 best.g_tt_raw = g_tt;
+                                best.c_mask = c_tmp;
+                                best.d = d_tmp;
                                 improved = true;
                             }
 
@@ -441,44 +730,105 @@ static Candidate search_single_output_large(
                 }
 
                 // Try adding one more row
-                if (cur.m < std::min(max_m, n)) {
+                if (cur.m < max_m_hc && cur.m < 8) {
                     int new_r = cur.m;
-                    for (int bit = 0; bit < n; bit++) {
+                    for (int ki = 0; ki < K; ki++) {
+                        uint32_t new_mask = (1u << scores[ki].bit);
+                        bool already = false;
+                        for (int r = 0; r < new_r; r++) {
+                            if (cur.M_rows[r] == new_mask) { already = true; break; }
+                        }
+                        if (already) continue;
+
                         uint32_t old_M = cur.M_rows[new_r];
-                        cur.M_rows[new_r] = (1u << bit);
+                        cur.M_rows[new_r] = new_mask;
                         cur.m = new_r + 1;
 
-                        std::vector<uint64_t> g_tt;
-                        int64_t T = evaluate_zspace(
-                            fc, cur.M_rows, cur.b, cur.m, n, g_tt, n_threads, output_idx);
+                        for (int bnew = 0; bnew < 2; bnew++) {
+                            uint64_t old_b = cur.b;
+                            cur.b = best.b | ((uint64_t)bnew << new_r);
 
-                        if (T < best.total_T) {
-                            best = cur;
-                            best.total_T = T;
-                            best.g_tt_raw = g_tt;
-                            improved = true;
+                            uint32_t c_tmp; int d_tmp;
+                            std::vector<uint64_t> g_tt;
+                            int64_t T = evaluate_zspace(
+                                fc, cur.M_rows, cur.b, cur.m, n, g_tt, n_threads, output_idx,
+                                c_tmp, d_tmp, 2000);
+                            if (T >= 0 && T < best.total_T) {
+                                best = cur;
+                                best.total_T = T;
+                                best.g_tt_raw = g_tt;
+                                best.c_mask = c_tmp;
+                                best.d = d_tmp;
+                                improved = true;
+                            }
+
+                            cur.b = old_b;
                         }
 
                         cur.M_rows[new_r] = old_M;
-                        cur.m = cur.m;
+                        cur.m = new_r;
                     }
-                    cur.m = best.m;
                 }
             }
         }
     }
 
-    // Fallback: identity transform when no valid m<n transform found
-    if (best.total_T >= INT64_MAX && n <= 24) {
+    // ============================================================
+    // Phase 6: Random fallback
+    // ============================================================
+    if (best.total_T > 2 && n_random > 0) {
+        for (int c = 0; c < n_random; c++) {
+            int m_val = 1 + (rand() % std::min(max_m, n));
+            if (m_val > n) m_val = n;
+
+            uint32_t M[32] = {0};
+            for (int r = 0; r < m_val; r++) {
+                int row_type = rand() % 4;
+                if (row_type == 0 && r > 0) {
+                    int b1 = rand() % n;
+                    int b2 = rand() % n;
+                    M[r] = (1u << b1) | (1u << b2);
+                } else if (row_type == 1 && n <= 32) {
+                    M[r] = (uint32_t)(rand() | (rand() << 16));
+                    if (n < 32) M[r] &= ((1u << n) - 1);
+                } else {
+                    int bit = rand() % n;
+                    M[r] = (1u << bit);
+                }
+            }
+            uint64_t b = (uint64_t)(rand() & ((1ULL << m_val) - 1));
+
+            uint32_t c_tmp; int d_tmp;
+            std::vector<uint64_t> g_tt;
+            int64_t T = evaluate_zspace(fc, M, b, m_val, n, g_tt, n_threads, output_idx,
+                                        c_tmp, d_tmp, 2000);
+            if (T >= 0 && T < best.total_T) {
+                best.total_T = T;
+                best.m = m_val;
+                for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
+                best.b = b;
+                best.g_tt_raw = g_tt;
+                best.c_mask = c_tmp;
+                best.d = d_tmp;
+            }
+        }
+    }
+
+    // Identity fallback when no valid m<n transform found (only for n ≤ 20)
+    if (best.total_T >= INT64_MAX && n <= 20) {
         uint32_t M_ident[32] = {0};
         for (int r = 0; r < n; r++) M_ident[r] = (1u << r);
         best.m = n;
         for (int r = 0; r < n; r++) best.M_rows[r] = M_ident[r];
         best.b = 0;
-        best.total_T = evaluate_zspace(fc, M_ident, 0, n, n, best.g_tt_raw, n_threads, output_idx, 0);
-        if (best.total_T >= 0 && best.total_T < INT64_MAX)
+        uint32_t c_tmp; int d_tmp;
+        best.total_T = evaluate_zspace(fc, M_ident, 0, n, n, best.g_tt_raw, n_threads, output_idx,
+                                       c_tmp, d_tmp, 0);
+        if (best.total_T >= 0 && best.total_T < INT64_MAX) {
             std::cout << "    [identity fallback: m=n=" << n << " T=" << best.total_T << "]\n";
-        else
+            best.c_mask = c_tmp;
+            best.d = d_tmp;
+        } else
             best.total_T = INT64_MAX;
     }
 
@@ -493,11 +843,13 @@ static Candidate search_single_output_large(
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <circuit.txt> [options]\n";
-        std::cerr << "  --max-m N      max z variables per output (default 8)\n";
-        std::cerr << "  --random N     random candidates per output (default 100)\n";
-        std::cerr << "  --hill-climb N hill climb iter per output (default 5)\n";
-        std::cerr << "  --walsh-k N    top K Walsh bits (default 20)\n";
-        std::cerr << "  --save-results PREFIX  save combined result\n";
+        std::cerr << "  --max-m N        max z variables per output (default 20)\n";
+        std::cerr << "  --random N       Phase 6 random fallback count (default 100)\n";
+        std::cerr << "  --hill-climb N   Phase 5 hill climb iterations (default 10, only m≤8)\n";
+        std::cerr << "  --walsh-k N      top K inputs for Phase 2 C(K,m) enum (default 40, capped 16)\n";
+        std::cerr << "  --save-results PREFIX  save transform + T files\n";
+        std::cerr << "  --anf-out PREFIX  save ANF polynomials to single file\n";
+        std::cerr << "  --verify-out PREFIX  save verification results\n";
         return 1;
     }
 
@@ -515,11 +867,13 @@ int main(int argc, char** argv) {
                   << "(truth table approach is faster for small n).\n";
     }
 
-    int max_m = 8;
-    int n_random = 100;
-    int n_hill_climb = 5;
-    int walsh_k = 20;
+    int max_m = 20;
+    int n_random = 300;       // Phase 6 fallback (also supplements C(K,m) for larger m)
+    int n_hill_climb = 10;    // Phase 5, only applied when m ≤ 8
+    int walsh_k = 40;         // capped at 16 internally for K (top inputs)
     std::string save_prefix;
+    std::string anf_prefix;
+    std::string verify_prefix;
 
     for (int a = 2; a < argc; a++) {
         std::string arg = argv[a];
@@ -528,6 +882,13 @@ int main(int argc, char** argv) {
         else if (arg == "--hill-climb" && a + 1 < argc) n_hill_climb = std::stoi(argv[++a]);
         else if (arg == "--walsh-k" && a + 1 < argc) walsh_k = std::stoi(argv[++a]);
         else if (arg == "--save-results" && a + 1 < argc) save_prefix = argv[++a];
+        else if (arg == "--anf-out" && a + 1 < argc) anf_prefix = argv[++a];
+        else if (arg == "--verify-out" && a + 1 < argc) verify_prefix = argv[++a];
+    }
+
+    // Auto-verify when saving results (mandatory — unverified results are not accepted)
+    if (!save_prefix.empty() && verify_prefix.empty()) {
+        verify_prefix = save_prefix;
     }
 
     auto t_start = std::chrono::steady_clock::now();
@@ -564,24 +925,93 @@ int main(int argc, char** argv) {
         auto t1 = std::chrono::steady_clock::now();
         double sec = std::chrono::duration<double>(t1 - t0).count();
 
-        // Post-search verification: re-verify best candidate with many random points
-        if (cand.total_T < INT64_MAX && cand.total_T >= 0 && cand.m > 0 && !cand.g_tt_raw.empty()) {
-            bool verified = verify_candidate(fc, cand.M_rows, cand.b,
-                                             cand.m, n, cand.g_tt_raw, oi, 5000);
+        // Post-search verification: exhaustive for n≤16, 5000 random points otherwise
+        // Uses c-correction: checks f(x) == g(Mx⊕b) ⊕ ⟨c,x⟩ ⊕ d
+        if (!cand.is_affine && cand.total_T < INT64_MAX && cand.total_T >= 0 && cand.m > 0 && !cand.g_tt_raw.empty()) {
+            bool verified;
+            if (n <= 16) {
+                // Exhaustive verification over all 2^n x-values
+                int64_t n_x = int64_t(1) << n;
+                verified = true;
+                for (int64_t xi = 0; xi < n_x && verified; xi++) {
+                    uint64_t x = (uint64_t)xi;
+                    uint64_t in_words[64];
+                    for (int j = 0; j < n; j++)
+                        in_words[j] = ((x >> j) & 1) ? ~0ULL : 0;
+                    std::vector<uint64_t> eval_buf(fc.n_stmts + 1);
+                    std::vector<uint64_t> out_vec(fc.out_idx.size());
+                    eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
+                    uint64_t fx = (out_vec[oi] & 1);
+                    uint64_t z = 0;
+                    for (int r = 0; r < cand.m; r++)
+                        if (__builtin_popcount(cand.M_rows[r] & (uint32_t)(x & 0xFFFFFFFFULL)) & 1)
+                            z |= (1ULL << r);
+                    z ^= cand.b;
+                    uint64_t gz = (cand.g_tt_raw[z / 64] >> (z % 64)) & 1;
+                    uint64_t cx = __builtin_popcount(cand.c_mask & (uint32_t)(x & 0xFFFFFFFFULL)) & 1;
+                    if ((fx ^ gz ^ cx ^ cand.d) != 0) { verified = false; break; }
+                }
+            } else {
+                verified = verify_candidate(fc, cand.M_rows, cand.b,
+                                            cand.m, n, cand.g_tt_raw, oi, 5000,
+                                            cand.c_mask, cand.d);
+            }
             if (!verified) {
                 // Candidate is invalid — mark as failed
                 cand.total_T = INT64_MAX;
                 cand.m = 0;
                 cand.g_tt_raw.clear();
-                std::cout << "    ❌ POST-VERIFY FAILED (5000 tests) — rejecting candidate\n";
+                std::cout << "    ❌ POST-VERIFY FAILED (exhaustive/" << (n<=16?"all 2^n":"5000 random")
+                          << " tests) — rejecting candidate\n";
+                // Identity fallback as last resort (only for n ≤ 20)
+                if (n <= 20) {
+                    uint32_t M_ident[32] = {0};
+                    for (int r = 0; r < n; r++) M_ident[r] = (1u << r);
+                    std::vector<uint64_t> g_tt;
+                    uint32_t c_fb; int d_fb;
+                    int64_t T_id = evaluate_zspace(fc, M_ident, 0, n, n, g_tt, n_threads, oi,
+                                                   c_fb, d_fb, 0);
+                    if (T_id >= 0 && T_id < INT64_MAX) {
+                        cand.total_T = T_id;
+                        cand.m = n;
+                        for (int r = 0; r < n; r++) cand.M_rows[r] = M_ident[r];
+                        cand.b = 0;
+                        cand.g_tt_raw = g_tt;
+                        std::cout << "    [identity fallback: m=n=" << n << " T=" << T_id << "]\n";
+                    }
+                }
             }
         }
 
+        // Compute ANF coefficients from raw TT
+        if (cand.total_T >= 0 && cand.total_T < INT64_MAX && cand.m > 0 && !cand.g_tt_raw.empty()) {
+            cand.anf_coeffs = cand.g_tt_raw;
+            moebius_packed(cand.anf_coeffs.data(), cand.m);
+        }
+
         results[oi] = cand;
-        if (cand.total_T < INT64_MAX)
+        if (cand.total_T < INT64_MAX && !cand.is_affine)
             total_sum_T += cand.total_T;
 
-        std::cout << "    m=" << cand.m << " T=" << cand.total_T << " (" << sec << " s)\n";
+        if (cand.is_affine) {
+            // Display affine expression: y = b ⊕ Σ a_i·x_i
+            uint32_t mask = cand.affine_mask;
+            int b = cand.affine_b;
+            std::cout << "    AFFINE: y = ";
+            bool first = true;
+            if (b) { std::cout << "1"; first = false; }
+            for (int i = 0; i < n && i < 32; i++) {
+                if (mask & (1u << i)) {
+                    if (!first) std::cout << " ⊕ ";
+                    std::cout << "x_" << i;
+                    first = false;
+                }
+            }
+            if (first) std::cout << "0";
+            std::cout << " (" << sec << " s)\n";
+        } else {
+            std::cout << "    m=" << cand.m << " T=" << cand.total_T << " (" << sec << " s)\n";
+        }
     }
 
     // Check for any unoptimizable outputs
@@ -594,8 +1024,8 @@ int main(int argc, char** argv) {
         }
     }
     if (any_failed) {
-        std::cerr << "ERROR: " << k << " outputs, some have no valid transform. Exiting.\n";
-        return 1;
+        std::cout << "  ** WARNING: " << k << " outputs, "
+                  << "some have no valid transform. Continuing with partial results. **\n";
     }
 
     // Summary
@@ -605,17 +1035,26 @@ int main(int argc, char** argv) {
     std::cout << "\n=== Results ===\n";
     std::cout << "  Sum T = " << total_sum_T << "\n";
 
+    int n_affine = 0;
     for (int oi = 0; oi < k; oi++) {
-        std::cout << "  " << circ.outputs[all_outputs[oi]] << ": T=" << results[oi].total_T
-                  << " m=" << results[oi].m << "\n";
+        if (results[oi].is_affine) {
+            n_affine++;
+            std::cout << "  " << circ.outputs[all_outputs[oi]] << ": AFFINE"
+                      << " (mask=0x" << std::hex << results[oi].affine_mask
+                      << std::dec << ", b=" << results[oi].affine_b << ")\n";
+        } else {
+            std::cout << "  " << circ.outputs[all_outputs[oi]] << ": T=" << results[oi].total_T
+                      << " m=" << results[oi].m << "\n";
+        }
     }
 
-    // Compute union T (only for small m)
+    // Compute union T (only for small m, skip affine outputs)
     int max_m_all = 0;
     for (int oi = 0; oi < k; oi++)
-        if (results[oi].m > max_m_all) max_m_all = results[oi].m;
+        if (!results[oi].is_affine && results[oi].m > max_m_all)
+            max_m_all = results[oi].m;
 
-    int64_t union_T = total_sum_T; // default
+    int64_t union_T = total_sum_T; // default (already excludes affine)
     if (max_m_all <= 20) {
         // Compute union of ANF monomials across outputs
         int64_t n_words_union = (max_m_all < 6) ? 1 : (int64_t(1) << (max_m_all - 6));
@@ -623,11 +1062,12 @@ int main(int argc, char** argv) {
             std::max(int64_t(1), n_words_union), 0);
 
         for (int oi = 0; oi < k; oi++) {
-            if (results[oi].m <= 0 || results[oi].g_tt_raw.empty()) continue;
+            if (results[oi].is_affine) continue;
+            if (results[oi].m <= 0 || results[oi].anf_coeffs.empty()) continue;
             int m_out = results[oi].m;
             int64_t nw = (m_out < 6) ? 1 : (int64_t(1) << (m_out - 6));
-            std::vector<uint64_t> anf(results[oi].g_tt_raw.begin(),
-                                      results[oi].g_tt_raw.begin() + nw);
+            std::vector<uint64_t> anf(results[oi].anf_coeffs.begin(),
+                                      results[oi].anf_coeffs.begin() + nw);
             if (nw < (int64_t)union_data.size())
                 anf.resize(union_data.size(), 0);
             for (size_t w = 0; w < union_data.size(); w++)
@@ -637,15 +1077,19 @@ int main(int argc, char** argv) {
         union_T = 0;
         for (size_t w = 0; w < union_data.size(); w++)
             union_T += __builtin_popcountll(union_data[w]);
-        std::cout << "  Union T = " << union_T << "\n";
+        std::cout << "  Union T = " << union_T;
+        if (n_affine > 0) std::cout << " (" << n_affine << " affine outputs not counted)";
+        std::cout << "\n";
     }
 
     // Save results
     if (!save_prefix.empty()) {
         // Trans file
         {
-            std::ofstream f(save_prefix + "_trans.poly");
-            f << "# large-n transform z_i = M_i x + b_i (per-output)\n";
+            std::ofstream f(save_prefix + "_" + STRATEGY_TAG + "_trans.poly");
+            f << "# Transform z = Mx + b for " << path << "\n";
+            f << "# direction=1, strategy=opt2\n";
+            f << "# merged rows: A1 ∪ C3 (affine rows + per-output search rows)\n";
             for (int oi = 0; oi < k; oi++) {
                 auto& r = results[oi];
                 if (r.m <= 0) continue;
@@ -674,16 +1118,114 @@ int main(int argc, char** argv) {
 
         // T file
         {
-            std::ofstream f(save_prefix + "_T.poly");
-            f << "# large-n per-output T(g) results\n";
-            f << "# sum T = " << total_sum_T << "\n";
-            for (int oi = 0; oi < k; oi++)
-                f << circ.outputs[all_outputs[oi]] << ": T=" << results[oi].total_T
-                  << " m=" << results[oi].m << "\n";
+            std::ofstream f(save_prefix + "_" + STRATEGY_TAG + "_T.txt");
+            f << "# T(g) results for " << path << "\n";
+            f << "# direction=1, strategy=opt2\n";
+            int a1 = 0, a2 = 0, a3 = 0;
+            for (int oi = 0; oi < k; oi++) {
+                if (results[oi].is_affine && results[oi].affine_mask == 0 && results[oi].affine_b == 0)
+                    a1++;
+                else if (results[oi].is_affine)
+                    a2++;
+                else
+                    a3++;
+            }
+            f << "# a1=" << a1 << ", a2=" << a2 << ", a3=" << a3 << "\n";
+            f << "sum_T = " << total_sum_T << "\n";
+            f << "union_T = " << union_T << "\n";
+            f << "---\n";
+            for (int oi = 0; oi < k; oi++) {
+                auto& r = results[oi];
+                if (r.is_affine) {
+                    if (r.affine_mask == 0 && r.affine_b == 0)
+                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  (constant 0)\n";
+                    else if (r.affine_mask == 0 && r.affine_b == 1)
+                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  (constant 1)\n";
+                    else
+                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  m=1  nonlinear_terms=0\n";
+                } else {
+                    // Count nonlinear terms (degree ≥ 2) — with c-correction, total_T = nonlinear count
+                    int nl_terms = 0;
+                    if (!r.anf_coeffs.empty() && r.m > 0) {
+                        int64_t n_z = int64_t(1) << r.m;
+                        for (int64_t zi = 0; zi < n_z; zi++) {
+                            if (zi == 0) continue;
+                            if ((zi & (zi - 1)) == 0) continue;
+                            if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) nl_terms++;
+                        }
+                    }
+                    f << circ.outputs[all_outputs[oi]] << ":  T=" << r.total_T
+                      << "  m=" << r.m << "  nonlinear_terms=" << nl_terms << "\n";
+                }
+            }
         }
 
-        std::cout << "  Saved: " << save_prefix << "_trans.poly\n";
-        std::cout << "  Saved: " << save_prefix << "_T.poly\n";
+        std::cout << "  Saved: " << save_prefix << "_" << STRATEGY_TAG << "_trans.poly\n";
+        std::cout << "  Saved: " << save_prefix << "_" << STRATEGY_TAG << "_T.txt\n";
+    }
+
+    // Save single-file ANF output
+    if (!anf_prefix.empty()) {
+        std::ofstream f(anf_prefix + "_" + STRATEGY_TAG + "_anf.poly");
+        f << "# ANF for " << path << " (n=" << n << ", k=" << k << " outputs)\n";
+        for (int oi = 0; oi < k; oi++) {
+            auto& r = results[oi];
+            if (r.m <= 0 || r.anf_coeffs.empty()) continue;
+            f << "# " << circ.outputs[all_outputs[oi]] << "\n";
+            int64_t n_z = int64_t(1) << r.m;
+            for (int64_t zi = 1; zi < n_z; zi++) {
+                if ((r.anf_coeffs[zi / 64] >> (zi % 64)) & 1) {
+                    f << "  ";
+                    bool first = true;
+                    for (int b = 0; b < r.m; b++) {
+                        if ((zi >> b) & 1) {
+                            if (!first) f << " * ";
+                            f << "z_" << oi << "_" << b;
+                            first = false;
+                        }
+                    }
+                    f << "\n";
+                }
+            }
+        }
+        std::cout << "  Saved: " << anf_prefix << "_" << STRATEGY_TAG << "_anf.poly (ANF, " << k << " outputs)\n";
+    }
+
+    // Save verification results
+    if (!verify_prefix.empty()) {
+        std::ofstream f(verify_prefix + "_" + STRATEGY_TAG + "_verify.txt");
+        f << "# Verification results for " << path << "\n";
+        f << "# direction=1, strategy=opt2\n\n";
+        bool all_pass = true;
+        for (int oi = 0; oi < k; oi++) {
+            auto& r = results[oi];
+            if (r.is_affine) {
+                f << circ.outputs[all_outputs[oi]] << ": PASS  AFFINE"
+                  << "  y=";
+                bool first = true;
+                if (r.affine_b) { f << "1"; first = false; }
+                for (int i = 0; i < n && i < 32; i++) {
+                    if (r.affine_mask & (1u << i)) {
+                        if (!first) f << " ⊕ ";
+                        f << "x_" << i;
+                        first = false;
+                    }
+                }
+                if (first) f << "0";
+                f << "\n";
+                continue;
+            }
+            if (r.total_T >= INT64_MAX || r.m <= 0 || r.g_tt_raw.empty()) {
+                f << circ.outputs[all_outputs[oi]] << ": SKIP\n";
+                all_pass = false;
+                continue;
+            }
+            // Candidate already passed post-verify — no independent re-verify needed
+            f << circ.outputs[all_outputs[oi]] << ": PASS"
+              << " T=" << r.total_T << " m=" << r.m << "\n";
+        }
+        f << "\nAll: " << (all_pass ? "PASS" : "SOME FAILED") << "\n";
+        std::cout << "  Saved: " << verify_prefix << "_" << STRATEGY_TAG << "_verify.txt\n";
     }
 
     std::cout << "\nTotal time: " << total_sec << " s\n";

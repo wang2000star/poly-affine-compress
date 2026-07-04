@@ -48,6 +48,13 @@ add_executable(optimize_anf_large
 )
 target_include_directories(optimize_anf_large PRIVATE include)
 
+# Sparse-g enumeration optimizer (direction 2: exhaustive pool search + c-correction)
+add_executable(optimize_anf_sparse_g
+    src/main_sparse_g.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_sparse_g PRIVATE include)
+
 # Standalone verifier: read circuit + trans + expr, verify f(x) == g(Mx+b)
 add_executable(verify_anf
     src/verify_anf.cpp
@@ -55,3 +62,13 @@ add_executable(verify_anf
 )
 target_include_directories(verify_anf PRIVATE include)
 target_compile_options(verify_anf PRIVATE -O3 -march=native -mtune=native -pthread)
+
+# Gate builder (direction 1b): circuit-guided (g, M, b) construction
+add_executable(optimize_anf_gatebuilder
+    src/main_gate_builder.cpp
+    src/sparse_anf.cpp
+    src/gate_builder.cpp
+    src/circuit.cpp
+)
+target_include_directories(optimize_anf_gatebuilder PRIVATE include)
+target_compile_options(optimize_anf_gatebuilder PRIVATE -O3 -march=native -mtune=native -pthread -std=c++17)

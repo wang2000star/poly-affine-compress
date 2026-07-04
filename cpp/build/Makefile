@@ -194,6 +194,19 @@ verify_anf/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/build
 .PHONY : verify_anf/fast
 
+#=============================================================================
+# Target rules for targets named optimize_anf_gatebuilder
+
+# Build rule for target.
+optimize_anf_gatebuilder: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 optimize_anf_gatebuilder
+.PHONY : optimize_anf_gatebuilder
+
+# fast build rule for target.
+optimize_anf_gatebuilder/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/build
+.PHONY : optimize_anf_gatebuilder/fast
+
 src/affine.o: src/affine.cpp.o
 .PHONY : src/affine.o
 
@@ -270,6 +283,7 @@ src/circuit.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/circuit.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/circuit.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/circuit.cpp.o
 .PHONY : src/circuit.cpp.o
 
 src/circuit.i: src/circuit.cpp.i
@@ -282,6 +296,7 @@ src/circuit.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/circuit.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/circuit.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/circuit.cpp.i
 .PHONY : src/circuit.cpp.i
 
 src/circuit.s: src/circuit.cpp.s
@@ -294,6 +309,7 @@ src/circuit.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/circuit.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/circuit.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/circuit.cpp.s
 .PHONY : src/circuit.cpp.s
 
 src/compute_raw_anf.o: src/compute_raw_anf.cpp.o
@@ -319,6 +335,30 @@ src/compute_raw_anf.s: src/compute_raw_anf.cpp.s
 src/compute_raw_anf.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/src/compute_raw_anf.cpp.s
 .PHONY : src/compute_raw_anf.cpp.s
+
+src/gate_builder.o: src/gate_builder.cpp.o
+.PHONY : src/gate_builder.o
+
+# target to build an object file
+src/gate_builder.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/gate_builder.cpp.o
+.PHONY : src/gate_builder.cpp.o
+
+src/gate_builder.i: src/gate_builder.cpp.i
+.PHONY : src/gate_builder.i
+
+# target to preprocess a source file
+src/gate_builder.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/gate_builder.cpp.i
+.PHONY : src/gate_builder.cpp.i
+
+src/gate_builder.s: src/gate_builder.cpp.s
+.PHONY : src/gate_builder.s
+
+# target to generate assembly for a file
+src/gate_builder.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/gate_builder.cpp.s
+.PHONY : src/gate_builder.cpp.s
 
 src/gf2.o: src/gf2.cpp.o
 .PHONY : src/gf2.o
@@ -385,6 +425,30 @@ src/io.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/io.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/io.cpp.s
 .PHONY : src/io.cpp.s
+
+src/main_gate_builder.o: src/main_gate_builder.cpp.o
+.PHONY : src/main_gate_builder.o
+
+# target to build an object file
+src/main_gate_builder.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/main_gate_builder.cpp.o
+.PHONY : src/main_gate_builder.cpp.o
+
+src/main_gate_builder.i: src/main_gate_builder.cpp.i
+.PHONY : src/main_gate_builder.i
+
+# target to preprocess a source file
+src/main_gate_builder.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/main_gate_builder.cpp.i
+.PHONY : src/main_gate_builder.cpp.i
+
+src/main_gate_builder.s: src/main_gate_builder.cpp.s
+.PHONY : src/main_gate_builder.s
+
+# target to generate assembly for a file
+src/main_gate_builder.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/main_gate_builder.cpp.s
+.PHONY : src/main_gate_builder.cpp.s
 
 src/main_large.o: src/main_large.cpp.o
 .PHONY : src/main_large.o
@@ -548,6 +612,30 @@ src/search.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/search.cpp.s
 .PHONY : src/search.cpp.s
 
+src/sparse_anf.o: src/sparse_anf.cpp.o
+.PHONY : src/sparse_anf.o
+
+# target to build an object file
+src/sparse_anf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/sparse_anf.cpp.o
+.PHONY : src/sparse_anf.cpp.o
+
+src/sparse_anf.i: src/sparse_anf.cpp.i
+.PHONY : src/sparse_anf.i
+
+# target to preprocess a source file
+src/sparse_anf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/sparse_anf.cpp.i
+.PHONY : src/sparse_anf.cpp.i
+
+src/sparse_anf.s: src/sparse_anf.cpp.s
+.PHONY : src/sparse_anf.s
+
+# target to generate assembly for a file
+src/sparse_anf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/sparse_anf.cpp.s
+.PHONY : src/sparse_anf.cpp.s
+
 src/truth_table.o: src/truth_table.cpp.o
 .PHONY : src/truth_table.o
 
@@ -680,6 +768,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... compute_raw_anf"
+	@echo "... optimize_anf_gatebuilder"
 	@echo "... optimize_anf_large"
 	@echo "... optimize_anf_opt1"
 	@echo "... optimize_anf_opt2"
@@ -697,12 +786,18 @@ help:
 	@echo "... src/compute_raw_anf.o"
 	@echo "... src/compute_raw_anf.i"
 	@echo "... src/compute_raw_anf.s"
+	@echo "... src/gate_builder.o"
+	@echo "... src/gate_builder.i"
+	@echo "... src/gate_builder.s"
 	@echo "... src/gf2.o"
 	@echo "... src/gf2.i"
 	@echo "... src/gf2.s"
 	@echo "... src/io.o"
 	@echo "... src/io.i"
 	@echo "... src/io.s"
+	@echo "... src/main_gate_builder.o"
+	@echo "... src/main_gate_builder.i"
+	@echo "... src/main_gate_builder.s"
 	@echo "... src/main_large.o"
 	@echo "... src/main_large.i"
 	@echo "... src/main_large.s"
@@ -721,6 +816,9 @@ help:
 	@echo "... src/search.o"
 	@echo "... src/search.i"
 	@echo "... src/search.s"
+	@echo "... src/sparse_anf.o"
+	@echo "... src/sparse_anf.i"
+	@echo "... src/sparse_anf.s"
 	@echo "... src/truth_table.o"
 	@echo "... src/truth_table.i"
 	@echo "... src/truth_table.s"
