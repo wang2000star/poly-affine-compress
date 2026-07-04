@@ -422,7 +422,7 @@ n=32 实例第 7-9 行为 0（无法计算完整 ANF）。
 
 表示 y_2=0, y_4=1。无常量输出则只一行 0。
 
-### 10.4 仿射文件 `{inst}_affine.mat`
+### 10.4 仿射文件 `{inst}_affine.txt`
 
 第一行个数，第二行下标，第三行行数 列数，后面矩阵（每行 n+1 个数，前 n 位 mask，最后一位 b）。
 
@@ -499,30 +499,63 @@ n=32 实例只有前两行（无 T_raw 和 deg）。
 
 ```
 results/{inst}/
-  {inst}_{variant}_trans.poly   — 变换矩阵
-  {inst}_{variant}_anf.poly    — g 的 ANF（非线性项）
-  {inst}_{variant}_T.txt       — 每输出 T 值
-  {inst}_{variant}_verify.txt  — 验证结果（可选）
+  {inst}_{combo}.affine     — 变换矩阵
+  {inst}_{combo}.poly       — g(z) 的多项式（矩阵格式）
+  {inst}_{combo}_stats.txt  — T 统计
+  {inst}_{combo}_verify.txt — 验证结果（可选）
 ```
 
-`variant` 取值：`opt1`、`opt2`、`gatebuilder` 等，表示不同优化策略。
+`combo` 取值：`d1a_opt2`、`d1a_opt1`、`d1b_opt2`、`d2_opt2` 等。
 
 ### 11.1 命名规则
 
 ```
-{inst}_d{dir}_opt{1/2}_{suffix}
-{inst}_best_{suffix}
+{inst}_{combo}.affine     变换矩阵
+{inst}_{combo}.poly       g(z) 多项式
+{inst}_{combo}_stats.txt  每输出 T 值 + Sum/Union
+{inst}_{combo}_verify.txt 验证结果
+{inst}_best.affine        最优变换
+{inst}_best.poly          最优多项式
+{inst}_best_stats.txt     最优 T 统计
+{inst}_best_verify.txt    最优验证
+{inst}_best_summary.txt   各组合对比
+
+### 11.2 .affine 文件格式
+
+第一行 `m  n+1`（行数 列数），后面 m 行数据。第 k 行对应 z_{k-1}，列 = `[mask_bit_{n-1} ... mask_bit_0  b]`。
+
+```
+3  9            ← m=3 行, n+1=9 列
+0 0 0 0 0 0 1 0 0    ← z_0 = x_1
+0 0 0 0 0 1 0 0 1    ← z_1 = x_2 + 1
+0 0 0 0 0 0 0 1 0    ← z_2 = x_0
 ```
 
-| 后缀 | 文件类型 |
-|------|---------|
-| `T.txt` | 每输出 T 值 + Sum/Union |
-| `trans.poly` | 变换矩阵（每行一个仿射映射）|
-| `anf.poly` | g 的 ANF（非线性项）|
-| `verify.txt` | 验证结果 |
-| `summary.txt` | 各组合对比（仅 best）|
+### 11.3 .poly 文件格式
 
-### 11.2 T 文件（T.txt）
+与预处理 {inst}.poly 格式一致：
+
+```
+n              ← 第1行: 输入变元数
+n_outputs      ← 第2行: 输出分量个数
+t_0 t_1 ...    ← 第3行: 各分量对应的项数
+[e_0,...,e_{n-1},c]  ← 之后所有行按顺序排列
+[e_0,...,e_{n-1},c]
+...
+```
+
+第 k 个输出分量的项从第 4 行开始的第 `(t_0+...+t_{k-1})` 行起连续 t_k 行。
+
+### 11.4 _stats.txt 文件格式
+
+```
+sum_T = 32
+union_T = 32
+---
+y_0:  T=0  m=1
+y_1:  T=1  m=2
+...
+```
 
 ```
 # T(g) results for hd01
