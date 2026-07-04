@@ -9,7 +9,7 @@ set(CMAKE_BUILD_TYPE Release)
 set(COMMON_FLAGS "-O3 -march=native -mtune=native -pthread")
 set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_FLAGS}")
 
-# Core sources
+# Core sources (truth-table pipeline)
 set(CORE_SRC
     src/circuit.cpp
     src/truth_table.cpp
@@ -23,37 +23,80 @@ set(CORE_SRC
     src/verify.cpp
 )
 
-# Main ANF optimizer — opt1 (shared transform)
-add_executable(optimize_anf_opt1
+# ====================================================================
+# Direction 1a: Truth-table-based search
+#   opt  = single-output (k=1, shared=per-output are equivalent)
+#   opt1 = multi-output, shared transform
+#   opt2 = multi-output, per-output transforms (large-n z-space eval)
+# ====================================================================
+
+add_executable(optimize_anf_d1a_opt
     src/main_opt1.cpp
     ${CORE_SRC}
 )
-target_include_directories(optimize_anf_opt1 PRIVATE include)
+target_include_directories(optimize_anf_d1a_opt PRIVATE include)
+target_compile_definitions(optimize_anf_d1a_opt PRIVATE STRATEGY_TAG="opt")
 
-# Main ANF optimizer — opt2 (per-output transforms)
-add_executable(optimize_anf_opt2
-    src/main_opt2.cpp
+add_executable(optimize_anf_d1a_opt1
+    src/main_opt1.cpp
     ${CORE_SRC}
 )
-target_include_directories(optimize_anf_opt2 PRIVATE include)
+target_include_directories(optimize_anf_d1a_opt1 PRIVATE include)
+target_compile_definitions(optimize_anf_d1a_opt1 PRIVATE STRATEGY_TAG="opt1")
 
-# Legacy: compute_raw_anf (standalone, uses old code)
-add_executable(compute_raw_anf src/compute_raw_anf.cpp)
-target_compile_options(compute_raw_anf PRIVATE -O3 -march=native -mtune=native -pthread)
-
-# Large-n ANF optimizer (z-space evaluation, n > 20)
-add_executable(optimize_anf_large
+add_executable(optimize_anf_d1a_opt2
     src/main_large.cpp
     ${CORE_SRC}
 )
-target_include_directories(optimize_anf_large PRIVATE include)
+target_include_directories(optimize_anf_d1a_opt2 PRIVATE include)
+target_compile_definitions(optimize_anf_d1a_opt2 PRIVATE STRATEGY_TAG="opt2")
 
-# Sparse-g enumeration optimizer (direction 2: exhaustive pool search + c-correction)
-add_executable(optimize_anf_sparse_g
+# ====================================================================
+# Direction 1b: Gate-builder-based construction
+#   opt2 = per-output transforms
+# ====================================================================
+
+add_executable(optimize_anf_d1b_opt2
+    src/main_gate_builder.cpp
+    src/sparse_anf.cpp
+    src/gate_builder.cpp
+    src/circuit.cpp
+)
+target_include_directories(optimize_anf_d1b_opt2 PRIVATE include)
+target_compile_definitions(optimize_anf_d1b_opt2 PRIVATE STRATEGY_TAG="opt2")
+target_compile_options(optimize_anf_d1b_opt2 PRIVATE -O3 -march=native -mtune=native -pthread -std=c++17)
+
+# ====================================================================
+# Direction 2: Sparse-g enumeration (pool search + c-correction)
+#   opt2 = per-output transforms
+# ====================================================================
+
+add_executable(optimize_anf_d2_opt2
     src/main_sparse_g.cpp
     ${CORE_SRC}
 )
-target_include_directories(optimize_anf_sparse_g PRIVATE include)
+target_include_directories(optimize_anf_d2_opt2 PRIVATE include)
+target_compile_definitions(optimize_anf_d2_opt2 PRIVATE STRATEGY_TAG="opt2")
+
+# ====================================================================
+# Direction 3: Per-output Walsh + random + hill-climb
+#   opt2 = per-output transforms
+# ====================================================================
+
+add_executable(optimize_anf_d3_opt2
+    src/main_opt2.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_d3_opt2 PRIVATE include)
+target_compile_definitions(optimize_anf_d3_opt2 PRIVATE STRATEGY_TAG="opt2")
+
+# ====================================================================
+# Auxiliary tools
+# ====================================================================
+
+# Standalone raw ANF computation
+add_executable(compute_raw_anf src/compute_raw_anf.cpp)
+target_compile_options(compute_raw_anf PRIVATE -O3 -march=native -mtune=native -pthread)
 
 # Standalone verifier: read circuit + trans + expr, verify f(x) == g(Mx+b)
 add_executable(verify_anf
@@ -62,16 +105,6 @@ add_executable(verify_anf
 )
 target_include_directories(verify_anf PRIVATE include)
 target_compile_options(verify_anf PRIVATE -O3 -march=native -mtune=native -pthread)
-
-# Gate builder (direction 1b): circuit-guided (g, M, b) construction
-add_executable(optimize_anf_gatebuilder
-    src/main_gate_builder.cpp
-    src/sparse_anf.cpp
-    src/gate_builder.cpp
-    src/circuit.cpp
-)
-target_include_directories(optimize_anf_gatebuilder PRIVATE include)
-target_compile_options(optimize_anf_gatebuilder PRIVATE -O3 -march=native -mtune=native -pthread -std=c++17)
 
 # Preprocess: one-time variable remapping and output classification
 add_executable(preprocess

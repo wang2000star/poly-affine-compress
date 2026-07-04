@@ -35,8 +35,10 @@
 #include <chrono>
 #include <filesystem>
 
-// Strategy tag for output file naming (prevents confusion between different search strategies)
-static const char* STRATEGY_TAG = "lg";
+// Strategy tag from compile-time definition (STRATEGY_TAG is a macro set by CMake)
+#ifndef STRATEGY_TAG
+#define STRATEGY_TAG "lg"
+#endif
 
 // Count only nonlinear terms (degree ≥ 2) in ANF data
 static int64_t count_nonlinear_T(const uint64_t* data, int m) {
@@ -1117,7 +1119,7 @@ int main(int argc, char** argv) {
         fs::create_directories(results_dir);
 
         std::string inst_name = fs::path(path).stem().string();
-        std::string tag = (k <= 1) ? "_d1a_opt" : "_d1a_opt2";
+        std::string tag = "_d1a_" + std::string(STRATEGY_TAG);
         std::string base = results_dir + "/" + inst_name + tag;
 
         // ---- Compute per-output z-offset in shared space ----

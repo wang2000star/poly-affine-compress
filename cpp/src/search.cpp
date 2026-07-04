@@ -1259,8 +1259,10 @@ void run_search(const TruthTable& tt, const Circuit& circ,
         if (!params.results_dir.empty()) {
             namespace fs = std::filesystem;
             fs::create_directories(params.results_dir);
-            std::string pol_tag = (output_indices.size() <= 1) ? "opt" : "opt1";
-            std::string base = params.results_dir + "/" + params.inst_name + "_d1a_" + pol_tag;
+#ifndef STRATEGY_TAG
+#define STRATEGY_TAG "opt1"
+#endif
+            std::string base = params.results_dir + "/" + params.inst_name + "_d1a_" + STRATEGY_TAG;
 
             save_trans(best, circ, n, base + ".affine");
 

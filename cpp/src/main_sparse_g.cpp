@@ -46,8 +46,10 @@
 #include <cmath>
 #include <filesystem>
 
-// Strategy tag for output file naming (prevents confusion between different search strategies)
-static const char* STRATEGY_TAG = "sg";
+// Strategy tag from compile-time definition (STRATEGY_TAG is a macro set by CMake)
+#ifndef STRATEGY_TAG
+#define STRATEGY_TAG "sg"
+#endif
 
 // Same z-patterns as main_large.cpp
 static const uint64_t Z_PATTERNS[6] = {
@@ -1070,7 +1072,7 @@ int main(int argc, char** argv) {
         // Ensure save_prefix is a directory (remove trailing separator)
         std::string dir = save_prefix;
         while (!dir.empty() && dir.back() == '/') dir.pop_back();
-        std::string tag = (k <= 1) ? "_d2_opt" : "_d2_opt2";
+        std::string tag = "_d2_" + std::string(STRATEGY_TAG);
         std::string base = dir + "/" + inst_name + tag;
 
         // ---- .affine: concatenated per-output M, b + c,d correction ----

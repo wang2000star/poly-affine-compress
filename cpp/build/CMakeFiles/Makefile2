@@ -63,24 +63,26 @@ CMAKE_BINARY_DIR = /home/wangfz/bool/cpp/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/optimize_anf_opt1.dir/all
-all: CMakeFiles/optimize_anf_opt2.dir/all
+all: CMakeFiles/optimize_anf_d1a_opt.dir/all
+all: CMakeFiles/optimize_anf_d1a_opt1.dir/all
+all: CMakeFiles/optimize_anf_d1a_opt2.dir/all
+all: CMakeFiles/optimize_anf_d1b_opt2.dir/all
+all: CMakeFiles/optimize_anf_d2_opt2.dir/all
+all: CMakeFiles/optimize_anf_d3_opt2.dir/all
 all: CMakeFiles/compute_raw_anf.dir/all
-all: CMakeFiles/optimize_anf_large.dir/all
-all: CMakeFiles/optimize_anf_sparse_g.dir/all
 all: CMakeFiles/verify_anf.dir/all
-all: CMakeFiles/optimize_anf_gatebuilder.dir/all
 all: CMakeFiles/preprocess.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
-codegen: CMakeFiles/optimize_anf_opt1.dir/codegen
-codegen: CMakeFiles/optimize_anf_opt2.dir/codegen
+codegen: CMakeFiles/optimize_anf_d1a_opt.dir/codegen
+codegen: CMakeFiles/optimize_anf_d1a_opt1.dir/codegen
+codegen: CMakeFiles/optimize_anf_d1a_opt2.dir/codegen
+codegen: CMakeFiles/optimize_anf_d1b_opt2.dir/codegen
+codegen: CMakeFiles/optimize_anf_d2_opt2.dir/codegen
+codegen: CMakeFiles/optimize_anf_d3_opt2.dir/codegen
 codegen: CMakeFiles/compute_raw_anf.dir/codegen
-codegen: CMakeFiles/optimize_anf_large.dir/codegen
-codegen: CMakeFiles/optimize_anf_sparse_g.dir/codegen
 codegen: CMakeFiles/verify_anf.dir/codegen
-codegen: CMakeFiles/optimize_anf_gatebuilder.dir/codegen
 codegen: CMakeFiles/preprocess.dir/codegen
 .PHONY : codegen
 
@@ -89,79 +91,208 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/optimize_anf_opt1.dir/clean
-clean: CMakeFiles/optimize_anf_opt2.dir/clean
+clean: CMakeFiles/optimize_anf_d1a_opt.dir/clean
+clean: CMakeFiles/optimize_anf_d1a_opt1.dir/clean
+clean: CMakeFiles/optimize_anf_d1a_opt2.dir/clean
+clean: CMakeFiles/optimize_anf_d1b_opt2.dir/clean
+clean: CMakeFiles/optimize_anf_d2_opt2.dir/clean
+clean: CMakeFiles/optimize_anf_d3_opt2.dir/clean
 clean: CMakeFiles/compute_raw_anf.dir/clean
-clean: CMakeFiles/optimize_anf_large.dir/clean
-clean: CMakeFiles/optimize_anf_sparse_g.dir/clean
 clean: CMakeFiles/verify_anf.dir/clean
-clean: CMakeFiles/optimize_anf_gatebuilder.dir/clean
 clean: CMakeFiles/preprocess.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/optimize_anf_opt1.dir
+# Target rules for target CMakeFiles/optimize_anf_d1a_opt.dir
 
 # All Build rule for target.
-CMakeFiles/optimize_anf_opt1.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=20,21,22,23,24,25,26,27,28,29,30,31 "Built target optimize_anf_opt1"
-.PHONY : CMakeFiles/optimize_anf_opt1.dir/all
+CMakeFiles/optimize_anf_d1a_opt.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt.dir/build.make CMakeFiles/optimize_anf_d1a_opt.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt.dir/build.make CMakeFiles/optimize_anf_d1a_opt.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10,11,12,13,14 "Built target optimize_anf_d1a_opt"
+.PHONY : CMakeFiles/optimize_anf_d1a_opt.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/optimize_anf_opt1.dir/rule: cmake_check_build_system
+CMakeFiles/optimize_anf_d1a_opt.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 12
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_opt1.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_d1a_opt.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
-.PHONY : CMakeFiles/optimize_anf_opt1.dir/rule
+.PHONY : CMakeFiles/optimize_anf_d1a_opt.dir/rule
 
 # Convenience name for target.
-optimize_anf_opt1: CMakeFiles/optimize_anf_opt1.dir/rule
-.PHONY : optimize_anf_opt1
+optimize_anf_d1a_opt: CMakeFiles/optimize_anf_d1a_opt.dir/rule
+.PHONY : optimize_anf_d1a_opt
 
 # codegen rule for target.
-CMakeFiles/optimize_anf_opt1.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=20,21,22,23,24,25,26,27,28,29,30,31 "Finished codegen for target optimize_anf_opt1"
-.PHONY : CMakeFiles/optimize_anf_opt1.dir/codegen
+CMakeFiles/optimize_anf_d1a_opt.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt.dir/build.make CMakeFiles/optimize_anf_d1a_opt.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10,11,12,13,14 "Finished codegen for target optimize_anf_d1a_opt"
+.PHONY : CMakeFiles/optimize_anf_d1a_opt.dir/codegen
 
 # clean rule for target.
-CMakeFiles/optimize_anf_opt1.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/clean
-.PHONY : CMakeFiles/optimize_anf_opt1.dir/clean
+CMakeFiles/optimize_anf_d1a_opt.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt.dir/build.make CMakeFiles/optimize_anf_d1a_opt.dir/clean
+.PHONY : CMakeFiles/optimize_anf_d1a_opt.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/optimize_anf_opt2.dir
+# Target rules for target CMakeFiles/optimize_anf_d1a_opt1.dir
 
 # All Build rule for target.
-CMakeFiles/optimize_anf_opt2.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=32,33,34,35,36,37,38,39,40,41,42,43 "Built target optimize_anf_opt2"
-.PHONY : CMakeFiles/optimize_anf_opt2.dir/all
+CMakeFiles/optimize_anf_d1a_opt1.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt1.dir/build.make CMakeFiles/optimize_anf_d1a_opt1.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt1.dir/build.make CMakeFiles/optimize_anf_d1a_opt1.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=15,16,17,18,19,20,21,22,23,24,25,26 "Built target optimize_anf_d1a_opt1"
+.PHONY : CMakeFiles/optimize_anf_d1a_opt1.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/optimize_anf_opt2.dir/rule: cmake_check_build_system
+CMakeFiles/optimize_anf_d1a_opt1.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 12
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_opt2.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_d1a_opt1.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
-.PHONY : CMakeFiles/optimize_anf_opt2.dir/rule
+.PHONY : CMakeFiles/optimize_anf_d1a_opt1.dir/rule
 
 # Convenience name for target.
-optimize_anf_opt2: CMakeFiles/optimize_anf_opt2.dir/rule
-.PHONY : optimize_anf_opt2
+optimize_anf_d1a_opt1: CMakeFiles/optimize_anf_d1a_opt1.dir/rule
+.PHONY : optimize_anf_d1a_opt1
 
 # codegen rule for target.
-CMakeFiles/optimize_anf_opt2.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=32,33,34,35,36,37,38,39,40,41,42,43 "Finished codegen for target optimize_anf_opt2"
-.PHONY : CMakeFiles/optimize_anf_opt2.dir/codegen
+CMakeFiles/optimize_anf_d1a_opt1.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt1.dir/build.make CMakeFiles/optimize_anf_d1a_opt1.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=15,16,17,18,19,20,21,22,23,24,25,26 "Finished codegen for target optimize_anf_d1a_opt1"
+.PHONY : CMakeFiles/optimize_anf_d1a_opt1.dir/codegen
 
 # clean rule for target.
-CMakeFiles/optimize_anf_opt2.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/clean
-.PHONY : CMakeFiles/optimize_anf_opt2.dir/clean
+CMakeFiles/optimize_anf_d1a_opt1.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt1.dir/build.make CMakeFiles/optimize_anf_d1a_opt1.dir/clean
+.PHONY : CMakeFiles/optimize_anf_d1a_opt1.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/optimize_anf_d1a_opt2.dir
+
+# All Build rule for target.
+CMakeFiles/optimize_anf_d1a_opt2.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt2.dir/build.make CMakeFiles/optimize_anf_d1a_opt2.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt2.dir/build.make CMakeFiles/optimize_anf_d1a_opt2.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=27,28,29,30,31,32,33,34,35,36,37,38 "Built target optimize_anf_d1a_opt2"
+.PHONY : CMakeFiles/optimize_anf_d1a_opt2.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/optimize_anf_d1a_opt2.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 12
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_d1a_opt2.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/optimize_anf_d1a_opt2.dir/rule
+
+# Convenience name for target.
+optimize_anf_d1a_opt2: CMakeFiles/optimize_anf_d1a_opt2.dir/rule
+.PHONY : optimize_anf_d1a_opt2
+
+# codegen rule for target.
+CMakeFiles/optimize_anf_d1a_opt2.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt2.dir/build.make CMakeFiles/optimize_anf_d1a_opt2.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=27,28,29,30,31,32,33,34,35,36,37,38 "Finished codegen for target optimize_anf_d1a_opt2"
+.PHONY : CMakeFiles/optimize_anf_d1a_opt2.dir/codegen
+
+# clean rule for target.
+CMakeFiles/optimize_anf_d1a_opt2.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1a_opt2.dir/build.make CMakeFiles/optimize_anf_d1a_opt2.dir/clean
+.PHONY : CMakeFiles/optimize_anf_d1a_opt2.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/optimize_anf_d1b_opt2.dir
+
+# All Build rule for target.
+CMakeFiles/optimize_anf_d1b_opt2.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1b_opt2.dir/build.make CMakeFiles/optimize_anf_d1b_opt2.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1b_opt2.dir/build.make CMakeFiles/optimize_anf_d1b_opt2.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=39,40,41,42,43 "Built target optimize_anf_d1b_opt2"
+.PHONY : CMakeFiles/optimize_anf_d1b_opt2.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/optimize_anf_d1b_opt2.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 5
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_d1b_opt2.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/optimize_anf_d1b_opt2.dir/rule
+
+# Convenience name for target.
+optimize_anf_d1b_opt2: CMakeFiles/optimize_anf_d1b_opt2.dir/rule
+.PHONY : optimize_anf_d1b_opt2
+
+# codegen rule for target.
+CMakeFiles/optimize_anf_d1b_opt2.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1b_opt2.dir/build.make CMakeFiles/optimize_anf_d1b_opt2.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=39,40,41,42,43 "Finished codegen for target optimize_anf_d1b_opt2"
+.PHONY : CMakeFiles/optimize_anf_d1b_opt2.dir/codegen
+
+# clean rule for target.
+CMakeFiles/optimize_anf_d1b_opt2.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d1b_opt2.dir/build.make CMakeFiles/optimize_anf_d1b_opt2.dir/clean
+.PHONY : CMakeFiles/optimize_anf_d1b_opt2.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/optimize_anf_d2_opt2.dir
+
+# All Build rule for target.
+CMakeFiles/optimize_anf_d2_opt2.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d2_opt2.dir/build.make CMakeFiles/optimize_anf_d2_opt2.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d2_opt2.dir/build.make CMakeFiles/optimize_anf_d2_opt2.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=44,45,46,47,48,49,50,51,52,53,54,55 "Built target optimize_anf_d2_opt2"
+.PHONY : CMakeFiles/optimize_anf_d2_opt2.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/optimize_anf_d2_opt2.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 12
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_d2_opt2.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/optimize_anf_d2_opt2.dir/rule
+
+# Convenience name for target.
+optimize_anf_d2_opt2: CMakeFiles/optimize_anf_d2_opt2.dir/rule
+.PHONY : optimize_anf_d2_opt2
+
+# codegen rule for target.
+CMakeFiles/optimize_anf_d2_opt2.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d2_opt2.dir/build.make CMakeFiles/optimize_anf_d2_opt2.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=44,45,46,47,48,49,50,51,52,53,54,55 "Finished codegen for target optimize_anf_d2_opt2"
+.PHONY : CMakeFiles/optimize_anf_d2_opt2.dir/codegen
+
+# clean rule for target.
+CMakeFiles/optimize_anf_d2_opt2.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d2_opt2.dir/build.make CMakeFiles/optimize_anf_d2_opt2.dir/clean
+.PHONY : CMakeFiles/optimize_anf_d2_opt2.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/optimize_anf_d3_opt2.dir
+
+# All Build rule for target.
+CMakeFiles/optimize_anf_d3_opt2.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d3_opt2.dir/build.make CMakeFiles/optimize_anf_d3_opt2.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d3_opt2.dir/build.make CMakeFiles/optimize_anf_d3_opt2.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=56,57,58,59,60,61,62,63,64,65,66,67 "Built target optimize_anf_d3_opt2"
+.PHONY : CMakeFiles/optimize_anf_d3_opt2.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/optimize_anf_d3_opt2.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 12
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_d3_opt2.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/optimize_anf_d3_opt2.dir/rule
+
+# Convenience name for target.
+optimize_anf_d3_opt2: CMakeFiles/optimize_anf_d3_opt2.dir/rule
+.PHONY : optimize_anf_d3_opt2
+
+# codegen rule for target.
+CMakeFiles/optimize_anf_d3_opt2.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d3_opt2.dir/build.make CMakeFiles/optimize_anf_d3_opt2.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=56,57,58,59,60,61,62,63,64,65,66,67 "Finished codegen for target optimize_anf_d3_opt2"
+.PHONY : CMakeFiles/optimize_anf_d3_opt2.dir/codegen
+
+# clean rule for target.
+CMakeFiles/optimize_anf_d3_opt2.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_d3_opt2.dir/build.make CMakeFiles/optimize_anf_d3_opt2.dir/clean
+.PHONY : CMakeFiles/optimize_anf_d3_opt2.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/compute_raw_anf.dir
@@ -196,77 +327,13 @@ CMakeFiles/compute_raw_anf.dir/clean:
 .PHONY : CMakeFiles/compute_raw_anf.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/optimize_anf_large.dir
-
-# All Build rule for target.
-CMakeFiles/optimize_anf_large.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=8,9,10,11,12,13,14,15,16,17,18,19 "Built target optimize_anf_large"
-.PHONY : CMakeFiles/optimize_anf_large.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/optimize_anf_large.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 12
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_large.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
-.PHONY : CMakeFiles/optimize_anf_large.dir/rule
-
-# Convenience name for target.
-optimize_anf_large: CMakeFiles/optimize_anf_large.dir/rule
-.PHONY : optimize_anf_large
-
-# codegen rule for target.
-CMakeFiles/optimize_anf_large.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=8,9,10,11,12,13,14,15,16,17,18,19 "Finished codegen for target optimize_anf_large"
-.PHONY : CMakeFiles/optimize_anf_large.dir/codegen
-
-# clean rule for target.
-CMakeFiles/optimize_anf_large.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/clean
-.PHONY : CMakeFiles/optimize_anf_large.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/optimize_anf_sparse_g.dir
-
-# All Build rule for target.
-CMakeFiles/optimize_anf_sparse_g.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=44,45,46,47,48,49,50,51,52,53,54,55 "Built target optimize_anf_sparse_g"
-.PHONY : CMakeFiles/optimize_anf_sparse_g.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/optimize_anf_sparse_g.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 12
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_sparse_g.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
-.PHONY : CMakeFiles/optimize_anf_sparse_g.dir/rule
-
-# Convenience name for target.
-optimize_anf_sparse_g: CMakeFiles/optimize_anf_sparse_g.dir/rule
-.PHONY : optimize_anf_sparse_g
-
-# codegen rule for target.
-CMakeFiles/optimize_anf_sparse_g.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=44,45,46,47,48,49,50,51,52,53,54,55 "Finished codegen for target optimize_anf_sparse_g"
-.PHONY : CMakeFiles/optimize_anf_sparse_g.dir/codegen
-
-# clean rule for target.
-CMakeFiles/optimize_anf_sparse_g.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/clean
-.PHONY : CMakeFiles/optimize_anf_sparse_g.dir/clean
-
-#=============================================================================
 # Target rules for target CMakeFiles/verify_anf.dir
 
 # All Build rule for target.
 CMakeFiles/verify_anf.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=59,60,61 "Built target verify_anf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=71,72,73 "Built target verify_anf"
 .PHONY : CMakeFiles/verify_anf.dir/all
 
 # Build rule for subdir invocation for target.
@@ -283,7 +350,7 @@ verify_anf: CMakeFiles/verify_anf.dir/rule
 # codegen rule for target.
 CMakeFiles/verify_anf.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=59,60,61 "Finished codegen for target verify_anf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=71,72,73 "Finished codegen for target verify_anf"
 .PHONY : CMakeFiles/verify_anf.dir/codegen
 
 # clean rule for target.
@@ -292,45 +359,13 @@ CMakeFiles/verify_anf.dir/clean:
 .PHONY : CMakeFiles/verify_anf.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/optimize_anf_gatebuilder.dir
-
-# All Build rule for target.
-CMakeFiles/optimize_anf_gatebuilder.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=3,4,5,6,7 "Built target optimize_anf_gatebuilder"
-.PHONY : CMakeFiles/optimize_anf_gatebuilder.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/optimize_anf_gatebuilder.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 5
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/optimize_anf_gatebuilder.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
-.PHONY : CMakeFiles/optimize_anf_gatebuilder.dir/rule
-
-# Convenience name for target.
-optimize_anf_gatebuilder: CMakeFiles/optimize_anf_gatebuilder.dir/rule
-.PHONY : optimize_anf_gatebuilder
-
-# codegen rule for target.
-CMakeFiles/optimize_anf_gatebuilder.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=3,4,5,6,7 "Finished codegen for target optimize_anf_gatebuilder"
-.PHONY : CMakeFiles/optimize_anf_gatebuilder.dir/codegen
-
-# clean rule for target.
-CMakeFiles/optimize_anf_gatebuilder.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/clean
-.PHONY : CMakeFiles/optimize_anf_gatebuilder.dir/clean
-
-#=============================================================================
 # Target rules for target CMakeFiles/preprocess.dir
 
 # All Build rule for target.
 CMakeFiles/preprocess.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=56,57,58 "Built target preprocess"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=68,69,70 "Built target preprocess"
 .PHONY : CMakeFiles/preprocess.dir/all
 
 # Build rule for subdir invocation for target.
@@ -347,7 +382,7 @@ preprocess: CMakeFiles/preprocess.dir/rule
 # codegen rule for target.
 CMakeFiles/preprocess.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=56,57,58 "Finished codegen for target preprocess"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=68,69,70 "Finished codegen for target preprocess"
 .PHONY : CMakeFiles/preprocess.dir/codegen
 
 # clean rule for target.

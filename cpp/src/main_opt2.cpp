@@ -346,7 +346,10 @@ int main(int argc, char** argv) {
         std::string inst_name = std::filesystem::path(path).stem().string();
         std::string dir = save_prefix;
         while (!dir.empty() && dir.back() == '/') dir.pop_back();
-        std::string tag = (k <= 1) ? "_d3_opt" : "_d3_opt2";
+#ifndef STRATEGY_TAG
+#define STRATEGY_TAG "opt2"
+#endif
+        std::string tag = "_d3_" + std::string(STRATEGY_TAG);
         std::string prefix = dir + "/" + inst_name + tag;
 
         // ---- .affine: block-diagonal M with per-output b ----

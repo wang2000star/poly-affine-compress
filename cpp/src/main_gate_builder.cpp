@@ -391,7 +391,10 @@ int main(int argc, char** argv) {
     // Write output files
     fs::create_directories(out_dir);
     int k_tag = (int)results.size();
-    std::string tag = (k_tag <= 1) ? "_d1b_opt" : "_d1b_opt2";
+#ifndef STRATEGY_TAG
+#define STRATEGY_TAG "opt2"
+#endif
+    std::string tag = "_d1b_" + std::string(STRATEGY_TAG);
     std::string base = out_dir + "/" + inst + tag;
     write_affine(base + ".affine", results, circ);
     write_poly(base + ".poly", results);
