@@ -17,6 +17,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/build"
 EXAMPLES_DIR="$SCRIPT_DIR/examples"
+PREPROCESS_DIR="$SCRIPT_DIR/preprocessed"
 RESULTS_DIR="$SCRIPT_DIR/results"
 
 MODE="${1:-test}"
@@ -134,8 +135,8 @@ echo ""
 # ---- Preprocess all ----
 echo "--- Preprocessing ---"
 for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02; do
-    mkdir -p "$RESULTS_DIR/$inst"
-    "$BUILD_DIR/preprocess" "$EXAMPLES_DIR/${inst}.txt" --out-dir "$RESULTS_DIR/$inst" &> /dev/null
+    mkdir -p "$PREPROCESS_DIR/$inst"
+    "$BUILD_DIR/preprocess" "$EXAMPLES_DIR/${inst}.txt" --out-dir "$PREPROCESS_DIR/$inst" &> /dev/null
     echo "  $inst ✓"
 done
 echo ""
