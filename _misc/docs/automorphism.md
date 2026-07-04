@@ -712,38 +712,53 @@ f(x) ⊕ f(x⊕Δ) = ⟨c,Δ⟩                 (2)
 
 #### 6.5.4 完整判定与计算算法
 
+**允许 m > n：** 行池大小 ≈ 3n，m 的上界是池大小（而非 n）。m > n 时的关键性质：
+
+1. **rank(M) ≤ n**：不论 m 多大，M 的秩 ≤ n（只有 n 个输入变量）
+2. **ker(M) 不变**：额外行只要不增加秩，就不改变 ker(M)，一致性条件不变
+3. **右逆存在**：rank(M) < n 时仍可用右逆（但需一致性检查）
+4. **g_tt 大小**：2^m 随 m 指数增长，实际限制 max_m ≤ 20（2^m ≤ 10⁶ 可接受）
+
+m > n 的主要收益：**互补对**（z_i=x_j, z_{n+i}=x_j⊕1 → z_i·z_{n+i}=0 可滤除项）
+
 ```
-输入: f 的 truth table（n ≤ 16），参数 max_m, K（池大小）
+输入: f 的 truth table（n ≤ 16），参数 max_m, K（池大小，K ≤ 池总大小）
 输出: 最优 (M,b,c,d,g,T(g))
 
+行池 ← 3n 池（identity + complement + XOR 对），Walsh 评分降序
+取前 K 行
+
 对 m = 1..max_m:
-  行池 ← 取 3n 池中前 K 行（Walsh 评分前 top）
+  if 2ᵐ 太大（如 > 2²⁰）→ 跳过本 m
   对所有 C(K,m) 种 (M,b) 组合:
     
     阶段 A — 广义一致性检查
-    ker_basis = nullspace_basis(M, n)   // 高斯消元
-    for 每个 Δ ∈ ker_basis:
-      ref = f(0) ⊕ f(Δ)                // 参考值
-      for all x ∈ F₂ⁿ:
-        if f(x) ⊕ f(x⊕Δ) ≠ ref:
-          goto NEXT_MB                  // 不满足
+    r = gf2_rank(M, m, n)                // M 的秩
+    if r == n:  ker = {0}, 自动一致 → 跳过检查
+    else:
+      ker_basis = nullspace_basis(M, n)  // 高斯消元, dim = n-r
+      for 每个 Δ ∈ ker_basis:
+        ref = f(0) ⊕ f(Δ)                // 参考值
+        for all x ∈ F₂ⁿ:
+          if f(x) ⊕ f(x⊕Δ) ≠ ref:
+            goto NEXT_MB                 // 不满足广义一致
     
     阶段 B — 解 c
-    // 对每个基 Δⱼ: ⟨c, Δⱼ⟩ = f(0)⊕f(Δⱼ)
+    // ⟨c, Δⱼ⟩ = f(0)⊕f(Δⱼ)  对每个基 Δⱼ
     c = solve_linear(B, const_vector)
     // c 在 ker(M)⊥ 的分量设为 0
     
     阶段 C — 构造 g
-    M⁺ = right_inverse(M, m, n)
+    M⁺ = right_inverse(M, m, n)          // 右逆始终存在
     g_tt  ← 大小为 2ᵐ 的数组
     for each z ∈ F₂ᵐ:
       x = M⁺·(z ⊕ b)
-      g_tt[z] = f[x] ⊕ ⟨c, x⟩
+      g_tt[z] = f[x] ⊕ ⟨c, x⟩           // 去掉输出侧仿射
     
     阶段 D — 计算 T(g)
     moebius(g_tt, m)
     T = popcount(g_tt)
-    T = min(T, 2ᵐ - T)          // 含 d 选择
+    T = min(T, 2ᵐ - T)                  // d 的选择
     if T < best_T:
       best = (M,b,c,d,g_tt,T)
     
@@ -751,6 +766,8 @@ f(x) ⊕ f(x⊕Δ) = ⟨c,Δ⟩                 (2)
 
 输出 best
 ```
+
+**关于右逆：** 当 rank(M) < m 时，M 的右逆 M⁺ 不唯一。不同的右逆给出不同的 x = M⁺(z⊕b) ∈ F₂ⁿ 映射到同一个 z。广义一致性保证这些不同的 x 在 f⊕⟨c,·⟩ 下给出相同的值，因此 g(z) 与右逆的选择无关。
 
 #### 6.5.5 与当前随机 M,b 搜索的关系
 
