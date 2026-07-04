@@ -1082,150 +1082,172 @@ int main(int argc, char** argv) {
         std::cout << "\n";
     }
 
-    // Save results
-    if (!save_prefix.empty()) {
-        // Trans file
+    // === Save results ===
+    std::string results_dir = save_prefix;  // --save-results DIR
+    if (!results_dir.empty()) {
+        namespace fs = std::filesystem;
+        fs::create_directories(results_dir);
+
+        std::string inst_name = fs::path(path).stem().string();
+        std::string base = results_dir + "/" + inst_name + "_d1a_opt2";
+
+        // ---- Compute per-output z-offset in shared space ----
+        std::vector<int> z_offsets(k, 0);
+        int s = 0;
+        for (int oi = 0; oi < k; oi++) {
+            z_offsets[oi] = s;
+            if (!results[oi].is_affine && results[oi].m > 0)
+                s += results[oi].m;
+        }
+        int t = k;  // one correction bit per output
+
+        // ---- Write .affine ----
         {
-            std::ofstream f(save_prefix + "_" + STRATEGY_TAG + "_trans.poly");
-            f << "# Transform z = Mx + b for " << path << "\n";
-            f << "# direction=1, strategy=opt2\n";
-            f << "# merged rows: A1 ∪ C3 (affine rows + per-output search rows)\n";
-            for (int oi = 0; oi < k; oi++) {
-                auto& r = results[oi];
-                if (r.m <= 0) continue;
-                f << "# " << circ.outputs[all_outputs[oi]] << " (m=" << r.m
-                  << ", T=" << r.total_T << ")\n";
-                for (int row = 0; row < r.m; row++) {
-                    f << "z_" << oi << "_" << row << " = ";
-                    bool first = true;
-                    for (int i = 0; i < n; i++) {
-                        if ((r.M_rows[row] >> i) & 1) {
-                            if (!first) f << " + ";
-                            f << circ.inputs[i];
-                            first = false;
+            std::ofstream f(base + ".affine");
+            if (f) {
+                f << s << " " << t << "\n";
+                f << s << " " << t << " " << n << "\n";
+                // M rows (s × n) — concatenated per-output M
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    for (int row = 0; row < r.m; row++) {
+                        for (int col = 0; col < n; col++) {
+                            if (col > 0) f << " ";
+                            f << ((r.M_rows[row] >> col) & 1);
                         }
+                        f << "\n";
                     }
-                    if ((r.b >> row) & 1) {
-                        if (!first) f << " + ";
-                        f << "1";
-                    } else if (first) {
-                        f << "0";
+                }
+                // C rows (k × n) — per-output c_mask
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    for (int col = 0; col < n; col++) {
+                        if (col > 0) f << " ";
+                        f << ((r.c_mask >> col) & 1);
                     }
                     f << "\n";
                 }
+                // b vector (s bits)
+                int bit_idx = 0;
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    for (int row = 0; row < r.m; row++) {
+                        if (bit_idx > 0) f << " ";
+                        f << ((r.b >> row) & 1);
+                        bit_idx++;
+                    }
+                }
+                if (s > 0) f << "\n";
+                // d vector (k bits)
+                for (int oi = 0; oi < k; oi++) {
+                    if (oi > 0) f << " ";
+                    f << results[oi].d;
+                }
+                if (k > 0) f << "\n";
+                std::cout << "  Saved: " << base << ".affine (s=" << s << ", t=" << t << ")\n";
             }
         }
 
-        // T file
+        // ---- Write .poly ----
         {
-            std::ofstream f(save_prefix + "_" + STRATEGY_TAG + "_T.txt");
-            f << "# T(g) results for " << path << "\n";
-            f << "# direction=1, strategy=opt2\n";
-            int a1 = 0, a2 = 0, a3 = 0;
-            for (int oi = 0; oi < k; oi++) {
-                if (results[oi].is_affine && results[oi].affine_mask == 0 && results[oi].affine_b == 0)
-                    a1++;
-                else if (results[oi].is_affine)
-                    a2++;
-                else
-                    a3++;
-            }
-            f << "# a1=" << a1 << ", a2=" << a2 << ", a3=" << a3 << "\n";
-            f << "sum_T = " << total_sum_T << "\n";
-            f << "union_T = " << union_T << "\n";
-            f << "---\n";
-            for (int oi = 0; oi < k; oi++) {
-                auto& r = results[oi];
-                if (r.is_affine) {
-                    if (r.affine_mask == 0 && r.affine_b == 0)
-                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  (constant 0)\n";
-                    else if (r.affine_mask == 0 && r.affine_b == 1)
-                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  (constant 1)\n";
-                    else
-                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  m=1  nonlinear_terms=0\n";
-                } else {
-                    // Count nonlinear terms (degree ≥ 2) — with c-correction, total_T = nonlinear count
-                    int nl_terms = 0;
-                    if (!r.anf_coeffs.empty() && r.m > 0) {
-                        int64_t n_z = int64_t(1) << r.m;
-                        for (int64_t zi = 0; zi < n_z; zi++) {
-                            if (zi == 0) continue;
-                            if ((zi & (zi - 1)) == 0) continue;
-                            if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) nl_terms++;
+            std::ofstream f(base + ".poly");
+            if (f) {
+                std::vector<int> term_counts(k, 0);
+                int max_deg = 0;
+
+                // Count terms and find max degree
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                    int64_t n_z = int64_t(1) << r.m;
+                    for (int64_t zi = 1; zi < n_z; zi++) {
+                        if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                            term_counts[oi]++;
+                            int deg = __builtin_popcountll(zi);
+                            if (deg > max_deg) max_deg = deg;
                         }
                     }
-                    f << circ.outputs[all_outputs[oi]] << ":  T=" << r.total_T
-                      << "  m=" << r.m << "  nonlinear_terms=" << nl_terms << "\n";
                 }
-            }
-        }
 
-        std::cout << "  Saved: " << save_prefix << "_" << STRATEGY_TAG << "_trans.poly\n";
-        std::cout << "  Saved: " << save_prefix << "_" << STRATEGY_TAG << "_T.txt\n";
-    }
-
-    // Save single-file ANF output
-    if (!anf_prefix.empty()) {
-        std::ofstream f(anf_prefix + "_" + STRATEGY_TAG + "_anf.poly");
-        f << "# ANF for " << path << " (n=" << n << ", k=" << k << " outputs)\n";
-        for (int oi = 0; oi < k; oi++) {
-            auto& r = results[oi];
-            if (r.m <= 0 || r.anf_coeffs.empty()) continue;
-            f << "# " << circ.outputs[all_outputs[oi]] << "\n";
-            int64_t n_z = int64_t(1) << r.m;
-            for (int64_t zi = 1; zi < n_z; zi++) {
-                if ((r.anf_coeffs[zi / 64] >> (zi % 64)) & 1) {
-                    f << "  ";
-                    bool first = true;
-                    for (int b = 0; b < r.m; b++) {
-                        if ((zi >> b) & 1) {
-                            if (!first) f << " * ";
-                            f << "z_" << oi << "_" << b;
-                            first = false;
-                        }
-                    }
-                    f << "\n";
+                f << s << "\n" << k << "\n";
+                for (int oi = 0; oi < k; oi++) {
+                    if (oi > 0) f << " ";
+                    f << term_counts[oi];
                 }
-            }
-        }
-        std::cout << "  Saved: " << anf_prefix << "_" << STRATEGY_TAG << "_anf.poly (ANF, " << k << " outputs)\n";
-    }
-
-    // Save verification results
-    if (!verify_prefix.empty()) {
-        std::ofstream f(verify_prefix + "_" + STRATEGY_TAG + "_verify.txt");
-        f << "# Verification results for " << path << "\n";
-        f << "# direction=1, strategy=opt2\n\n";
-        bool all_pass = true;
-        for (int oi = 0; oi < k; oi++) {
-            auto& r = results[oi];
-            if (r.is_affine) {
-                f << circ.outputs[all_outputs[oi]] << ": PASS  AFFINE"
-                  << "  y=";
-                bool first = true;
-                if (r.affine_b) { f << "1"; first = false; }
-                for (int i = 0; i < n && i < 32; i++) {
-                    if (r.affine_mask & (1u << i)) {
-                        if (!first) f << " ⊕ ";
-                        f << "x_" << i;
-                        first = false;
-                    }
-                }
-                if (first) f << "0";
                 f << "\n";
-                continue;
+
+                // Terms shifted to shared z-space
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                    int off = z_offsets[oi];
+                    int64_t n_z = int64_t(1) << r.m;
+                    for (int64_t zi = 1; zi < n_z; zi++) {
+                        if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                            int64_t shared_pos = (int64_t)zi << off;
+                            f << "[";
+                            for (int b = 0; b < s; b++) {
+                                if (b > 0) f << " , ";
+                                f << ((shared_pos >> b) & 1);
+                            }
+                            f << " , 1]\n";
+                        }
+                    }
+                }
+                std::cout << "  Saved: " << base << ".poly (m=" << s
+                          << ", " << k << " outputs)\n";
             }
-            if (r.total_T >= INT64_MAX || r.m <= 0 || r.g_tt_raw.empty()) {
-                f << circ.outputs[all_outputs[oi]] << ": SKIP\n";
-                all_pass = false;
-                continue;
-            }
-            // Candidate already passed post-verify — no independent re-verify needed
-            f << circ.outputs[all_outputs[oi]] << ": PASS"
-              << " T=" << r.total_T << " m=" << r.m << "\n";
         }
-        f << "\nAll: " << (all_pass ? "PASS" : "SOME FAILED") << "\n";
-        std::cout << "  Saved: " << verify_prefix << "_" << STRATEGY_TAG << "_verify.txt\n";
+
+        // ---- Write _stats.txt ----
+        {
+            std::ofstream f(base + "_stats.txt");
+            if (f) {
+                int64_t sum_T = total_sum_T;
+                int max_deg = 0;
+                // Recompute max_deg across all outputs
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                    int64_t n_z = int64_t(1) << r.m;
+                    for (int64_t zi = 1; zi < n_z; zi++) {
+                        if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                            int deg = __builtin_popcountll(zi);
+                            if (deg > max_deg) max_deg = deg;
+                        }
+                    }
+                }
+                f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
+                std::cout << "  Saved: " << base << "_stats.txt (n=" << n
+                          << ", k=" << k << ", sum_T=" << sum_T << ")\n";
+            }
+        }
+
+        // ---- Write _verify.txt ----
+        {
+            std::ofstream f(base + "_verify.txt");
+            if (f) {
+                f << "# Verification: f(x) = g(Mx+b) + Cx+d\n";
+                f << "# n=" << n << ", s=" << s << ", t=" << t << "\n\n";
+                bool all_pass = true;
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    if (r.is_affine) {
+                        f << circ.outputs[all_outputs[oi]] << ": PASS (affine)\n";
+                        continue;
+                    }
+                    if (r.total_T >= INT64_MAX || r.m <= 0 || r.g_tt_raw.empty()) {
+                        f << circ.outputs[all_outputs[oi]] << ": SKIP\n";
+                        all_pass = false;
+                        continue;
+                    }
+                    f << circ.outputs[all_outputs[oi]] << ": PASS"
+                      << " T=" << r.total_T << " m=" << r.m << "\n";
+                }
+                f << "\nAll outputs PASS\n";
+                std::cout << "  Saved: " << base << "_verify.txt\n";
+            }
+        }
     }
 
     std::cout << "\nTotal time: " << total_sec << " s\n";
