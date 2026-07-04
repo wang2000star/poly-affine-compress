@@ -30,7 +30,7 @@ struct AffineTransform {
 };
 
 struct PolyTerm {
-    uint32_t mask;   // which z-variables appear (bits 0..m-1)
+    uint64_t mask;   // which z-variables appear (bits 0..m-1)
     int coeff;       // 0 or 1
 };
 
@@ -95,10 +95,10 @@ static std::vector<PolyOutput> parse_poly(const std::string& path, int& m) {
         for (int ti = 0; ti < term_counts[oi]; ti++) {
             // Parse [e_0, e_1, ..., e_{m-1}, coeff]
             char c; f >> c; // skip '['
-            uint32_t mask = 0;
+            uint64_t mask = 0;
             for (int b = 0; b < m; b++) {
                 int bit; f >> bit; f >> c; // read bit and comma/']
-                if (bit) mask |= (1u << b);
+                if (bit) mask |= (1ULL << b);
             }
             int coeff; f >> coeff;
             f >> c; // skip ']'
@@ -112,7 +112,7 @@ static std::vector<PolyOutput> parse_poly(const std::string& path, int& m) {
 //  Evaluate ANF at given z-value
 // ====================================================================
 
-static bool eval_poly(const PolyOutput& out, uint32_t z) {
+static bool eval_poly(const PolyOutput& out, uint64_t z) {
     bool result = false;
     for (const auto& term : out.terms) {
         if (term.coeff == 0) continue;
@@ -211,11 +211,11 @@ int main(int argc, char** argv) {
     for (int test = 0; test < n_total; test++) {
         uint32_t x = (n <= 16) ? (uint32_t)test
                                : (uint32_t)(((uint64_t)test * 0x9e3779b97f4a7c15ULL) & mask);
-        // z = Mx+b
-        uint32_t z = 0;
+        // z = Mx+b (z can be up to 64 bits for s > 32)
+        uint64_t z = 0;
         for (int j = 0; j < tfm.s; j++) {
             if ((__builtin_popcount(tfm.M_rows[j] & x) & 1) ^ tfm.b[j])
-                z |= (1u << j);
+                z |= (1ULL << j);
         }
 
         auto f_vals = eval_circuit_point(circ, x);
