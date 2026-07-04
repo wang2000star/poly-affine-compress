@@ -368,9 +368,111 @@ f(x) = g(z) ⊕ ⟨c,x⟩ ⊕ d, z = Mx⊕b
 
 ---
 
-## 十、文件路径与结果文件格式
+## 十、预处理
 
-### 10.0 文件路径
+### 10.0 概述
+
+`preprocess` 程序对每个实例做一次性预处理，生成固定文件供后续优化程序使用。结果存放在 `preprocessed/{inst}/` 下，与 `results/`（优化输出）完全分开。
+
+预处理步骤：
+1. 变量重命名：输入 → x_i, 输出 → y_j, 中间信号 → t_k
+2. 输出分类：检测每个输出是常量、仿射还是非线性
+3. 生成 6 种文件（部分实例无 raw_anf.poly）
+
+### 10.1 重命名电路 `{inst}.txt`
+
+```
+INORDER = x_7 x_6 x_5 x_4 x_3 x_2 x_1 x_0;
+OUTORDER = y_0 y_1 y_2 y_3 y_4 y_5 y_6 y_7;
+t_0 = !x_0;
+t_1 = !x_1;
+t_2 = t_0 * t_1;
+...
+```
+
+格式与原始电路一致，变量名标准化。后续所有优化程序读此文件。
+
+### 10.2 统计文件 `{inst}_stats.txt`
+
+9 行纯数字，按行号索引，无等号无注释：
+
+```
+行 1: n_inputs      输入变量数
+行 2: n_outputs     输出变量数
+行 3: n_internal    中间信号数
+行 4: n_and         AND 门数
+行 5: n_xor         XOR 门数
+行 6: n_not         NOT 门数
+行 7: sum_T_raw     原始非线性项数总和（仅 n≤16）
+行 8: union_T_raw   原始非线性项并集大小（仅 n≤16）
+行 9: max_deg       最高 ANF 度数
+```
+
+n=32 实例第 7-9 行为 0（无法计算完整 ANF）。
+
+### 10.3 常量文件 `{inst}_const.txt`
+
+第一行个数，第二行下标，第三行对应值。
+
+```
+2
+2 4
+0 1
+```
+
+表示 y_2=0, y_4=1。无常量输出则只一行 0。
+
+### 10.4 仿射文件 `{inst}_affine.mat`
+
+第一行个数，第二行下标，第三行行数 列数，后面矩阵（每行 n+1 个数，前 n 位 mask，最后一位 b）。
+
+```
+2
+1 7
+2 9
+1 0 0 0 1 0 0 0 0
+0 0 0 0 0 0 0 1 1
+```
+
+表示 y_1: mask=bit_4+bit_1, b=0 → z=x_4+x_1；y_7: mask=bit_0, b=1 → z=x_0+1。
+无仿射输出则只一行 0。
+
+### 10.5 非线性文件 `{inst}_nonlinear.txt`
+
+第一行个数，第二行下标，第三行原始 T 值（degree ≥ 2），第四行度数。
+
+```
+5
+0 3 4 5 6
+120 85 77 62 33
+5 4 3 4 3
+```
+
+n=32 实例只有前两行（无 T_raw 和 deg）。
+无非线性输出则只一行 0。
+
+### 10.6 原始 ANF 文件 `{inst}_raw_anf.poly`
+
+仅 n≤16 的实例生成。每输出一段 monomial 列表：
+
+```
+# y_0
+x_0 * x_1
+x_0 * x_2 * x_3
+...
+```
+
+n=32 的实例无此文件。
+
+### 10.7 分类互斥规则
+
+每个输出恰好出现在一个分类文件中（const / affine / nonlinear 之一），不重复。
+
+---
+
+## 十一、文件路径与结果文件格式
+
+### 11.0 文件路径
 
 **输入**：原始电路文件 `.txt` 放在 `examples/{inst}.txt`。
 
@@ -391,7 +493,7 @@ results/{inst}/
 
 `variant` 取值：`opt1`、`opt2`、`gatebuilder` 等，表示不同优化策略。
 
-### 10.1 命名规则
+### 11.1 命名规则
 
 ```
 {inst}_d{dir}_opt{1/2}_{suffix}
@@ -406,7 +508,7 @@ results/{inst}/
 | `verify.txt` | 验证结果 |
 | `summary.txt` | 各组合对比（仅 best）|
 
-### 10.2 T 文件（T.txt）
+### 11.2 T 文件（T.txt）
 
 ```
 # T(g) results for hd01
@@ -427,7 +529,7 @@ om_0:  AFFINE  (constant 0)
 - `m` 是该输出所用 z 变量数
 - `nonlinear_terms` 是 T(gⱼ)
 
-### 10.3 变换文件（trans.poly）
+### 11.3 变换文件（trans.poly）
 
 ```
 # Transform z = Mx + b for hd01
@@ -446,7 +548,7 @@ z_1 = i1            # om_8
 - 若 mask=0 则写 `z_{idx} = 0`
 - 注释行标注对应输出
 
-### 10.4 ANF 文件（anf.poly）
+### 11.4 ANF 文件（anf.poly）
 
 ```
 # ANF for hd01
@@ -465,7 +567,7 @@ z_1 = i1            # om_8
 每个输出下列出其 g 的 ANF 中所有 degree ≥ 2 的项。
 每行一项，格式：`z_i * z_j * ...`（AND 链）。
 
-### 10.5 验证文件（verify.txt）
+### 11.5 验证文件（verify.txt）
 
 ```
 # Verification results for hd01
@@ -483,7 +585,7 @@ All outputs: PASS
 
 FAIL 时标注具体失败输出数和测试点数。
 
-### 10.6 汇总文件（best_summary.txt）
+### 11.6 汇总文件（best_summary.txt）
 
 ```
 # Best results for hd01
@@ -505,7 +607,7 @@ affine outputs: om_0 (constant 0)
 
 ---
 
-## 十一、待实现优先级
+## 十二、待实现优先级
 
 | 优先级 | 项目 | 说明 |
 |--------|------|------|
