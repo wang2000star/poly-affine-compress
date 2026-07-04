@@ -34,6 +34,7 @@
 #include <sstream>
 #include <thread>
 #include <algorithm>
+#include <filesystem>
 
 struct Opt2Result {
     int m;                              // total z variables
@@ -217,7 +218,21 @@ int main(int argc, char** argv) {
     }
 
     std::cout << std::unitbuf;
-    std::string path = argv[1];
+
+    // ---- Resolve project root from executable path, then chdir ----
+    namespace fs = std::filesystem;
+    auto orig_cwd = fs::current_path();
+    auto exe = fs::weakly_canonical(fs::absolute(fs::path(argv[0])));
+    auto root = exe.parent_path();
+    for (int i = 0; i < 3 && !fs::exists(root / "examples"); i++)
+        root = root.parent_path();
+    fs::current_path(root);
+
+    // Resolve circuit path (relative to original CWD), then make relative to project root
+    fs::path circ_fs_path(argv[1]);
+    if (circ_fs_path.is_relative()) circ_fs_path = orig_cwd / circ_fs_path;
+    circ_fs_path = fs::weakly_canonical(circ_fs_path);
+    std::string path = circ_fs_path.string();
 
     Circuit circ = read_circuit(path);
     int n = circ.n_inputs;
@@ -237,7 +252,11 @@ int main(int argc, char** argv) {
         else if (arg == "--walsh-k" && a + 1 < argc) params.walsh_single_top = std::stoi(argv[++a]);
         else if (arg == "--random" && a + 1 < argc) params.n_random = std::stoi(argv[++a]);
         else if (arg == "--hill-climb" && a + 1 < argc) params.n_hill_climb = std::stoi(argv[++a]);
-        else if (arg == "--save-results" && a + 1 < argc) save_prefix = argv[++a];
+        else if (arg == "--save-results" && a + 1 < argc) {
+            fs::path p(argv[++a]);
+            if (p.is_relative()) p = root / p;
+            save_prefix = p.string();
+        }
     }
 
     if (n > 32) {
@@ -324,58 +343,81 @@ int main(int argc, char** argv) {
 
     // Save results
     if (!save_prefix.empty()) {
-        std::string p = save_prefix;
+        std::string inst_name = std::filesystem::path(path).stem().string();
+        std::string dir = save_prefix;
+        while (!dir.empty() && dir.back() == '/') dir.pop_back();
+        std::string prefix = dir + "/" + inst_name + "_d3_opt2";
 
-        // Trans file
+        // ---- .affine: block-diagonal M with per-output b ----
         {
-            std::ofstream f(p + "_opt2_trans.poly");
-            f << "# opt2 transform z_i = M_i x + b_i (per-output, block-diagonal M)\n";
-            f << "# m=" << result.m << ", n=" << n << "\n";
-            int off = 0;
-            for (int oi = 0; oi < k; oi++) {
-                int mi = per_output[oi].m;
-                for (int r = 0; r < mi; r++) {
-                    f << "z_" << (off + r) << " = ";
-                    bool first = true;
-                    for (int i = 0; i < n; i++) {
-                        if ((per_output[oi].M_rows[r] >> i) & 1) {
-                            if (!first) f << " + ";
-                            f << circ.inputs[i];
-                            first = false;
+            int s = result.m;
+            int t = 0;
+            std::ofstream f(prefix + ".affine");
+            if (f) {
+                f << s << " " << t << "\n" << s << " " << t << " " << n << "\n";
+                // M rows: concatenated per-output M_rows
+                for (int oi = 0; oi < k; oi++) {
+                    for (int r = 0; r < per_output[oi].m; r++) {
+                        for (int c = 0; c < n; c++) {
+                            if (c > 0) f << " ";
+                            f << ((per_output[oi].M_rows[r] >> c) & 1);
                         }
+                        f << "\n";
                     }
-                    if ((per_output[oi].b >> r) & 1) {
-                        if (!first) f << " + ";
-                        f << "1";
-                    } else if (first) {
-                        f << "0";
-                    }
-                    f << "\n";
                 }
-                off += mi;
+                // b vector: concatenated per-output b
+                int bit = 0;
+                for (int oi = 0; oi < k; oi++) {
+                    for (int r = 0; r < per_output[oi].m; r++) {
+                        if (bit > 0) f << " ";
+                        f << ((per_output[oi].b >> r) & 1);
+                        bit++;
+                    }
+                }
+                if (s > 0) f << "\n";
+                std::cout << "  Saved: " << prefix << ".affine (s=" << s << ")\n";
             }
         }
 
-        // Expr file (only when merged g_tt_raw is available)
+        // ---- .poly: merged g truth table ----
         if (!result.g_tt_raw.empty()) {
-            save_opt_expr(result.g_tt_raw, circ, output_indices, result.m, p + "_opt2_expr.poly");
+            save_opt_expr(result.g_tt_raw, circ, output_indices, result.m, prefix + ".poly");
         }
 
-        // T file
+        // ---- _stats.txt: 5-line numeric ----
         {
-            std::ofstream f(p + "_opt2_T.poly");
-            f << "# opt2 T(g) (per-output, m=" << result.m << ")\n";
-            f << "# sum T = " << result.sum_T << "\n";
-            f << "# union T = " << result.union_T << "\n";
-            for (int oi = 0; oi < k; oi++)
-                f << circ.outputs[output_indices[oi]] << ": T=" << per_output[oi].total_T << "\n";
-        }
+            // Compute max degree from merged g_tt_raw (Möbius transform)
+            std::vector<std::vector<uint64_t>> g_copy;
+            if (!result.g_tt_raw.empty()) {
+                g_copy = result.g_tt_raw;
+                int max_deg = 0;
+                int64_t n_words = int64_t(1) << (result.m < 6 ? 0 : result.m - 6);
+                for (int oi = 0; oi < k; oi++) {
+                    std::vector<uint64_t> anf(g_copy[oi]);
+                    if (result.m > 0) {
+                        // in-place Möbius would modify, use a copy per output
+                        moebius_packed(anf.data(), result.m);
+                    }
+                    for (int64_t w = 0; w < n_words; w++) {
+                        uint64_t word = anf[w];
+                        while (word) {
+                            int bit = __builtin_ctzll(word);
+                            word &= word - 1;
+                            int deg = __builtin_popcountll((w << 6) | bit);
+                            if (deg > max_deg) max_deg = deg;
+                        }
+                    }
+                }
 
-        std::cout << "\n  Saved: " << p << "_opt2_trans.poly\n";
-        if (!result.g_tt_raw.empty())
-            std::cout << "  Saved ANF: " << p << "_opt2_expr.poly (" << result.sum_T << " terms)\n";
-        std::cout << "  Saved T: " << p << "_opt2_T.poly (sum=" << result.sum_T
-                  << ", union=" << result.union_T << ")\n";
+                std::ofstream f(prefix + "_stats.txt");
+                if (f) {
+                    f << n << "\n" << k << "\n" << result.sum_T << "\n"
+                      << result.union_T << "\n" << max_deg << "\n";
+                    std::cout << "  Saved: " << prefix << "_stats.txt (sum_T="
+                              << result.sum_T << ", union_T=" << result.union_T << ")\n";
+                }
+            }
+        }
     }
 
     std::cout << "\nTotal time: skipped\n";

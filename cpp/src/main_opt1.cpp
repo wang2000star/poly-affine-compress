@@ -39,7 +39,24 @@ int main(int argc, char** argv) {
     }
 
     std::cout << std::unitbuf;
-    std::string path = argv[1];
+    std::string path;
+    std::string _opt_root;  // project root for resolving relative paths
+
+    // ---- Resolve project root from executable path, then chdir ----
+    {
+        namespace _fs = std::filesystem;
+        auto orig_cwd = _fs::current_path();
+        auto exe = _fs::weakly_canonical(_fs::absolute(_fs::path(argv[0])));
+        _opt_root = exe.parent_path().string();
+        for (int i = 0; i < 3 && !_fs::exists(_opt_root + "/examples"); i++)
+            _opt_root = _fs::path(_opt_root).parent_path().string();
+        _fs::current_path(_opt_root);
+
+        // Resolve circuit path (relative to original CWD) to absolute
+        _fs::path circ_fs_path(argv[1]);
+        if (circ_fs_path.is_relative()) circ_fs_path = orig_cwd / circ_fs_path;
+        path = _fs::weakly_canonical(circ_fs_path).string();
+    }
 
     // Extract instance name: "examples/hd08.txt" -> "hd08"
     std::string inst = path;
@@ -90,6 +107,21 @@ int main(int argc, char** argv) {
             params.progressive_max_m = std::stoi(argv[++a]);
         else if (arg == "--dep-filter" && a + 1 < argc)
             params.use_dep_filter = (std::stoi(argv[++a]) != 0);
+    }
+    // Make output paths absolute (relative to project root)
+    {
+        std::string& s = params.anf_out_dir;
+        if (!s.empty()) {
+            std::filesystem::path p(s);
+            if (p.is_relative()) s = (std::filesystem::path(_opt_root) / p).string();
+        }
+    }
+    {
+        std::string& s = params.results_dir;
+        if (!s.empty()) {
+            std::filesystem::path p(s);
+            if (p.is_relative()) s = (std::filesystem::path(_opt_root) / p).string();
+        }
     }
 
     // Phase 1: Compute truth table

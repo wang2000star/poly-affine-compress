@@ -124,102 +124,192 @@ static std::vector<OutputResult> process_outputs(
 }
 
 // ====================================================================
-//  File writers
+//  File writers — matrix format (.affine, .poly, _stats.txt)
 // ====================================================================
 
-static void write_trans(const std::string& path, const std::string& inst,
-                         const std::vector<std::string>& inputs,
-                         const std::vector<OutputResult>& results)
+static void write_affine(const std::string& path,
+                          const std::vector<OutputResult>& results,
+                          const Circuit& circ)
 {
     std::ofstream f(path);
     if (!f) { std::cerr << "  ERROR: cannot write " << path << "\n"; return; }
-    f << "# Transform z = Mx + b for " << inst << "\n";
-    f << "# direction=1, strategy=opt2, variant=1b (gate-level)\n";
 
-    int z_idx = 0;
-    for (auto& r : results) {
-        for (int j = 0; j < (int)r.M_rows.size(); j++) {
-            uint32_t row = r.M_rows[j];
-            if (row == 0 && !((r.b >> j) & 1)) continue;
-            f << "z_" << z_idx << " = ";
-            bool first = true;
-            for (int i = 0; i < (int)inputs.size(); i++) {
-                if ((row >> i) & 1) {
-                    if (!first) f << " + ";
-                    f << inputs[i];
-                    first = false;
-                }
-            }
-            if ((r.b >> j) & 1) {
-                if (!first) f << " + ";
-                f << "1";
-                first = false;
-            }
-            f << "  # " << r.name << "\n";
-            z_idx++;
-        }
-        // c rows: ⟨c, x⟩
-        for (int i = 0; i < (int)r.c.size(); i++) {
-            if (r.c[i]) {
-                f << "z_" << z_idx << " = " << inputs[i] << "  # c for " << r.name << "\n";
-                z_idx++;
-            }
-        }
-        // d row
-        if (r.d) {
-            f << "z_" << z_idx << " = 1  # d for " << r.name << "\n";
-            z_idx++;
-        }
+    int n = circ.n_inputs;
+    int k = (int)results.size();
+
+    // Count total z vars: M rows + c rows + d row
+    // GateBuilder uses shared z indices across all outputs
+    // But each output has its own M_rows, c, d — they're not concatenated
+    // Each output's variables are independent, placed at z_offsets[oi]
+
+    // For simplicity: each output gets (m_used + popcount(c) + (d!=0)) z vars
+    std::vector<int> z_offsets(k, 0);
+    int s = 0;
+    for (int oi = 0; oi < k; oi++) {
+        z_offsets[oi] = s;
+        int m = results[oi].m_used;
+        int c_cnt = 0;
+        for (int v : results[oi].c) if (v) c_cnt++;
+        s += m + c_cnt + (results[oi].d ? 1 : 0);
     }
-}
+    int t = k;
 
-static void write_anf(const std::string& path, const std::string& inst,
-                       const std::vector<OutputResult>& results,
-                       const std::vector<std::string>& z_names)
-{
-    std::ofstream f(path);
-    if (!f) { std::cerr << "  ERROR: cannot write " << path << "\n"; return; }
-    f << "# ANF for " << inst << " (g corrected, degree >= 2 only)\n";
-    f << "# direction=1, strategy=opt2, variant=1b\n";
+    f << s << " " << t << "\n" << s << " " << t << " " << n << "\n";
 
-    for (auto& r : results) {
-        if (r.g_corrected.T_nonlinear() == 0) continue;
-        f << "# " << r.name << "\n";
-        auto& terms = r.g_corrected.terms();
-        std::vector<std::pair<uint64_t, int>> sorted(terms.begin(), terms.end());
-        std::sort(sorted.begin(), sorted.end());
-        for (auto& [mask, v] : sorted) {
-            if (!v || __builtin_popcountll(mask) < 2) continue;
-            f << "  ";
-            bool first = true;
-            for (int j = 0; j < 64; j++) {
-                if ((mask >> j) & 1) {
-                    if (!first) f << " * ";
-                    f << (j < (int)z_names.size() ? z_names[j] : ("z_" + std::to_string(j)));
-                    first = false;
+    // M rows
+    for (int oi = 0; oi < k; oi++) {
+        for (int r = 0; r < (int)results[oi].M_rows.size(); r++) {
+            for (int c = 0; c < n; c++) {
+                if (c > 0) f << " ";
+                f << ((results[oi].M_rows[r] >> c) & 1);
+            }
+            f << "\n";
+        }
+        // c rows
+        for (int c = 0; c < n; c++) {
+            if (results[oi].c[c]) {
+                for (int cc = 0; cc < n; cc++) {
+                    if (cc > 0) f << " ";
+                    f << (cc == c ? 1 : 0);
                 }
+                f << "\n";
+            }
+        }
+        // d row (constant row = all zeros in M)
+        if (results[oi].d) {
+            for (int c = 0; c < n; c++) {
+                if (c > 0) f << " ";
+                f << "0";
             }
             f << "\n";
         }
     }
+
+    // C rows (k × n), each is the c vector for that output
+    for (int oi = 0; oi < k; oi++) {
+        for (int c = 0; c < n; c++) {
+            if (c > 0) f << " ";
+            f << results[oi].c[c];
+        }
+        f << "\n";
+    }
+
+    // b vector (s bits)
+    int bit = 0;
+    for (int oi = 0; oi < k; oi++) {
+        for (int r = 0; r < (int)results[oi].M_rows.size(); r++) {
+            if (bit > 0) f << " ";
+            f << ((results[oi].b >> r) & 1);
+            bit++;
+        }
+        for (int v : results[oi].c) {
+            if (v) {
+                if (bit > 0) f << " ";
+                f << "0";
+                bit++;
+            }
+        }
+        if (results[oi].d) {
+            if (bit > 0) f << " ";
+            f << "1";
+            bit++;
+        }
+    }
+    if (s > 0) f << "\n";
+
+    // d vector (k bits)
+    for (int oi = 0; oi < k; oi++) {
+        if (oi > 0) f << " ";
+        f << results[oi].d;
+    }
+    if (k > 0) f << "\n";
+
+    std::cout << "  Saved: " << path << " (s=" << s << ", t=" << t << ")\n";
 }
 
-static void write_T(const std::string& path, const std::string& inst,
-                     const std::vector<OutputResult>& results)
+static void write_poly(const std::string& path,
+                        const std::vector<OutputResult>& results)
 {
     std::ofstream f(path);
     if (!f) { std::cerr << "  ERROR: cannot write " << path << "\n"; return; }
-    int64_t sum_T = 0;
-    for (auto& r : results) sum_T += r.g_corrected.T_nonlinear();
-    f << "# T(g) results for " << inst << "\n";
-    f << "# direction=1, strategy=opt2, variant=1b\n";
-    f << "sum_T = " << sum_T << "\n";
-    f << "---\n";
-    for (auto& r : results) {
-        int T_nl = r.g_corrected.T_nonlinear();
-        f << r.name << ":  T=" << T_nl << "  m=" << r.m_used
-          << "  nonlinear_terms=" << T_nl << "\n";
+
+    int k = (int)results.size();
+    if (k == 0) return;
+
+    // Compute z offsets and total s
+    std::vector<int> z_offsets(k, 0);
+    int s = 0;
+    for (int oi = 0; oi < k; oi++) {
+        z_offsets[oi] = s;
+        int m = results[oi].m_used;
+        int c_cnt = 0;
+        for (int v : results[oi].c) if (v) c_cnt++;
+        s += m + c_cnt + (results[oi].d ? 1 : 0);
     }
+
+    std::vector<int> term_counts(k, 0);
+    for (int oi = 0; oi < k; oi++) {
+        if (results[oi].g_corrected.T_nonlinear() == 0) continue;
+        auto& terms = results[oi].g_corrected.terms();
+        for (auto& [mask, v] : terms) {
+            if (v && __builtin_popcountll(mask) >= 2)
+                term_counts[oi]++;
+        }
+    }
+
+    f << s << "\n" << k << "\n";
+    for (int oi = 0; oi < k; oi++) {
+        if (oi > 0) f << " ";
+        f << term_counts[oi];
+    }
+    f << "\n";
+
+    for (int oi = 0; oi < k; oi++) {
+        int off = z_offsets[oi];
+        if (results[oi].g_corrected.T_nonlinear() == 0) continue;
+        auto& terms = results[oi].g_corrected.terms();
+        for (auto& [mask, v] : terms) {
+            if (!v || __builtin_popcountll(mask) < 2) continue;
+            uint64_t shared_pos = mask << off;
+            f << "[";
+            for (int b = 0; b < s; b++) {
+                if (b > 0) f << " , ";
+                f << ((shared_pos >> b) & 1);
+            }
+            f << " , 1]\n";
+        }
+    }
+    std::cout << "  Saved: " << path << " (m=" << s << ", " << k << " outputs)\n";
+}
+
+static void write_stats(const std::string& path,
+                         const std::vector<OutputResult>& results,
+                         int n)
+{
+    std::ofstream f(path);
+    if (!f) { std::cerr << "  ERROR: cannot write " << path << "\n"; return; }
+
+    int k = (int)results.size();
+    int64_t sum_T = 0;
+    int max_deg = 0;
+    for (int oi = 0; oi < k; oi++) {
+        int t = results[oi].g_corrected.T_nonlinear();
+        sum_T += t;
+        if (t > 0) {
+            auto& terms = results[oi].g_corrected.terms();
+            for (auto& [mask, v] : terms) {
+                if (v) {
+                    int deg = __builtin_popcountll(mask);
+                    if (deg > max_deg) max_deg = deg;
+                }
+            }
+        }
+    }
+
+    int64_t union_T = sum_T;  // approximate since SparseANF terms are per-output
+
+    f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
+    std::cout << "  Saved: " << path << " (sum_T=" << sum_T << ")\n";
 }
 
 // ====================================================================
@@ -236,19 +326,37 @@ int main(int argc, char** argv) {
     int threshold = 4096;
     std::string out_dir = "";
 
-    for (int i = 1; i < argc; i++) {
-        std::string arg = argv[i];
-        if (arg == "--threshold" && i + 1 < argc)
-            threshold = std::stoi(argv[++i]);
-        else if (arg == "--out-dir" && i + 1 < argc)
-            out_dir = argv[++i];
-        else if (arg[0] != '-')
-            circ_path = arg;
-    }
+    // ---- Resolve project root from executable path, then chdir ----
+    {
+        auto orig_cwd = fs::current_path();
+        auto exe = fs::weakly_canonical(fs::absolute(fs::path(argv[0])));
+        auto root = exe.parent_path();
+        for (int i = 0; i < 3 && !fs::exists(root / "examples"); i++)
+            root = root.parent_path();
+        fs::current_path(root);
 
-    if (circ_path.empty()) {
-        std::cerr << "  ERROR: no circuit file specified\n";
-        return 1;
+        for (int i = 1; i < argc; i++) {
+            std::string arg = argv[i];
+            if (arg == "--threshold" && i + 1 < argc)
+                threshold = std::stoi(argv[++i]);
+            else if (arg == "--out-dir" && i + 1 < argc) {
+                fs::path p(argv[++i]);
+                if (p.is_relative()) p = root / p;
+                out_dir = p.string();
+            }
+            else if (arg[0] != '-')
+                circ_path = arg;
+        }
+
+        if (circ_path.empty()) {
+            std::cerr << "  ERROR: no circuit file specified\n";
+            return 1;
+        }
+
+        // Resolve circuit path
+        fs::path cp(circ_path);
+        if (cp.is_relative()) cp = orig_cwd / cp;
+        circ_path = fs::weakly_canonical(cp).string();
     }
 
     // Derive instance name from circuit path
@@ -282,13 +390,12 @@ int main(int argc, char** argv) {
 
     // Write output files
     fs::create_directories(out_dir);
-    write_trans(out_dir + "/" + inst + "_gatebuilder_trans.poly", inst,
-                circ.inputs, results);
-    write_anf(out_dir + "/" + inst + "_gatebuilder_anf.poly", inst,
-              results, z_names);
-    write_T(out_dir + "/" + inst + "_gatebuilder_T.txt", inst, results);
+    std::string base = out_dir + "/" + inst + "_d1b_opt2";
+    write_affine(base + ".affine", results, circ);
+    write_poly(base + ".poly", results);
+    write_stats(base + "_stats.txt", results, circ.n_inputs);
 
-    printf("  Done. Files written to %s/%s_gatebuilder_*\n",
+    printf("  Done. Files written to %s/%s_d1b_opt2.*\n",
            out_dir.c_str(), inst.c_str());
     return 0;
 }

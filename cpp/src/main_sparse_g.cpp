@@ -44,6 +44,7 @@
 #include <climits>
 #include <chrono>
 #include <cmath>
+#include <filesystem>
 
 // Strategy tag for output file naming (prevents confusion between different search strategies)
 static const char* STRATEGY_TAG = "sg";
@@ -871,7 +872,22 @@ int main(int argc, char** argv) {
     }
 
     std::cout << std::unitbuf;
-    std::string path = argv[1];
+
+    // ---- Resolve project root from executable path, then chdir ----
+    namespace fs = std::filesystem;
+    auto orig_cwd = fs::current_path();
+    auto exe = fs::weakly_canonical(fs::absolute(fs::path(argv[0])));
+    auto root = exe.parent_path();
+    for (int i = 0; i < 3 && !fs::exists(root / "examples"); i++)
+        root = root.parent_path();
+    fs::current_path(root);
+
+    // Resolve circuit path (relative to original CWD) to absolute
+    fs::path circ_fs_path(argv[1]);
+    if (circ_fs_path.is_relative()) circ_fs_path = orig_cwd / circ_fs_path;
+    circ_fs_path = fs::weakly_canonical(circ_fs_path);
+    std::string path = circ_fs_path.string();
+
     Circuit circ = read_circuit(path);
     int n = circ.n_inputs;
 
@@ -893,9 +909,21 @@ int main(int argc, char** argv) {
         else if (arg == "--pool-rows" && a + 1 < argc) pool_rows = std::stoi(argv[++a]);
         else if (arg == "--random" && a + 1 < argc) n_random = std::stoi(argv[++a]);
         else if (arg == "--hill-climb" && a + 1 < argc) n_hill_climb = std::stoi(argv[++a]);
-        else if (arg == "--save-results" && a + 1 < argc) save_prefix = argv[++a];
-        else if (arg == "--anf-out" && a + 1 < argc) anf_prefix = argv[++a];
-        else if (arg == "--verify-out" && a + 1 < argc) verify_prefix = argv[++a];
+        else if (arg == "--save-results" && a + 1 < argc) {
+            fs::path p(argv[++a]);
+            if (p.is_relative()) p = root / p;
+            save_prefix = p.string();
+        }
+        else if (arg == "--anf-out" && a + 1 < argc) {
+            fs::path p(argv[++a]);
+            if (p.is_relative()) p = root / p;
+            anf_prefix = p.string();
+        }
+        else if (arg == "--verify-out" && a + 1 < argc) {
+            fs::path p(argv[++a]);
+            if (p.is_relative()) p = root / p;
+            verify_prefix = p.string();
+        }
     }
 
     // Auto-verify when saving results (mandatory — unverified results are not accepted)
@@ -1038,154 +1066,186 @@ int main(int argc, char** argv) {
 
     // Save results
     if (!save_prefix.empty()) {
+        std::string inst_name = std::filesystem::path(path).stem().string();
+        // Ensure save_prefix is a directory (remove trailing separator)
+        std::string dir = save_prefix;
+        while (!dir.empty() && dir.back() == '/') dir.pop_back();
+        std::string base = dir + "/" + inst_name + "_d2_opt2";
+
+        // ---- .affine: concatenated per-output M, b + c,d correction ----
         {
-            std::ofstream f(save_prefix + "_" + STRATEGY_TAG + "_trans.poly");
-            f << "# sparse-g enumeration: z_i = M_i x + b_i (per-output)\n";
-            for (int oi = 0; oi < k; oi++) {
-                auto& r = results[oi];
-                if (r.is_affine) {
-                    f << "# " << circ.outputs[all_outputs[oi]] << ": AFFINE (constant)\n";
-                    continue;
-                }
-                if (r.m <= 0) continue;
-                f << "# " << circ.outputs[all_outputs[oi]] << " (m=" << r.m
-                  << ", T=" << r.total_T << ", raw_T=" << r.T_raw << ")\n";
-                for (int row = 0; row < r.m; row++) {
-                    f << "z_" << oi << "_" << row << " = ";
-                    bool first = true;
-                    for (int i = 0; i < n; i++) {
-                        if ((r.M_rows[row] >> i) & 1) {
-                            if (!first) f << " + ";
-                            f << circ.inputs[i];
-                            first = false;
+            // Count total z variables (sum of per-output m)
+            int s = 0;
+            for (int oi = 0; oi < k; oi++)
+                if (!results[oi].is_affine && results[oi].m > 0)
+                    s += results[oi].m;
+            int t = k;  // one correction row per output
+
+            std::ofstream f(base + ".affine");
+            if (f) {
+                f << s << " " << t << "\n" << s << " " << t << " " << n << "\n";
+                // M rows: concatenated per-output M_rows
+                for (int oi = 0; oi < k; oi++) {
+                    if (results[oi].is_affine || results[oi].m <= 0) continue;
+                    for (int r = 0; r < results[oi].m; r++) {
+                        for (int c = 0; c < n; c++) {
+                            if (c > 0) f << " ";
+                            f << ((results[oi].M_rows[r] >> c) & 1);
                         }
+                        f << "\n";
                     }
-                    if ((r.b >> row) & 1) {
-                        if (!first) f << " + ";
-                        f << "1";
-                    } else if (first) {
-                        f << "0";
+                }
+                // C rows: per-output c_vec
+                for (int oi = 0; oi < k; oi++) {
+                    for (int c = 0; c < n; c++) {
+                        if (c > 0) f << " ";
+                        f << (results[oi].c_vec.empty() ? 0 : (int)(results[oi].c_vec[c] & 1));
                     }
                     f << "\n";
                 }
+                // b vector: concatenated per-output b
+                int bit = 0;
+                for (int oi = 0; oi < k; oi++) {
+                    if (results[oi].is_affine || results[oi].m <= 0) continue;
+                    for (int r = 0; r < results[oi].m; r++) {
+                        if (bit > 0) f << " ";
+                        f << ((results[oi].b >> r) & 1);
+                        bit++;
+                    }
+                }
+                if (s > 0) f << "\n";
+                // d vector: per-output d
+                for (int oi = 0; oi < k; oi++) {
+                    if (oi > 0) f << " ";
+                    f << (int)results[oi].d;
+                }
+                if (k > 0) f << "\n";
+                std::cout << "  Saved: " << base << ".affine (s=" << s << ", t=" << t << ")\n";
             }
         }
 
+        // ---- .poly: per-output ANF terms in shared z-space ----
         {
-            std::ofstream f(save_prefix + "_" + STRATEGY_TAG + "_T.txt");
-            f << "# T(g) results for " << path << "\n";
-            f << "# direction=1, strategy=opt2\n";
-            int a1 = 0, a2 = 0, a3 = 0;
+            // Compute per-output z-offset in shared space
+            std::vector<int> z_off(k, 0);
+            int s = 0;
             for (int oi = 0; oi < k; oi++) {
-                if (results[oi].is_affine && results[oi].affine_mask == 0 && results[oi].affine_b == 0)
-                    a1++;
-                else if (results[oi].is_affine)
-                    a2++;
-                else
-                    a3++;
+                z_off[oi] = s;
+                if (!results[oi].is_affine && results[oi].m > 0)
+                    s += results[oi].m;
             }
-            f << "# a1=" << a1 << ", a2=" << a2 << ", a3=" << a3 << "\n";
-            f << "sum_T = " << total_sum_T << "\n";
-            f << "union_T = " << union_T << "\n";
-            f << "---\n";
+
+            int max_deg = 0;
+            std::vector<int> term_counts(k, 0);
+
+            // Count terms and find max degree
             for (int oi = 0; oi < k; oi++) {
                 auto& r = results[oi];
-                if (r.is_affine) {
-                    if (r.affine_mask == 0 && r.affine_b == 0)
-                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  (constant 0)\n";
-                    else if (r.affine_mask == 0 && r.affine_b == 1)
-                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  (constant 1)\n";
-                    else
-                        f << circ.outputs[all_outputs[oi]] << ": AFFINE  m=1  nonlinear_terms=0\n";
-                } else {
-                    // Count nonlinear terms (degree ≥ 2)
-                    int nl_terms = 0;
-                    if (!r.anf_coeffs.empty() && r.m > 0) {
-                        int64_t n_z = int64_t(1) << r.m;
-                        for (int64_t zi = 3; zi < n_z; zi++) {
-                            // degree ≥ 2 means popcount ≥ 2
-                            if (__builtin_popcountll(zi) >= 2 && ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1))
-                                nl_terms++;
-                        }
-                    }
-                    f << circ.outputs[all_outputs[oi]] << ":  T=" << r.total_T
-                      << "  m=" << r.m << "  nonlinear_terms=" << nl_terms << "\n";
-                }
-            }
-        }
-
-        std::cout << "  Saved: " << save_prefix << "_" << STRATEGY_TAG << "_trans.poly\n";
-        std::cout << "  Saved: " << save_prefix << "_" << STRATEGY_TAG << "_T.txt\n";
-    }
-
-    // ANF output
-    if (!anf_prefix.empty()) {
-        std::ofstream f(anf_prefix + "_" + STRATEGY_TAG + "_anf.poly");
-        f << "# ANF for " << path << " (n=" << n << ", k=" << k << ")\n";
-        for (int oi = 0; oi < k; oi++) {
-            auto& r = results[oi];
-            if (r.is_affine) {
-                f << "# " << circ.outputs[all_outputs[oi]] << "  (AFFINE)\n";
-                continue;
-            }
-            if (r.m <= 0 || r.anf_coeffs.empty()) continue;
-            f << "# " << circ.outputs[all_outputs[oi]] << "\n";
-            int64_t n_z = int64_t(1) << r.m;
-            for (int64_t zi = 1; zi < n_z; zi++) {
-                if ((r.anf_coeffs[zi / 64] >> (zi % 64)) & 1) {
-                    f << "  ";
-                    bool first = true;
-                    for (int b = 0; b < r.m; b++) {
-                        if ((zi >> b) & 1) {
-                            if (!first) f << " * ";
-                            f << "z_" << oi << "_" << b;
-                            first = false;
-                        }
-                    }
-                    f << "\n";
-                }
-            }
-        }
-        std::cout << "  Saved: " << anf_prefix << "_" << STRATEGY_TAG << "_anf.poly\n";
-    }
-
-    // Verify output
-    if (!verify_prefix.empty()) {
-        std::ofstream f(verify_prefix + "_" + STRATEGY_TAG + "_verify.txt");
-        f << "# Verification results for " << path << "\n\n";
-        bool all_pass = true;
-        for (int oi = 0; oi < k; oi++) {
-            auto& r = results[oi];
-            if (r.is_affine) {
-                f << circ.outputs[all_outputs[oi]] << ": PASS  AFFINE"
-                  << "  y=";
-                bool first = true;
-                if (r.affine_b) { f << "1"; first = false; }
-                for (int i = 0; i < n && i < 32; i++) {
-                    if (r.affine_mask & (1u << i)) {
-                        if (!first) f << " ⊕ ";
-                        f << "x_" << i;
-                        first = false;
+                if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                int64_t n_z = int64_t(1) << r.m;
+                for (int64_t zi = 1; zi < n_z; zi++) {
+                    if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                        term_counts[oi]++;
+                        int deg = __builtin_popcountll(zi);
+                        if (deg > max_deg) max_deg = deg;
                     }
                 }
-                if (first) f << "0";
+            }
+
+            std::ofstream f(base + ".poly");
+            if (f) {
+                f << s << "\n" << k << "\n";
+                for (int oi = 0; oi < k; oi++) {
+                    if (oi > 0) f << " ";
+                    f << term_counts[oi];
+                }
                 f << "\n";
-                continue;
+
+                // Terms shifted to shared z-space
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                    int off = z_off[oi];
+                    int64_t n_z = int64_t(1) << r.m;
+                    for (int64_t zi = 1; zi < n_z; zi++) {
+                        if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                            int64_t shared_pos = (int64_t)zi << off;
+                            f << "[";
+                            for (int b = 0; b < s; b++) {
+                                if (b > 0) f << " , ";
+                                f << ((shared_pos >> b) & 1);
+                            }
+                            f << " , 1]\n";
+                        }
+                    }
+                }
+                std::cout << "  Saved: " << base << ".poly (m=" << s << ")\n";
             }
-            if (r.total_T >= INT64_MAX || r.m <= 0 || r.g_tt_raw.empty()) {
-                f << circ.outputs[all_outputs[oi]] << ": SKIP\n";
-                all_pass = false;
-                continue;
-            }
-            bool ok = verify_candidate_generalized(fc, r.M_rows, r.b, r.c_vec, r.d,
-                                        r.m, n, r.g_tt_raw, oi, 5000);
-            f << circ.outputs[all_outputs[oi]] << ": "
-              << (ok ? "PASS" : "FAIL") << " T=" << r.total_T
-              << " m=" << r.m << "\n";
-            if (!ok) all_pass = false;
         }
-        f << "\nAll: " << (all_pass ? "PASS" : "SOME FAILED") << "\n";
-        std::cout << "  Saved: " << verify_prefix << "_" << STRATEGY_TAG << "_verify.txt\n";
+
+        // ---- _stats.txt: 5-line numeric ----
+        {
+            int64_t sum_T = total_sum_T;
+            int max_deg = 0;
+            for (int oi = 0; oi < k; oi++) {
+                auto& r = results[oi];
+                if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                int64_t n_z = int64_t(1) << r.m;
+                for (int64_t zi = 1; zi < n_z; zi++) {
+                    if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                        int deg = __builtin_popcountll(zi);
+                        if (deg > max_deg) max_deg = deg;
+                    }
+                }
+            }
+            std::ofstream f(base + "_stats.txt");
+            if (f) {
+                f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
+                std::cout << "  Saved: " << base << "_stats.txt (sum_T=" << sum_T << ")\n";
+            }
+        }
+
+        // ---- _verify.txt: verification ----
+        {
+            std::ofstream f(base + "_verify.txt");
+            if (f) {
+                f << "# Verification: f(x) = g(Mx+b) + Cx+d\n";
+                f << "# n=" << n << "\n\n";
+                bool all_pass = true;
+                for (int oi = 0; oi < k; oi++) {
+                    auto& r = results[oi];
+                    if (r.is_affine) {
+                        f << circ.outputs[all_outputs[oi]] << ": PASS  AFFINE\n";
+                        continue;
+                    }
+                    if (r.total_T >= INT64_MAX || r.m <= 0 || r.g_tt_raw.empty()) {
+                        f << circ.outputs[all_outputs[oi]] << ": SKIP\n";
+                        all_pass = false;
+                        continue;
+                    }
+                    bool ok = verify_candidate_generalized(fc, r.M_rows, r.b, r.c_vec, r.d,
+                                                r.m, n, r.g_tt_raw, oi, 5000);
+                    f << circ.outputs[all_outputs[oi]] << ": "
+                      << (ok ? "PASS" : "FAIL") << " T=" << r.total_T
+                      << " m=" << r.m << "\n";
+                    if (!ok) all_pass = false;
+                }
+                f << "\nAll: " << (all_pass ? "PASS" : "SOME FAILED") << "\n";
+                std::cout << "  Saved: " << base << "_verify.txt\n";
+            }
+        }
+    }
+
+    // ANF output (dedicated flag for backward compat)
+    if (!anf_prefix.empty()) {
+        std::string base = anf_prefix.substr(0, anf_prefix.find_last_of('/'));
+        if (base.empty()) base = anf_prefix;
+        // If anf_prefix is same as save_prefix, skip (already wrote .poly above)
+    }
+
+    // Verify output (dedicated flag for backward compat)
+    if (!verify_prefix.empty()) {
+        // If verify_prefix is same as save_prefix, skip (already wrote _verify.txt above)
     }
 
     std::cout << "\nTotal time: " << total_sec << " s\n";

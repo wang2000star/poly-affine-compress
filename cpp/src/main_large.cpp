@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <climits>
 #include <chrono>
+#include <filesystem>
 
 // Strategy tag for output file naming (prevents confusion between different search strategies)
 static const char* STRATEGY_TAG = "lg";
@@ -854,7 +855,22 @@ int main(int argc, char** argv) {
     }
 
     std::cout << std::unitbuf;
-    std::string path = argv[1];
+
+    // ---- Resolve project root from executable path, then chdir ----
+    namespace fs = std::filesystem;
+    auto orig_cwd = fs::current_path();
+    auto exe = fs::weakly_canonical(fs::absolute(fs::path(argv[0])));
+    auto root = exe.parent_path();
+    for (int i = 0; i < 3 && !fs::exists(root / "examples"); i++)
+        root = root.parent_path();
+    fs::current_path(root);
+
+    // Resolve circuit path (relative to original CWD) to absolute
+    fs::path circ_fs_path(argv[1]);
+    if (circ_fs_path.is_relative()) circ_fs_path = orig_cwd / circ_fs_path;
+    circ_fs_path = fs::weakly_canonical(circ_fs_path);
+    std::string path = circ_fs_path.string();
+
     Circuit circ = read_circuit(path);
     int n = circ.n_inputs;
 
@@ -881,9 +897,21 @@ int main(int argc, char** argv) {
         else if (arg == "--random" && a + 1 < argc) n_random = std::stoi(argv[++a]);
         else if (arg == "--hill-climb" && a + 1 < argc) n_hill_climb = std::stoi(argv[++a]);
         else if (arg == "--walsh-k" && a + 1 < argc) walsh_k = std::stoi(argv[++a]);
-        else if (arg == "--save-results" && a + 1 < argc) save_prefix = argv[++a];
-        else if (arg == "--anf-out" && a + 1 < argc) anf_prefix = argv[++a];
-        else if (arg == "--verify-out" && a + 1 < argc) verify_prefix = argv[++a];
+        else if (arg == "--save-results" && a + 1 < argc) {
+            fs::path p(argv[++a]);
+            if (p.is_relative()) p = root / p;
+            save_prefix = p.string();
+        }
+        else if (arg == "--anf-out" && a + 1 < argc) {
+            fs::path p(argv[++a]);
+            if (p.is_relative()) p = root / p;
+            anf_prefix = p.string();
+        }
+        else if (arg == "--verify-out" && a + 1 < argc) {
+            fs::path p(argv[++a]);
+            if (p.is_relative()) p = root / p;
+            verify_prefix = p.string();
+        }
     }
 
     // Auto-verify when saving results (mandatory — unverified results are not accepted)
