@@ -252,17 +252,12 @@ static void write_stats(const std::string& path,
             int deg = max_degree(tt, n);
 
             if (T == 0) {
-                // Affine (or constant, but we already checked constant)
-                // Compute (a, b)
                 uint32_t a = 0;
-                int b = (int)tt[0];  // constant term
+                int b = (int)tt[0];
                 for (int i = 0; i < n; i++)
                     if (tt[1 << i]) a |= (1U << i);
                 f << "type = affine\n";
-                f << "mask = 0b";
-                for (int i = n - 1; i >= 0; i--)
-                    f << ((a >> i) & 1);
-                f << "\n";
+                f << "mask = 0x" << std::hex << a << std::dec << "\n";
                 f << "b = " << b << "\n";
                 n_affine++;
             } else {
@@ -272,20 +267,15 @@ static void write_stats(const std::string& path,
                 n_nonlinear++;
             }
         } else {
-            // n = 32: BLR test for affine detection
             uint32_t a = 0;
             int b = 0;
             if (detect_affine(circ, j, a, b)) {
                 f << "type = affine\n";
-                f << "mask = 0b";
-                for (int i = n - 1; i >= 0; i--)
-                    f << ((a >> i) & 1);
-                f << "\n";
+                f << "mask = 0x" << std::hex << a << std::dec << "\n";
                 f << "b = " << b << "\n";
                 n_affine++;
             } else {
                 f << "type = nonlinear\n";
-                f << "T_raw = N/A (n=32)\n";
                 n_nonlinear++;
             }
         }

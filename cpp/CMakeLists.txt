@@ -72,3 +72,11 @@ add_executable(optimize_anf_gatebuilder
 )
 target_include_directories(optimize_anf_gatebuilder PRIVATE include)
 target_compile_options(optimize_anf_gatebuilder PRIVATE -O3 -march=native -mtune=native -pthread -std=c++17)
+
+# Preprocess: one-time variable remapping and output classification
+add_executable(preprocess
+    src/preprocess.cpp
+    src/circuit.cpp
+)
+target_include_directories(preprocess PRIVATE include)
+target_compile_options(preprocess PRIVATE -O3 -march=native -mtune=native -pthread -std=c++17)
