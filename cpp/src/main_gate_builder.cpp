@@ -390,7 +390,9 @@ int main(int argc, char** argv) {
 
     // Write output files
     fs::create_directories(out_dir);
-    std::string base = out_dir + "/" + inst + "_d1b_opt2";
+    int k_tag = (int)results.size();
+    std::string tag = (k_tag <= 1) ? "_d1b_opt" : "_d1b_opt2";
+    std::string base = out_dir + "/" + inst + tag;
     write_affine(base + ".affine", results, circ);
     write_poly(base + ".poly", results);
     write_stats(base + "_stats.txt", results, circ.n_inputs);

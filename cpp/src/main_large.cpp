@@ -1117,7 +1117,8 @@ int main(int argc, char** argv) {
         fs::create_directories(results_dir);
 
         std::string inst_name = fs::path(path).stem().string();
-        std::string base = results_dir + "/" + inst_name + "_d1a_opt2";
+        std::string tag = (k <= 1) ? "_d1a_opt" : "_d1a_opt2";
+        std::string base = results_dir + "/" + inst_name + tag;
 
         // ---- Compute per-output z-offset in shared space ----
         std::vector<int> z_offsets(k, 0);
