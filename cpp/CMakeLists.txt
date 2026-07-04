@@ -35,14 +35,14 @@ add_executable(optimize_anf_d1a_opt
     ${CORE_SRC}
 )
 target_include_directories(optimize_anf_d1a_opt PRIVATE include)
-target_compile_definitions(optimize_anf_d1a_opt PRIVATE STRATEGY_TAG="opt")
+target_compile_definitions(optimize_anf_d1a_opt PRIVATE DIRECTION_TAG="d1a" STRATEGY_TAG="opt")
 
 add_executable(optimize_anf_d1a_opt1
     src/main_opt1.cpp
     ${CORE_SRC}
 )
 target_include_directories(optimize_anf_d1a_opt1 PRIVATE include)
-target_compile_definitions(optimize_anf_d1a_opt1 PRIVATE STRATEGY_TAG="opt1")
+target_compile_definitions(optimize_anf_d1a_opt1 PRIVATE DIRECTION_TAG="d1a" STRATEGY_TAG="opt1")
 
 add_executable(optimize_anf_d1a_opt2
     src/main_large.cpp
@@ -53,8 +53,20 @@ target_compile_definitions(optimize_anf_d1a_opt2 PRIVATE STRATEGY_TAG="opt2")
 
 # ====================================================================
 # Direction 1b: Gate-builder-based construction
+#   opt  = single-output (opt=opt2 when k=1)
 #   opt2 = per-output transforms
+#   Note: opt1 (shared) not applicable — gate builder is per-output by design
 # ====================================================================
+
+add_executable(optimize_anf_d1b_opt
+    src/main_gate_builder.cpp
+    src/sparse_anf.cpp
+    src/gate_builder.cpp
+    src/circuit.cpp
+)
+target_include_directories(optimize_anf_d1b_opt PRIVATE include)
+target_compile_definitions(optimize_anf_d1b_opt PRIVATE STRATEGY_TAG="opt")
+target_compile_options(optimize_anf_d1b_opt PRIVATE -O3 -march=native -mtune=native -pthread -std=c++17)
 
 add_executable(optimize_anf_d1b_opt2
     src/main_gate_builder.cpp
@@ -68,8 +80,17 @@ target_compile_options(optimize_anf_d1b_opt2 PRIVATE -O3 -march=native -mtune=na
 
 # ====================================================================
 # Direction 2: Sparse-g enumeration (pool search + c-correction)
+#   opt  = single-output (opt=opt2 when k=1)
 #   opt2 = per-output transforms
+#   Note: opt1 (shared) not applicable — sparse g is per-output by design
 # ====================================================================
+
+add_executable(optimize_anf_d2_opt
+    src/main_sparse_g.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_d2_opt PRIVATE include)
+target_compile_definitions(optimize_anf_d2_opt PRIVATE STRATEGY_TAG="opt")
 
 add_executable(optimize_anf_d2_opt2
     src/main_sparse_g.cpp
@@ -80,8 +101,24 @@ target_compile_definitions(optimize_anf_d2_opt2 PRIVATE STRATEGY_TAG="opt2")
 
 # ====================================================================
 # Direction 3: Per-output Walsh + random + hill-climb
+#   opt  = single-output (opt=opt2 when k=1)
+#   opt1 = shared transform (uses same shared-search as d1a_opt1)
 #   opt2 = per-output transforms
 # ====================================================================
+
+add_executable(optimize_anf_d3_opt
+    src/main_opt2.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_d3_opt PRIVATE include)
+target_compile_definitions(optimize_anf_d3_opt PRIVATE STRATEGY_TAG="opt")
+
+add_executable(optimize_anf_d3_opt1
+    src/main_opt1.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_d3_opt1 PRIVATE include)
+target_compile_definitions(optimize_anf_d3_opt1 PRIVATE DIRECTION_TAG="d3" STRATEGY_TAG="opt1")
 
 add_executable(optimize_anf_d3_opt2
     src/main_opt2.cpp

@@ -1,8 +1,12 @@
 /home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d1a_opt.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d1a_opt1.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d1a_opt2.dir
+/home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d1b_opt.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d1b_opt2.dir
+/home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d2_opt.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d2_opt2.dir
+/home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d3_opt.dir
+/home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d3_opt1.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_d3_opt2.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/compute_raw_anf.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/verify_anf.dir
