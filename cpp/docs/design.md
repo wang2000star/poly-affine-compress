@@ -404,8 +404,7 @@ t_2 = t_0 * t_1;
 行 5: max_deg       最高 ANF 度数
 ```
 
-预处理时 sum_T/union_T/max_deg 通过 Möbius 计算（n≤16）。  
-n=32 无法计算完整 ANF，三值为 -1。  
+预处理时 sum_T/union_T/max_deg 通过 Möbius 计算（n≤16）或门级 ANF 构建计算（n=32）。  
 优化输出时三值为优化后的统计值。
 
 ### 10.3 常量文件 `{inst}_const.txt`
