@@ -188,6 +188,8 @@ int main(int argc, char** argv) {
     printf("  ANF: m=%d, %zu outputs\n", m, poly_outputs.size());
 
     // ---- Verification: f(x) == g(Mx+b) ----
+    // For n ≤ 16, exhaustive enumeration is cheap and guarantees correctness.
+    int n_total = (n <= 16) ? (1 << n) : n_tests;
     uint32_t mask = (n == 32) ? 0xFFFFFFFF : ((1u << n) - 1);
     std::vector<int> mismatch_per_output(k, 0);
 
@@ -201,10 +203,14 @@ int main(int argc, char** argv) {
 
     *out << "# Verification: f(x) = g(Mx+b)\n";
     *out << "# n=" << n << ", s=" << tfm.s << "\n";
-    *out << "# Tests: " << n_tests << "\n\n";
+    if (n <= 16)
+        *out << "# Exhaustive: 2^" << n << " = " << n_total << " inputs\n\n";
+    else
+        *out << "# Tests: " << n_total << "\n\n";
 
-    for (int test = 0; test < n_tests; test++) {
-        uint32_t x = (uint32_t)(((uint64_t)test * 0x9e3779b97f4a7c15ULL) & mask);
+    for (int test = 0; test < n_total; test++) {
+        uint32_t x = (n <= 16) ? (uint32_t)test
+                               : (uint32_t)(((uint64_t)test * 0x9e3779b97f4a7c15ULL) & mask);
         // z = Mx+b
         uint32_t z = 0;
         for (int j = 0; j < tfm.s; j++) {
@@ -224,28 +230,29 @@ int main(int argc, char** argv) {
 
     // ---- Report results ----
     int n_fail = 0;
+    int n_display = n_total;
     for (int j = 0; j < k; j++) {
         if (mismatch_per_output[j] == 0) {
-            *out << "output " << j << ": PASS (" << n_tests << " tests)\n";
+            *out << "output " << j << ": PASS (" << n_display << " tests)\n";
         } else {
             *out << "output " << j << ": FAIL (" << mismatch_per_output[j]
-                 << "/" << n_tests << ")\n";
+                 << "/" << n_display << ")\n";
             n_fail++;
         }
     }
     *out << "\n";
 
     if (n_fail == 0) {
-        *out << "All outputs PASS (" << n_tests << " tests)\n";
-        printf("  Verification: ✅ PASS (%d outputs, %d tests)\n", k, n_tests);
+        *out << "All outputs PASS (" << n_display << " tests)\n";
+        printf("  Verification: ✅ PASS (%d outputs, %d tests)\n", k, n_display);
     } else {
         *out << n_fail << "/" << k << " outputs FAIL\n";
         printf("  Verification: ❌ FAIL (%d/%d outputs failed, %d tests)\n",
-               n_fail, k, n_tests);
+               n_fail, k, n_display);
         for (int j = 0; j < k; j++) {
             if (mismatch_per_output[j] > 0)
                 printf("    output %d: %d/%d FAIL\n",
-                       j, mismatch_per_output[j], n_tests);
+                       j, mismatch_per_output[j], n_display);
         }
     }
 
