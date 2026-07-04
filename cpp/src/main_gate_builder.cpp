@@ -400,7 +400,6 @@ int main(int argc, char** argv) {
     write_poly(base + ".poly", results);
     write_stats(base + "_stats.txt", results, circ.n_inputs);
 
-    printf("  Done. Files written to %s/%s_d1b_opt2.*\n",
-           out_dir.c_str(), inst.c_str());
+    std::cout << "  Done. Files written to " << (out_dir + "/" + inst + tag + ".*") << "\n";
     return 0;
 }
