@@ -1,5 +1,5 @@
 /**
- * verify_anf.cpp — Verification: f(x) = g(Mx+b) + Cx+d
+ * verify_anf.cpp — Verification: f(x) = g(Mx+b)
  *
  * Reads circuit (.eqn), transform (.affine), and ANF (.poly),
  * then verifies the identity for random test points.
@@ -24,11 +24,9 @@
 // ====================================================================
 
 struct AffineTransform {
-    int s{0}, t{0}, n{0};
-    std::vector<uint32_t> M_rows; // s rows, each an n-bit mask (A = Mx+b)
-    std::vector<uint32_t> C_rows; // t rows, each an n-bit mask (B = Cx+d)
+    int s{0}, n{0};
+    std::vector<uint32_t> M_rows; // s rows, each an n-bit mask
     std::vector<uint8_t> b;       // s bias bits
-    std::vector<uint8_t> d;       // t bias bits
 };
 
 struct PolyTerm {
@@ -41,16 +39,6 @@ struct PolyOutput {
 };
 
 // ====================================================================
-//  Helpers
-// ====================================================================
-
-static std::string trim(const std::string& s) {
-    size_t a = s.find_first_not_of(" \t\r\n");
-    size_t b = s.find_last_not_of(" \t\r\n");
-    return (a == std::string::npos) ? "" : s.substr(a, b - a + 1);
-}
-
-// ====================================================================
 //  Parse .affine
 // ====================================================================
 
@@ -59,46 +47,29 @@ static AffineTransform parse_affine(const std::string& path) {
     std::ifstream f(path);
     if (!f) { std::cerr << "  ERROR: cannot open " << path << "\n"; return tfm; }
 
-    f >> tfm.s >> tfm.t;
-    int s_check = 0, t_check = 0;
-    f >> s_check >> t_check >> tfm.n;
-    if (s_check != tfm.s || t_check != tfm.t) {
+    f >> tfm.s;
+    int rows = 0, cols = 0;
+    f >> rows >> cols;
+    tfm.n = cols - 1;
+    if (rows != tfm.s || cols != tfm.n + 1) {
         std::cerr << "  ERROR: affine header mismatch (s=" << tfm.s
-                  << " t=" << tfm.t << ", but matrix claims "
-                  << s_check << " " << t_check << ")\n";
+                  << ", matrix claims " << rows << "×" << cols
+                  << ", expected " << tfm.s << "×" << (tfm.n + 1) << ")\n";
         return tfm;
     }
 
+    // s × (n+1) matrix: [M | b]
     tfm.M_rows.resize(tfm.s);
-    for (int i = 0; i < tfm.s; i++) {
-        uint32_t row = 0;
-        for (int b = 0; b < tfm.n; b++) {
-            int bit; f >> bit;
-            if (bit) row |= (1u << b);
-        }
-        tfm.M_rows[i] = row;
-    }
-
-    tfm.C_rows.resize(tfm.t);
-    for (int i = 0; i < tfm.t; i++) {
-        uint32_t row = 0;
-        for (int b = 0; b < tfm.n; b++) {
-            int bit; f >> bit;
-            if (bit) row |= (1u << b);
-        }
-        tfm.C_rows[i] = row;
-    }
-
     tfm.b.resize(tfm.s);
     for (int i = 0; i < tfm.s; i++) {
-        int bit; f >> bit;
-        tfm.b[i] = (uint8_t)bit;
-    }
-
-    tfm.d.resize(tfm.t);
-    for (int i = 0; i < tfm.t; i++) {
-        int bit; f >> bit;
-        tfm.d[i] = (uint8_t)bit;
+        uint32_t row = 0;
+        for (int col = 0; col < tfm.n; col++) {
+            int bit; f >> bit;
+            if (bit) row |= (1u << col);
+        }
+        tfm.M_rows[i] = row;
+        int b_bit; f >> b_bit;
+        tfm.b[i] = (uint8_t)b_bit;
     }
 
     return tfm;
@@ -129,7 +100,6 @@ static std::vector<PolyOutput> parse_poly(const std::string& path, int& m) {
                 int bit; f >> bit; f >> c; // read bit and comma/']
                 if (bit) mask |= (1u << b);
             }
-            // Last value is coefficient
             int coeff; f >> coeff;
             f >> c; // skip ']'
             outputs[oi].terms[ti] = {mask, coeff};
@@ -139,7 +109,7 @@ static std::vector<PolyOutput> parse_poly(const std::string& path, int& m) {
 }
 
 // ====================================================================
-//  Evaluate ANF at given z (z = A, s-bit value)
+//  Evaluate ANF at given z-value
 // ====================================================================
 
 static bool eval_poly(const PolyOutput& out, uint32_t z) {
@@ -150,27 +120,6 @@ static bool eval_poly(const PolyOutput& out, uint32_t z) {
             result ^= true;
     }
     return result;
-}
-
-// ====================================================================
-//  Compute A = Mx+b, B = Cx+d
-// ====================================================================
-
-static uint32_t compute_A(const AffineTransform& tfm, uint32_t x) {
-    uint32_t A = 0;
-    for (int j = 0; j < tfm.s; j++) {
-        if ((__builtin_popcount(tfm.M_rows[j] & x) & 1) ^ tfm.b[j])
-            A |= (1u << j);
-    }
-    return A;
-}
-
-static void compute_B(const AffineTransform& tfm, uint32_t x,
-                       std::vector<uint8_t>& B) {
-    B.resize(tfm.t);
-    for (int j = 0; j < tfm.t; j++) {
-        B[j] = (__builtin_popcount(tfm.C_rows[j] & x) & 1) ^ tfm.d[j];
-    }
 }
 
 // ====================================================================
@@ -208,7 +157,7 @@ int main(int argc, char** argv) {
 
     // ---- Read affine transform ----
     AffineTransform tfm = parse_affine(affine_path);
-    if (tfm.s == 0 && tfm.t == 0) {
+    if (tfm.s == 0) {
         std::cerr << "  ERROR: failed to parse " << affine_path << "\n";
         return 1;
     }
@@ -217,12 +166,7 @@ int main(int argc, char** argv) {
                   << " != circuit n=" << n << "\n";
         return 1;
     }
-    if (tfm.t != k) {
-        std::cerr << "  ERROR: transform t=" << tfm.t
-                  << " != circuit outputs=" << k << "\n";
-        return 1;
-    }
-    printf("  Transform: s=%d, t=%d, n=%d\n", tfm.s, tfm.t, tfm.n);
+    printf("  Transform: s=%d, n=%d\n", tfm.s, tfm.n);
 
     // ---- Read ANF poly ----
     int m = 0;
@@ -243,7 +187,7 @@ int main(int argc, char** argv) {
     }
     printf("  ANF: m=%d, %zu outputs\n", m, poly_outputs.size());
 
-    // ---- Run verification ----
+    // ---- Verification: f(x) == g(Mx+b) ----
     uint32_t mask = (n == 32) ? 0xFFFFFFFF : ((1u << n) - 1);
     std::vector<int> mismatch_per_output(k, 0);
 
@@ -255,23 +199,25 @@ int main(int argc, char** argv) {
         out = &f_out;
     }
 
-    *out << "# Verification: f(x) = g(Mx+b) + Cx+d\n";
-    *out << "# n=" << n << ", s=" << tfm.s << ", t=" << tfm.t << "\n";
+    *out << "# Verification: f(x) = g(Mx+b)\n";
+    *out << "# n=" << n << ", s=" << tfm.s << "\n";
     *out << "# Tests: " << n_tests << "\n\n";
 
-    std::vector<uint8_t> B;
     for (int test = 0; test < n_tests; test++) {
         uint32_t x = (uint32_t)(((uint64_t)test * 0x9e3779b97f4a7c15ULL) & mask);
-        uint32_t A = compute_A(tfm, x);
-        compute_B(tfm, x, B);
+        // z = Mx+b
+        uint32_t z = 0;
+        for (int j = 0; j < tfm.s; j++) {
+            if ((__builtin_popcount(tfm.M_rows[j] & x) & 1) ^ tfm.b[j])
+                z |= (1u << j);
+        }
 
         auto f_vals = eval_circuit_point(circ, x);
 
         for (int j = 0; j < k; j++) {
             uint8_t f_val = f_vals[j];
-            uint8_t g_val = eval_poly(poly_outputs[j], A) ? 1 : 0;
-            uint8_t rhs = g_val ^ B[j];
-            if (f_val != rhs)
+            uint8_t g_val = eval_poly(poly_outputs[j], z) ? 1 : 0;
+            if (f_val != g_val)
                 mismatch_per_output[j]++;
         }
     }

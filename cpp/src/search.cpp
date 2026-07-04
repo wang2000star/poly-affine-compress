@@ -4,7 +4,6 @@
 #include "gf2.h"
 #include "io.h"
 #include "moebius.h"
-#include "verify.h"
 #include "walsh.h"
 #include <algorithm>
 #include <chrono>
@@ -1207,7 +1206,6 @@ void run_search(const TruthTable& tt, const Circuit& circ,
         }
 
         // Re-evaluate with save_g_tt=true (with pair filtering for complement)
-        bool all_verified = true;
         MbCandidate verified_cand;
         verified_cand.m = best.m;
         verified_cand.b = best.b;
@@ -1217,18 +1215,11 @@ void run_search(const TruthTable& tt, const Circuit& circ,
         verified_cand.per_output_T = best.per_output_T;
 
         if (best.m == n) {
-            std::cout << "Verifying best candidate (5000 random tests per output)...\n";
+            std::cout << "  Evaluating best candidate for output...\n";
             verified_cand = evaluate_Mb(tt_copy, best.M_rows.data(), best.b, best.m,
                                          params.n_threads, true);
-            for (int oi = 0; oi < tt.n_outputs; oi++) {
-                bool ok = verify_transform(tt_copy, verified_cand.g_tt_raw[oi], oi,
-                    best.M_rows.data(), best.b, best.m, n, 5000);
-                std::cout << "  " << circ.outputs[output_indices[oi]]
-                          << (ok ? " ✅ Verified (5000 tests)" : " ❌ FAILED") << "\n";
-                if (!ok) all_verified = false;
-            }
         } else if (is_complement) {
-            std::cout << "Verifying complement candidate (5000 random tests per output)...\n";
+            std::cout << "  Evaluating complement candidate for output...\n";
             verified_cand = evaluate_Mb(tt_copy, best.M_rows.data(), best.b, best.m,
                                          params.n_threads, true);
             // Clean g_tt_raw: Möbius → filter pairs → inverse Möbius
@@ -1240,20 +1231,13 @@ void run_search(const TruthTable& tt, const Circuit& circ,
                 filter_pairs(raw.data(), best.m, comp_pair_masks, n_comp_pairs);
                 moebius_packed(raw.data(), best.m);
             }
-            // Verify with cleaned truth table
-            for (int oi = 0; oi < tt.n_outputs; oi++) {
-                bool ok = verify_transform(tt_copy, verified_cand.g_tt_raw[oi], oi,
-                    best.M_rows.data(), best.b, best.m, n, 5000);
-                std::cout << "  " << circ.outputs[output_indices[oi]]
-                          << (ok ? " ✅ Verified (5000 tests)" : " ❌ FAILED") << "\n";
-                if (!ok) all_verified = false;
-            }
         } else {
-            std::cout << "Skipping verification (non-bijective m=" << best.m << " != n=" << n << ")\n";
+            std::cout << "  Evaluating best candidate (m=" << best.m << ") for output...\n";
+            if (best.m <= 32) {
+                verified_cand = evaluate_Mb(tt_copy, best.M_rows.data(), best.b, best.m,
+                                             params.n_threads, true);
+            }
         }
-
-        if (all_verified)
-            std::cout << "✅ All outputs verified!\n";
 
         // Save results to files
         if (!params.results_dir.empty()) {
@@ -1276,8 +1260,7 @@ void run_search(const TruthTable& tt, const Circuit& circ,
                           base + "_stats.txt");
             }
 
-            save_verify(tt_copy, verified_cand.g_tt_raw, best, n, output_indices, circ,
-                       base + "_verify.txt");
+            // Verification is done separately via verify_anf tool
         }
     }
 

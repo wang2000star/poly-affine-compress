@@ -154,6 +154,31 @@ for inst in hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02; do
         d1a_opt1 d1a_opt2 d1b_opt2 d2_opt2 d3_opt1 d3_opt2
 done
 
+# ---- Verification ----
+echo ""
+echo "--- Verification (verify_anf: f(x) = g(Mx+b)) ---"
+VERIFY_EXE="$BUILD_DIR/verify_anf"
+if [ -f "$VERIFY_EXE" ]; then
+    for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02; do
+        eqn="$PREPROCESS_DIR/$inst/$inst.eqn"
+        [ -f "$eqn" ] || eqn="$EXAMPLES_DIR/${inst}.eqn"
+        [ -f "$eqn" ] || continue
+        for aff in "$RESULTS_DIR/$inst"/*.affine; do
+            [ -f "$aff" ] || continue
+            base="${aff%.affine}"
+            poly="${base}.poly"
+            [ -f "$poly" ] || continue
+            verify_out="${base}_verify.txt"
+            [ -f "$verify_out" ] && grep -q "All outputs PASS" "$verify_out" 2>/dev/null && continue
+            "$VERIFY_EXE" "$eqn" "$aff" "$poly" 2000 --output "$verify_out" &> /dev/null && \
+                echo "    ✓ $(basename $base)" || \
+                echo "    ✗ $(basename $base) (check $verify_out)"
+        done
+    done
+else
+    echo "  WARNING: verify_anf not found, skipping verification"
+fi
+
 # ====================================================================
 # Summary
 # ====================================================================

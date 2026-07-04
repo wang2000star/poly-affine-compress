@@ -298,7 +298,8 @@ struct EvalResult {
     int64_t total_T;          // T(g) after c-correction
     int64_t T_raw;            // T(g) before c-correction
     std::vector<uint64_t> g_tt_raw;   // raw g truth table (pre-Möbius, post c-correction)
-    std::vector<uint64_t> anf_coeffs;  // ANF coefficients
+    std::vector<uint64_t> anf_coeffs;  // ANF coefficients (post-correction)
+    std::vector<uint64_t> raw_anf_coeffs; // ANF coefficients (pre-correction, all terms)
     std::vector<uint64_t> c_vec;       // output-side linear coefficients (size n)
     uint64_t d;               // output-side constant
     bool valid;
@@ -463,6 +464,7 @@ static EvalResult evaluate_Mb_ccorrect(
     r.T_raw = T_raw_val;
     r.g_tt_raw = g_corrected;
     r.anf_coeffs = g_anf;
+    r.raw_anf_coeffs = raw_anf;
     r.valid = true;
 
     for (int i = 0; i < m; i++) r.M_rows[i] = M_rows[i];
@@ -483,6 +485,7 @@ struct Candidate {
     int64_t T_raw;
     std::vector<uint64_t> g_tt_raw;   // corrected raw TT
     std::vector<uint64_t> anf_coeffs;  // ANF of corrected g
+    std::vector<uint64_t> raw_anf_coeffs; // ANF before correction (all terms)
     std::vector<uint64_t> c_vec;       // output-side linear coefficients
     uint64_t d;               // output-side constant
 
@@ -614,6 +617,7 @@ static Candidate search_sparse_g(
                 best.c_vec = er.c_vec;
                 best.d = er.d;
                 best.anf_coeffs = er.anf_coeffs;
+                best.raw_anf_coeffs = er.raw_anf_coeffs;
             }
         }
     }
@@ -649,6 +653,7 @@ static Candidate search_sparse_g(
                 best.c_vec = er.c_vec;
                 best.d = er.d;
                 best.anf_coeffs = er.anf_coeffs;
+                best.raw_anf_coeffs = er.raw_anf_coeffs;
             }
 
             // Also try b with each row's complement bit
@@ -666,6 +671,7 @@ static Candidate search_sparse_g(
                     best.b = b_compl;
                     best.g_tt_raw = er2.g_tt_raw;
                     best.anf_coeffs = er2.anf_coeffs;
+                    best.raw_anf_coeffs = er2.raw_anf_coeffs;
                 }
             }
 
@@ -726,6 +732,7 @@ static Candidate search_sparse_g(
                         best.c_vec = er.c_vec;
                         best.d = er.d;
                         best.anf_coeffs = er.anf_coeffs;
+                best.raw_anf_coeffs = er.raw_anf_coeffs;
                     }
                 }
                 // Try complement b: set b bits for complement-type pool rows
@@ -745,6 +752,7 @@ static Candidate search_sparse_g(
                             best.c_vec = er.c_vec;
                             best.d = er.d;
                             best.anf_coeffs = er.anf_coeffs;
+                best.raw_anf_coeffs = er.raw_anf_coeffs;
                         }
                     }
                 }
@@ -786,6 +794,7 @@ static Candidate search_sparse_g(
                                 best.c_vec = er.c_vec;
                                 best.d = er.d;
                                 best.anf_coeffs = er.anf_coeffs;
+                best.raw_anf_coeffs = er.raw_anf_coeffs;
                                 improved = true;
                             }
 
@@ -823,6 +832,7 @@ static Candidate search_sparse_g(
                                 best.c_vec = er.c_vec;
                                 best.d = er.d;
                                 best.anf_coeffs = er.anf_coeffs;
+                best.raw_anf_coeffs = er.raw_anf_coeffs;
                                 improved = true;
                             }
                         }
@@ -850,6 +860,7 @@ static Candidate search_sparse_g(
             best.c_vec = er.c_vec;
             best.d = er.d;
             best.anf_coeffs = er.anf_coeffs;
+            best.raw_anf_coeffs = er.raw_anf_coeffs;
         }
     }
 
@@ -981,7 +992,7 @@ int main(int argc, char** argv) {
 
         results[oi] = cand;
         if (cand.total_T < INT64_MAX && !cand.is_affine)
-            total_sum_T += cand.total_T;
+            total_sum_T += cand.T_raw;
 
         if (cand.is_affine) {
             uint32_t mask = cand.affine_mask;
@@ -1049,11 +1060,11 @@ int main(int argc, char** argv) {
 
         for (int oi = 0; oi < k; oi++) {
             if (results[oi].is_affine) continue;
-            if (results[oi].m <= 0 || results[oi].anf_coeffs.empty()) continue;
+            if (results[oi].m <= 0 || results[oi].raw_anf_coeffs.empty()) continue;
             int m_out = results[oi].m;
             int64_t nw = (m_out < 6) ? 1 : (int64_t(1) << (m_out - 6));
-            std::vector<uint64_t> anf(results[oi].anf_coeffs.begin(),
-                                      results[oi].anf_coeffs.begin() + nw);
+            std::vector<uint64_t> anf(results[oi].raw_anf_coeffs.begin(),
+                                      results[oi].raw_anf_coeffs.begin() + nw);
             if (nw < (int64_t)union_data.size())
                 anf.resize(union_data.size(), 0);
             for (size_t w = 0; w < union_data.size(); w++)
@@ -1069,85 +1080,57 @@ int main(int argc, char** argv) {
     // Save results
     if (!save_prefix.empty()) {
         std::string inst_name = std::filesystem::path(path).stem().string();
-        // Ensure save_prefix is a directory (remove trailing separator)
         std::string dir = save_prefix;
         while (!dir.empty() && dir.back() == '/') dir.pop_back();
         std::string tag = "_d2_" + std::string(STRATEGY_TAG);
         std::string base = dir + "/" + inst_name + tag;
 
-        // ---- .affine: concatenated per-output M, b + c,d correction ----
+        // ---- .affine: [M|b] matrix per output (concatenated) ----
         {
-            // Count total z variables (sum of per-output m)
             int s = 0;
-            for (int oi = 0; oi < k; oi++)
+            for (int oi = 0; oi < k; oi++) {
                 if (!results[oi].is_affine && results[oi].m > 0)
                     s += results[oi].m;
-            int t = k;  // one correction row per output
+            }
 
             std::ofstream f(base + ".affine");
             if (f) {
-                f << s << " " << t << "\n" << s << " " << t << " " << n << "\n";
-                // M rows: concatenated per-output M_rows
+                f << s << "\n" << s << " " << (n + 1) << "\n";
                 for (int oi = 0; oi < k; oi++) {
-                    if (results[oi].is_affine || results[oi].m <= 0) continue;
-                    for (int r = 0; r < results[oi].m; r++) {
+                    auto& r = results[oi];
+                    if (r.is_affine || r.m <= 0) continue;
+                    for (int rw = 0; rw < r.m; rw++) {
                         for (int c = 0; c < n; c++) {
                             if (c > 0) f << " ";
-                            f << ((results[oi].M_rows[r] >> c) & 1);
+                            f << ((r.M_rows[rw] >> c) & 1);
                         }
-                        f << "\n";
+                        f << " " << ((r.b >> rw) & 1) << "\n";
                     }
                 }
-                // C rows: per-output c_vec
-                for (int oi = 0; oi < k; oi++) {
-                    for (int c = 0; c < n; c++) {
-                        if (c > 0) f << " ";
-                        f << (results[oi].c_vec.empty() ? 0 : (int)(results[oi].c_vec[c] & 1));
-                    }
-                    f << "\n";
-                }
-                // b vector: concatenated per-output b
-                int bit = 0;
-                for (int oi = 0; oi < k; oi++) {
-                    if (results[oi].is_affine || results[oi].m <= 0) continue;
-                    for (int r = 0; r < results[oi].m; r++) {
-                        if (bit > 0) f << " ";
-                        f << ((results[oi].b >> r) & 1);
-                        bit++;
-                    }
-                }
-                if (s > 0) f << "\n";
-                // d vector: per-output d
-                for (int oi = 0; oi < k; oi++) {
-                    if (oi > 0) f << " ";
-                    f << (int)results[oi].d;
-                }
-                if (k > 0) f << "\n";
-                std::cout << "  Saved: " << base << ".affine (s=" << s << ", t=" << t << ")\n";
+                std::cout << "  Saved: " << base << ".affine (s=" << s << ", n=" << n << ")\n";
             }
         }
 
-        // ---- .poly: per-output ANF terms in shared z-space ----
+        // ---- .poly: per-output ANF terms in shared z-space (raw ANF, no correction) ----
         {
-            // Compute per-output z-offset in shared space
             std::vector<int> z_off(k, 0);
             int s = 0;
             for (int oi = 0; oi < k; oi++) {
                 z_off[oi] = s;
-                if (!results[oi].is_affine && results[oi].m > 0)
-                    s += results[oi].m;
+                auto& r = results[oi];
+                if (!r.is_affine && r.m > 0)
+                    s += r.m;
             }
 
             int max_deg = 0;
             std::vector<int> term_counts(k, 0);
 
-            // Count terms and find max degree
             for (int oi = 0; oi < k; oi++) {
                 auto& r = results[oi];
-                if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                if (r.is_affine || r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
                 int64_t n_z = int64_t(1) << r.m;
-                for (int64_t zi = 1; zi < n_z; zi++) {
-                    if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                for (int64_t zi = 0; zi < n_z; zi++) {
+                    if ((r.raw_anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
                         term_counts[oi]++;
                         int deg = __builtin_popcountll(zi);
                         if (deg > max_deg) max_deg = deg;
@@ -1164,14 +1147,14 @@ int main(int argc, char** argv) {
                 }
                 f << "\n";
 
-                // Terms shifted to shared z-space
                 for (int oi = 0; oi < k; oi++) {
                     auto& r = results[oi];
-                    if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                    if (r.is_affine || r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
                     int off = z_off[oi];
                     int64_t n_z = int64_t(1) << r.m;
-                    for (int64_t zi = 1; zi < n_z; zi++) {
-                        if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+
+                    for (int64_t zi = 0; zi < n_z; zi++) {
+                        if ((r.raw_anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
                             int64_t shared_pos = (int64_t)zi << off;
                             f << "[";
                             for (int b = 0; b < s; b++) {
@@ -1182,25 +1165,27 @@ int main(int argc, char** argv) {
                         }
                     }
                 }
-                std::cout << "  Saved: " << base << ".poly (m=" << s << ")\n";
+                std::cout << "  Saved: " << base << ".poly (m=" << s << ", " << k << " outputs)\n";
             }
         }
 
-        // ---- _stats.txt: 5-line numeric ----
+        // ---- _stats.txt: 5-line numeric (from raw ANF) ----
         {
-            int64_t sum_T = total_sum_T;
+            int64_t sum_T = 0;
             int max_deg = 0;
             for (int oi = 0; oi < k; oi++) {
                 auto& r = results[oi];
-                if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+                if (r.is_affine || r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
                 int64_t n_z = int64_t(1) << r.m;
-                for (int64_t zi = 1; zi < n_z; zi++) {
-                    if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                for (int64_t zi = 0; zi < n_z; zi++) {
+                    if ((r.raw_anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                        sum_T++;
                         int deg = __builtin_popcountll(zi);
                         if (deg > max_deg) max_deg = deg;
                     }
                 }
             }
+            // For per-output disjoint z, union_T == sum_T
             std::ofstream f(base + "_stats.txt");
             if (f) {
                 f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
@@ -1208,7 +1193,7 @@ int main(int argc, char** argv) {
             }
         }
 
-        // ---- _verify.txt: verification ----
+        // ---- _verify.txt: verification (kept as embedded check, verify_anf also used) ----
         {
             std::ofstream f(base + "_verify.txt");
             if (f) {
@@ -1238,7 +1223,6 @@ int main(int argc, char** argv) {
             }
         }
     }
-
     // ANF output (dedicated flag for backward compat)
     if (!anf_prefix.empty()) {
         std::string base = anf_prefix.substr(0, anf_prefix.find_last_of('/'));

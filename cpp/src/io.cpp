@@ -263,32 +263,20 @@ void save_trans(const MbCandidate& best, const Circuit& circ,
     if (!f) { std::cerr << "  ERROR: cannot write " << fname << "\n"; return; }
 
     int s = best.m;
-    int t = 0;  // MbCandidate has no Cx+d
 
-    f << s << " " << t << "\n";
-    f << s << " " << t << " " << n << "\n";
+    f << s << "\n";
+    f << s << " " << (n + 1) << "\n";
 
-    // M rows (s × n)
+    // s × (n+1) matrix: [M | b]
     for (int row = 0; row < s; row++) {
         for (int col = 0; col < n; col++) {
             if (col > 0) f << " ";
             f << ((best.M_rows[row] >> col) & 1);
         }
-        f << "\n";
+        f << " " << ((best.b >> row) & 1) << "\n";
     }
 
-    // No C rows (t=0)
-
-    // b vector
-    for (int bit = 0; bit < s; bit++) {
-        if (bit > 0) f << " ";
-        f << ((best.b >> bit) & 1);
-    }
-    f << "\n";
-
-    // No d vector (t=0)
-
-    std::cout << "  Saved affine: " << fname << " (s=" << s << ", t=" << t << ")\n";
+    std::cout << "  Saved affine: " << fname << " (s=" << s << ", n=" << n << ")\n";
 }
 
 // ============================================================

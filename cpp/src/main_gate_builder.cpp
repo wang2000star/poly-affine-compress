@@ -33,54 +33,15 @@ static std::string strip_ext(const std::string& path) {
     return (pos == std::string::npos) ? path : path.substr(0, pos);
 }
 
-// ====================================================================
-//  C-correction: remove linear terms from g, compute c and d
-// ====================================================================
-struct CCorrection {
-    std::vector<int> c;      // c vector (length n)
-    int d;                    // d scalar
-    SparseANF g_corrected;    // g with linear terms removed
-};
-
-static CCorrection apply_correction(
-    const SparseANF& g,
-    const std::vector<uint32_t>& M_rows,
-    uint64_t b,
-    int n_inputs)
-{
-    SparseANF g_copy = g;
-    auto L = g_copy.extract_linear_terms();
-
-    // c = M^T · L: XOR of M_rows[j] for each j where L[j]=1
-    std::vector<int> c_vec(n_inputs, 0);
-    for (int j = 0; j < (int)L.size(); j++) {
-        if (L[j] && j < (int)M_rows.size()) {
-            uint32_t row = M_rows[j];
-            for (int i = 0; i < n_inputs; i++) {
-                if ((row >> i) & 1) c_vec[i] ^= 1;
-            }
-        }
-    }
-
-    // d = <L, b> = XOR of L[j]*b_bit_j
-    int d_val = 0;
-    for (int j = 0; j < (int)L.size(); j++) {
-        if (L[j] && ((b >> j) & 1)) d_val ^= 1;
-    }
-
-    return {c_vec, d_val, g_copy};
-}
 
 // ====================================================================
 //  Per-output processing
 // ====================================================================
 struct OutputResult {
     std::string name;
-    SparseANF g_corrected;    // nonlinear ANF in z-space
-    std::vector<uint32_t> M_rows;  // per-output M
+    SparseANF g_all;          // full ANF in z-space (all terms, no correction)
+    std::vector<uint32_t> M_rows;  // per-output M (raw, no c/d rows)
     uint64_t b;
-    std::vector<int> c;
-    int d;
     int m_used;                // active z variables used
 };
 
@@ -101,23 +62,19 @@ static std::vector<OutputResult> process_outputs(
             printf("  Output %s: m=%d T=%d T_nl=%d\n",
                    out_name.c_str(), si->m, si->g.T(), si->g.T_nonlinear());
 
-        auto cc = apply_correction(si->g, si->M_rows, si->b, circ.n_inputs);
-
         // Determine how many z variables are actually used
         int m_used = 0;
-        for (auto& [mask, v] : cc.g_corrected.terms()) {
+        for (auto& [mask, v] : si->g.terms()) {
             if (v) {
                 int max_bit = 63 - __builtin_clzll(mask);
                 if (max_bit + 1 > m_used) m_used = max_bit + 1;
             }
         }
 
-        results.push_back({out_name, cc.g_corrected, si->M_rows, si->b,
-                           cc.c, cc.d, m_used});
+        results.push_back({out_name, si->g, si->M_rows, si->b, m_used});
 
         if (verbose) {
-            printf("    after c-corr: T_nl=%d m_used=%d\n",
-                   cc.g_corrected.T_nonlinear(), m_used);
+            printf("    m_used=%d T=%d\n", m_used, si->g.T());
         }
     }
     return results;
@@ -135,96 +92,25 @@ static void write_affine(const std::string& path,
     if (!f) { std::cerr << "  ERROR: cannot write " << path << "\n"; return; }
 
     int n = circ.n_inputs;
-    int k = (int)results.size();
 
-    // Count total z vars: M rows + c rows + d row
-    // GateBuilder uses shared z indices across all outputs
-    // But each output has its own M_rows, c, d — they're not concatenated
-    // Each output's variables are independent, placed at z_offsets[oi]
-
-    // For simplicity: each output gets (m_used + popcount(c) + (d!=0)) z vars
-    std::vector<int> z_offsets(k, 0);
+    // Total z vars = sum of per-output m_used
     int s = 0;
-    for (int oi = 0; oi < k; oi++) {
-        z_offsets[oi] = s;
-        int m = results[oi].m_used;
-        int c_cnt = 0;
-        for (int v : results[oi].c) if (v) c_cnt++;
-        s += m + c_cnt + (results[oi].d ? 1 : 0);
-    }
-    int t = k;
+    for (const auto& r : results) s += r.m_used;
 
-    f << s << " " << t << "\n" << s << " " << t << " " << n << "\n";
+    f << s << "\n" << s << " " << (n + 1) << "\n";
 
-    // M rows
-    for (int oi = 0; oi < k; oi++) {
-        for (int r = 0; r < (int)results[oi].M_rows.size(); r++) {
+    // s × (n+1) matrix: [M | b]
+    for (const auto& r : results) {
+        for (int ri = 0; ri < (int)r.M_rows.size(); ri++) {
             for (int c = 0; c < n; c++) {
                 if (c > 0) f << " ";
-                f << ((results[oi].M_rows[r] >> c) & 1);
+                f << ((r.M_rows[ri] >> c) & 1);
             }
-            f << "\n";
-        }
-        // c rows
-        for (int c = 0; c < n; c++) {
-            if (results[oi].c[c]) {
-                for (int cc = 0; cc < n; cc++) {
-                    if (cc > 0) f << " ";
-                    f << (cc == c ? 1 : 0);
-                }
-                f << "\n";
-            }
-        }
-        // d row (constant row = all zeros in M)
-        if (results[oi].d) {
-            for (int c = 0; c < n; c++) {
-                if (c > 0) f << " ";
-                f << "0";
-            }
-            f << "\n";
+            f << " " << ((r.b >> ri) & 1) << "\n";
         }
     }
 
-    // C rows (k × n), each is the c vector for that output
-    for (int oi = 0; oi < k; oi++) {
-        for (int c = 0; c < n; c++) {
-            if (c > 0) f << " ";
-            f << results[oi].c[c];
-        }
-        f << "\n";
-    }
-
-    // b vector (s bits)
-    int bit = 0;
-    for (int oi = 0; oi < k; oi++) {
-        for (int r = 0; r < (int)results[oi].M_rows.size(); r++) {
-            if (bit > 0) f << " ";
-            f << ((results[oi].b >> r) & 1);
-            bit++;
-        }
-        for (int v : results[oi].c) {
-            if (v) {
-                if (bit > 0) f << " ";
-                f << "0";
-                bit++;
-            }
-        }
-        if (results[oi].d) {
-            if (bit > 0) f << " ";
-            f << "1";
-            bit++;
-        }
-    }
-    if (s > 0) f << "\n";
-
-    // d vector (k bits)
-    for (int oi = 0; oi < k; oi++) {
-        if (oi > 0) f << " ";
-        f << results[oi].d;
-    }
-    if (k > 0) f << "\n";
-
-    std::cout << "  Saved: " << path << " (s=" << s << ", t=" << t << ")\n";
+    std::cout << "  Saved: " << path << " (s=" << s << ", n=" << n << ")\n";
 }
 
 static void write_poly(const std::string& path,
@@ -241,19 +127,16 @@ static void write_poly(const std::string& path,
     int s = 0;
     for (int oi = 0; oi < k; oi++) {
         z_offsets[oi] = s;
-        int m = results[oi].m_used;
-        int c_cnt = 0;
-        for (int v : results[oi].c) if (v) c_cnt++;
-        s += m + c_cnt + (results[oi].d ? 1 : 0);
+        s += results[oi].m_used;
     }
 
+    // Count terms per output
     std::vector<int> term_counts(k, 0);
     for (int oi = 0; oi < k; oi++) {
-        if (results[oi].g_corrected.T_nonlinear() == 0) continue;
-        auto& terms = results[oi].g_corrected.terms();
-        for (auto& [mask, v] : terms) {
-            if (v && __builtin_popcountll(mask) >= 2)
-                term_counts[oi]++;
+        if (results[oi].g_all.T() > 0) {
+            for (auto& [mask, v] : results[oi].g_all.terms()) {
+                if (v) term_counts[oi]++;
+            }
         }
     }
 
@@ -266,17 +149,19 @@ static void write_poly(const std::string& path,
 
     for (int oi = 0; oi < k; oi++) {
         int off = z_offsets[oi];
-        if (results[oi].g_corrected.T_nonlinear() == 0) continue;
-        auto& terms = results[oi].g_corrected.terms();
-        for (auto& [mask, v] : terms) {
-            if (!v || __builtin_popcountll(mask) < 2) continue;
-            uint64_t shared_pos = mask << off;
-            f << "[";
-            for (int b = 0; b < s; b++) {
-                if (b > 0) f << " , ";
-                f << ((shared_pos >> b) & 1);
+
+        // g_all terms (shifted by off)
+        if (results[oi].g_all.T() > 0) {
+            for (auto& [mask, v] : results[oi].g_all.terms()) {
+                if (!v) continue;
+                uint64_t shared_pos = (uint64_t)mask << off;
+                f << "[";
+                for (int b = 0; b < s; b++) {
+                    if (b > 0) f << " , ";
+                    f << ((shared_pos >> b) & 1);
+                }
+                f << " , 1]\n";
             }
-            f << " , 1]\n";
         }
     }
     std::cout << "  Saved: " << path << " (m=" << s << ", " << k << " outputs)\n";
@@ -293,11 +178,10 @@ static void write_stats(const std::string& path,
     int64_t sum_T = 0;
     int max_deg = 0;
     for (int oi = 0; oi < k; oi++) {
-        int t = results[oi].g_corrected.T_nonlinear();
+        int t = results[oi].g_all.T();
         sum_T += t;
         if (t > 0) {
-            auto& terms = results[oi].g_corrected.terms();
-            for (auto& [mask, v] : terms) {
+            for (auto& [mask, v] : results[oi].g_all.terms()) {
                 if (v) {
                     int deg = __builtin_popcountll(mask);
                     if (deg > max_deg) max_deg = deg;
@@ -306,9 +190,8 @@ static void write_stats(const std::string& path,
         }
     }
 
-    int64_t union_T = sum_T;  // approximate since SparseANF terms are per-output
-
-    f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
+    // Each output has disjoint z, so sum_T == union_T
+    f << n << "\n" << k << "\n" << sum_T << "\n" << sum_T << "\n" << max_deg << "\n";
     std::cout << "  Saved: " << path << " (sum_T=" << sum_T << ")\n";
 }
 
