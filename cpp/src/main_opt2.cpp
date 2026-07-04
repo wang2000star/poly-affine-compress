@@ -352,40 +352,87 @@ int main(int argc, char** argv) {
         std::string tag = "_d3_" + std::string(STRATEGY_TAG);
         std::string prefix = dir + "/" + inst_name + tag;
 
-        // ---- .affine: block-diagonal M with per-output b ----
+        // ---- .affine: s × (n+1) matrix [M | b] ----
         {
             int s = result.m;
-            int t = 0;
             std::ofstream f(prefix + ".affine");
             if (f) {
-                f << s << " " << t << "\n" << s << " " << t << " " << n << "\n";
-                // M rows: concatenated per-output M_rows
+                f << s << "\n" << s << " " << (n + 1) << "\n";
+                int bit = 0;
                 for (int oi = 0; oi < k; oi++) {
                     for (int r = 0; r < per_output[oi].m; r++) {
                         for (int c = 0; c < n; c++) {
                             if (c > 0) f << " ";
                             f << ((per_output[oi].M_rows[r] >> c) & 1);
                         }
-                        f << "\n";
-                    }
-                }
-                // b vector: concatenated per-output b
-                int bit = 0;
-                for (int oi = 0; oi < k; oi++) {
-                    for (int r = 0; r < per_output[oi].m; r++) {
-                        if (bit > 0) f << " ";
-                        f << ((per_output[oi].b >> r) & 1);
+                        f << " " << ((per_output[oi].b >> r) & 1) << "\n";
                         bit++;
                     }
                 }
-                if (s > 0) f << "\n";
                 std::cout << "  Saved: " << prefix << ".affine (s=" << s << ")\n";
             }
         }
 
-        // ---- .poly: merged g truth table ----
+        // ---- .poly: per-output ANF in shared z-space ----
         if (!result.g_tt_raw.empty()) {
             save_opt_expr(result.g_tt_raw, circ, output_indices, result.m, prefix + ".poly");
+        } else {
+            // Large m: re-evaluate best per-output candidates with save_g_tt=true
+            int s = result.m;
+            std::vector<int> term_counts(k, 0);
+            std::vector<std::vector<uint64_t>> per_output_anf(k);
+            for (int oi = 0; oi < k; oi++) {
+                if (per_output[oi].m > 0 && per_output[oi].m <= 20) {
+                    TruthTable tt_oi;
+                    tt_oi.n = tt.n;
+                    tt_oi.n_outputs = 1;
+                    tt_oi.n_words = tt.n_words;
+                    tt_oi.tt = {tt.tt[oi]};
+                    auto er = evaluate_Mb(tt_oi,
+                        per_output[oi].M_rows.data(),
+                        per_output[oi].b,
+                        per_output[oi].m,
+                        params.n_threads, true);
+                    if (!er.g_tt_raw.empty()) {
+                        auto& g_tt = er.g_tt_raw[0];
+                        moebius_packed(g_tt.data(), per_output[oi].m);
+                        per_output_anf[oi] = g_tt;
+                        int64_t n_z = int64_t(1) << per_output[oi].m;
+                        for (int64_t zi = 0; zi < n_z; zi++) {
+                            if ((g_tt[zi >> 6] >> (zi & 63)) & 1)
+                                term_counts[oi]++;
+                        }
+                    }
+                }
+            }
+            std::ofstream f(prefix + ".poly");
+            if (f) {
+                f << s << "\n" << k << "\n";
+                for (int oi = 0; oi < k; oi++) {
+                    if (oi > 0) f << " ";
+                    f << term_counts[oi];
+                }
+                f << "\n";
+                int off = 0;
+                for (int oi = 0; oi < k; oi++) {
+                    if (!per_output_anf[oi].empty()) {
+                        int64_t n_z = int64_t(1) << per_output[oi].m;
+                        for (int64_t zi = 0; zi < n_z; zi++) {
+                            if ((per_output_anf[oi][zi >> 6] >> (zi & 63)) & 1) {
+                                int64_t shared_pos = (int64_t)zi << off;
+                                f << "[";
+                                for (int b = 0; b < s; b++) {
+                                    if (b > 0) f << " , ";
+                                    f << ((shared_pos >> b) & 1);
+                                }
+                                f << " , 1]\n";
+                            }
+                        }
+                    }
+                    off += per_output[oi].m;
+                }
+                std::cout << "  Saved poly: " << prefix << ".poly (m=" << s << ", " << k << " outputs)\n";
+            }
         }
 
         // ---- _stats.txt: 5-line numeric ----

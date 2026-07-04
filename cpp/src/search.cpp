@@ -1013,22 +1013,51 @@ void run_search(const TruthTable& tt, const Circuit& circ,
     } else if (n <= 32 && !walsh.empty()) {
         CandidateGenerator gen(n, params.max_m, walsh);
 
-        std::cout << "  4a: Single-row Walsh (" << (params.walsh_single_top * 2) << " candidates)\n";
+        // For n>20, the non-bijective evaluate_Mb (m < n) is extremely slow because
+        // it iterates the full 2^n truth table per output. Instead, pad Walsh-guided
+        // candidates to full-rank n×n matrices and use fast evaluate_Mb_bijective.
+        auto eval_as_bijective = [&](uint32_t* M_in, int m_in, uint64_t b_in) -> MbCandidate {
+            uint32_t M[32] = {0};
+            for (int j = 0; j < m_in; j++) M[j] = M_in[j];
+
+            // Pad to n rows with standard basis vectors
+            int r = m_in;
+            for (int i = 0; i < n && r < n; i++) {
+                M[r] = (1u << i);
+                int rank_before = gf2_rank(M, r, n);
+                int rank_after = gf2_rank(M, r + 1, n);
+                if (rank_after > rank_before) {
+                    r++;
+                } else {
+                    M[r] = 0;
+                }
+            }
+
+            if (r < n) {
+                MbCandidate bad;
+                bad.total_T = INT64_MAX;
+                bad.union_T = INT64_MAX;
+                return bad;
+            }
+            return evaluate_Mb_bijective(tt_copy, M, b_in, n, n, params.n_threads, false);
+        };
+
+        std::cout << "  4a: Single-row Walsh -> m=n permutations ("
+                  << (params.walsh_single_top * 2) << " candidates)\n";
         auto single_rows = gen.gen_walsh_single_rows(params.walsh_single_top);
         for (auto& [row, b] : single_rows) {
-            uint32_t M[32] = {0};
-            M[0] = row;
-            results.push_back(evaluate_Mb(tt_copy, M, b, 1, params.n_threads));
+            uint32_t M[1] = {row};
+            results.push_back(eval_as_bijective(M, 1, b));
         }
 
-        std::cout << "  4b: Multi-row Walsh (progressive m=1.." << std::min(20, n)
-                  << " + XOR pairs)\n";
+        std::cout << "  4b: Multi-row Walsh -> m=n matrices"
+                  << " (progressive m=1.." << std::min(20, n) << " + XOR pairs)\n";
         auto multi_rows = gen.gen_multi_row(std::min(20, n));
         for (auto& [rows, b] : multi_rows) {
             int m = (int)rows.size();
             uint32_t M[32] = {0};
             for (int j = 0; j < m; j++) M[j] = rows[j];
-            results.push_back(evaluate_Mb(tt_copy, M, b, m, params.n_threads));
+            results.push_back(eval_as_bijective(M, m, b));
         }
 
         std::cout << "  (skipping Phase 4c small-m random for n=" << n << ")\n";
