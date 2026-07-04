@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/anf_test.dir/test/test_main.cpp.o -o anf_test  libanf_core.a

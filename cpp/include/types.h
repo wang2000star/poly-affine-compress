@@ -63,9 +63,10 @@ struct MbResult {
 
 struct MbCandidate {
     int m;
-    uint32_t M_rows[32];
-    uint32_t b;
+    std::vector<uint32_t> M_rows;
+    uint64_t b;
     int64_t total_T;
+    int64_t union_T;  // unique monomials across all outputs (after Möbius)
     std::vector<int64_t> per_output_T;
     std::vector<std::vector<uint64_t>> g_tt_raw;  // pre-Möbius per output
 };
@@ -92,6 +93,7 @@ struct SearchParams {
     int walsh_single_top = 20;
     int multi_max_rows = 10;
     int n32_random = 0;
+    int n_complement = 0;   // complement candidates (k complement vars, 0 = skip)
     int n_threads = 4;
     int walsh_k = 30;
     std::string anf_out_prefix;

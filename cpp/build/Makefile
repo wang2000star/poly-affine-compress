@@ -117,17 +117,30 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named optimize_anf
+# Target rules for targets named optimize_anf_opt1
 
 # Build rule for target.
-optimize_anf: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 optimize_anf
-.PHONY : optimize_anf
+optimize_anf_opt1: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 optimize_anf_opt1
+.PHONY : optimize_anf_opt1
 
 # fast build rule for target.
-optimize_anf/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/build
-.PHONY : optimize_anf/fast
+optimize_anf_opt1/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/build
+.PHONY : optimize_anf_opt1/fast
+
+#=============================================================================
+# Target rules for targets named optimize_anf_opt2
+
+# Build rule for target.
+optimize_anf_opt2: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 optimize_anf_opt2
+.PHONY : optimize_anf_opt2
+
+# fast build rule for target.
+optimize_anf_opt2/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/build
+.PHONY : optimize_anf_opt2/fast
 
 #=============================================================================
 # Target rules for targets named compute_raw_anf
@@ -141,6 +154,19 @@ compute_raw_anf: cmake_check_build_system
 compute_raw_anf/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/compute_raw_anf.dir/build.make CMakeFiles/compute_raw_anf.dir/build
 .PHONY : compute_raw_anf/fast
+
+#=============================================================================
+# Target rules for targets named optimize_anf_large
+
+# Build rule for target.
+optimize_anf_large: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 optimize_anf_large
+.PHONY : optimize_anf_large
+
+# fast build rule for target.
+optimize_anf_large/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/build
+.PHONY : optimize_anf_large/fast
 
 #=============================================================================
 # Target rules for targets named verify_anf
@@ -160,7 +186,9 @@ src/affine.o: src/affine.cpp.o
 
 # target to build an object file
 src/affine.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/affine.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/affine.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/affine.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/affine.cpp.o
 .PHONY : src/affine.cpp.o
 
 src/affine.i: src/affine.cpp.i
@@ -168,7 +196,9 @@ src/affine.i: src/affine.cpp.i
 
 # target to preprocess a source file
 src/affine.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/affine.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/affine.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/affine.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/affine.cpp.i
 .PHONY : src/affine.cpp.i
 
 src/affine.s: src/affine.cpp.s
@@ -176,7 +206,9 @@ src/affine.s: src/affine.cpp.s
 
 # target to generate assembly for a file
 src/affine.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/affine.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/affine.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/affine.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/affine.cpp.s
 .PHONY : src/affine.cpp.s
 
 src/anf.o: src/anf.cpp.o
@@ -184,7 +216,9 @@ src/anf.o: src/anf.cpp.o
 
 # target to build an object file
 src/anf.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/anf.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/anf.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/anf.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/anf.cpp.o
 .PHONY : src/anf.cpp.o
 
 src/anf.i: src/anf.cpp.i
@@ -192,7 +226,9 @@ src/anf.i: src/anf.cpp.i
 
 # target to preprocess a source file
 src/anf.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/anf.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/anf.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/anf.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/anf.cpp.i
 .PHONY : src/anf.cpp.i
 
 src/anf.s: src/anf.cpp.s
@@ -200,7 +236,9 @@ src/anf.s: src/anf.cpp.s
 
 # target to generate assembly for a file
 src/anf.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/anf.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/anf.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/anf.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/anf.cpp.s
 .PHONY : src/anf.cpp.s
 
 src/circuit.o: src/circuit.cpp.o
@@ -208,7 +246,9 @@ src/circuit.o: src/circuit.cpp.o
 
 # target to build an object file
 src/circuit.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/circuit.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/circuit.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/circuit.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/circuit.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.o
 .PHONY : src/circuit.cpp.o
 
@@ -217,7 +257,9 @@ src/circuit.i: src/circuit.cpp.i
 
 # target to preprocess a source file
 src/circuit.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/circuit.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/circuit.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/circuit.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/circuit.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.i
 .PHONY : src/circuit.cpp.i
 
@@ -226,7 +268,9 @@ src/circuit.s: src/circuit.cpp.s
 
 # target to generate assembly for a file
 src/circuit.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/circuit.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/circuit.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/circuit.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/circuit.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.s
 .PHONY : src/circuit.cpp.s
 
@@ -259,7 +303,9 @@ src/gf2.o: src/gf2.cpp.o
 
 # target to build an object file
 src/gf2.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/gf2.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/gf2.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/gf2.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/gf2.cpp.o
 .PHONY : src/gf2.cpp.o
 
 src/gf2.i: src/gf2.cpp.i
@@ -267,7 +313,9 @@ src/gf2.i: src/gf2.cpp.i
 
 # target to preprocess a source file
 src/gf2.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/gf2.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/gf2.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/gf2.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/gf2.cpp.i
 .PHONY : src/gf2.cpp.i
 
 src/gf2.s: src/gf2.cpp.s
@@ -275,7 +323,9 @@ src/gf2.s: src/gf2.cpp.s
 
 # target to generate assembly for a file
 src/gf2.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/gf2.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/gf2.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/gf2.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/gf2.cpp.s
 .PHONY : src/gf2.cpp.s
 
 src/io.o: src/io.cpp.o
@@ -283,7 +333,9 @@ src/io.o: src/io.cpp.o
 
 # target to build an object file
 src/io.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/io.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/io.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/io.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/io.cpp.o
 .PHONY : src/io.cpp.o
 
 src/io.i: src/io.cpp.i
@@ -291,7 +343,9 @@ src/io.i: src/io.cpp.i
 
 # target to preprocess a source file
 src/io.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/io.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/io.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/io.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/io.cpp.i
 .PHONY : src/io.cpp.i
 
 src/io.s: src/io.cpp.s
@@ -299,39 +353,91 @@ src/io.s: src/io.cpp.s
 
 # target to generate assembly for a file
 src/io.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/io.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/io.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/io.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/io.cpp.s
 .PHONY : src/io.cpp.s
 
-src/main.o: src/main.cpp.o
-.PHONY : src/main.o
+src/main_large.o: src/main_large.cpp.o
+.PHONY : src/main_large.o
 
 # target to build an object file
-src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/main.cpp.o
-.PHONY : src/main.cpp.o
+src/main_large.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/main_large.cpp.o
+.PHONY : src/main_large.cpp.o
 
-src/main.i: src/main.cpp.i
-.PHONY : src/main.i
+src/main_large.i: src/main_large.cpp.i
+.PHONY : src/main_large.i
 
 # target to preprocess a source file
-src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/main.cpp.i
-.PHONY : src/main.cpp.i
+src/main_large.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/main_large.cpp.i
+.PHONY : src/main_large.cpp.i
 
-src/main.s: src/main.cpp.s
-.PHONY : src/main.s
+src/main_large.s: src/main_large.cpp.s
+.PHONY : src/main_large.s
 
 # target to generate assembly for a file
-src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/main.cpp.s
-.PHONY : src/main.cpp.s
+src/main_large.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/main_large.cpp.s
+.PHONY : src/main_large.cpp.s
+
+src/main_opt1.o: src/main_opt1.cpp.o
+.PHONY : src/main_opt1.o
+
+# target to build an object file
+src/main_opt1.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/main_opt1.cpp.o
+.PHONY : src/main_opt1.cpp.o
+
+src/main_opt1.i: src/main_opt1.cpp.i
+.PHONY : src/main_opt1.i
+
+# target to preprocess a source file
+src/main_opt1.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/main_opt1.cpp.i
+.PHONY : src/main_opt1.cpp.i
+
+src/main_opt1.s: src/main_opt1.cpp.s
+.PHONY : src/main_opt1.s
+
+# target to generate assembly for a file
+src/main_opt1.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/main_opt1.cpp.s
+.PHONY : src/main_opt1.cpp.s
+
+src/main_opt2.o: src/main_opt2.cpp.o
+.PHONY : src/main_opt2.o
+
+# target to build an object file
+src/main_opt2.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/main_opt2.cpp.o
+.PHONY : src/main_opt2.cpp.o
+
+src/main_opt2.i: src/main_opt2.cpp.i
+.PHONY : src/main_opt2.i
+
+# target to preprocess a source file
+src/main_opt2.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/main_opt2.cpp.i
+.PHONY : src/main_opt2.cpp.i
+
+src/main_opt2.s: src/main_opt2.cpp.s
+.PHONY : src/main_opt2.s
+
+# target to generate assembly for a file
+src/main_opt2.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/main_opt2.cpp.s
+.PHONY : src/main_opt2.cpp.s
 
 src/moebius.o: src/moebius.cpp.o
 .PHONY : src/moebius.o
 
 # target to build an object file
 src/moebius.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/moebius.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/moebius.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/moebius.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/moebius.cpp.o
 .PHONY : src/moebius.cpp.o
 
 src/moebius.i: src/moebius.cpp.i
@@ -339,7 +445,9 @@ src/moebius.i: src/moebius.cpp.i
 
 # target to preprocess a source file
 src/moebius.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/moebius.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/moebius.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/moebius.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/moebius.cpp.i
 .PHONY : src/moebius.cpp.i
 
 src/moebius.s: src/moebius.cpp.s
@@ -347,7 +455,9 @@ src/moebius.s: src/moebius.cpp.s
 
 # target to generate assembly for a file
 src/moebius.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/moebius.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/moebius.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/moebius.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/moebius.cpp.s
 .PHONY : src/moebius.cpp.s
 
 src/search.o: src/search.cpp.o
@@ -355,7 +465,9 @@ src/search.o: src/search.cpp.o
 
 # target to build an object file
 src/search.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/search.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/search.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/search.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/search.cpp.o
 .PHONY : src/search.cpp.o
 
 src/search.i: src/search.cpp.i
@@ -363,7 +475,9 @@ src/search.i: src/search.cpp.i
 
 # target to preprocess a source file
 src/search.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/search.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/search.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/search.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/search.cpp.i
 .PHONY : src/search.cpp.i
 
 src/search.s: src/search.cpp.s
@@ -371,7 +485,9 @@ src/search.s: src/search.cpp.s
 
 # target to generate assembly for a file
 src/search.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/search.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/search.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/search.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/search.cpp.s
 .PHONY : src/search.cpp.s
 
 src/truth_table.o: src/truth_table.cpp.o
@@ -379,7 +495,9 @@ src/truth_table.o: src/truth_table.cpp.o
 
 # target to build an object file
 src/truth_table.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/truth_table.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/truth_table.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/truth_table.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/truth_table.cpp.o
 .PHONY : src/truth_table.cpp.o
 
 src/truth_table.i: src/truth_table.cpp.i
@@ -387,7 +505,9 @@ src/truth_table.i: src/truth_table.cpp.i
 
 # target to preprocess a source file
 src/truth_table.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/truth_table.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/truth_table.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/truth_table.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/truth_table.cpp.i
 .PHONY : src/truth_table.cpp.i
 
 src/truth_table.s: src/truth_table.cpp.s
@@ -395,7 +515,9 @@ src/truth_table.s: src/truth_table.cpp.s
 
 # target to generate assembly for a file
 src/truth_table.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/truth_table.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/truth_table.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/truth_table.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/truth_table.cpp.s
 .PHONY : src/truth_table.cpp.s
 
 src/verify.o: src/verify.cpp.o
@@ -403,7 +525,9 @@ src/verify.o: src/verify.cpp.o
 
 # target to build an object file
 src/verify.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/verify.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/verify.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/verify.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/verify.cpp.o
 .PHONY : src/verify.cpp.o
 
 src/verify.i: src/verify.cpp.i
@@ -411,7 +535,9 @@ src/verify.i: src/verify.cpp.i
 
 # target to preprocess a source file
 src/verify.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/verify.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/verify.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/verify.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/verify.cpp.i
 .PHONY : src/verify.cpp.i
 
 src/verify.s: src/verify.cpp.s
@@ -419,7 +545,9 @@ src/verify.s: src/verify.cpp.s
 
 # target to generate assembly for a file
 src/verify.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/verify.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/verify.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/verify.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/verify.cpp.s
 .PHONY : src/verify.cpp.s
 
 src/verify_anf.o: src/verify_anf.cpp.o
@@ -451,7 +579,9 @@ src/walsh.o: src/walsh.cpp.o
 
 # target to build an object file
 src/walsh.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/walsh.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/walsh.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/walsh.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/walsh.cpp.o
 .PHONY : src/walsh.cpp.o
 
 src/walsh.i: src/walsh.cpp.i
@@ -459,7 +589,9 @@ src/walsh.i: src/walsh.cpp.i
 
 # target to preprocess a source file
 src/walsh.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/walsh.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/walsh.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/walsh.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/walsh.cpp.i
 .PHONY : src/walsh.cpp.i
 
 src/walsh.s: src/walsh.cpp.s
@@ -467,7 +599,9 @@ src/walsh.s: src/walsh.cpp.s
 
 # target to generate assembly for a file
 src/walsh.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf.dir/build.make CMakeFiles/optimize_anf.dir/src/walsh.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt1.dir/build.make CMakeFiles/optimize_anf_opt1.dir/src/walsh.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_opt2.dir/build.make CMakeFiles/optimize_anf_opt2.dir/src/walsh.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_large.dir/build.make CMakeFiles/optimize_anf_large.dir/src/walsh.cpp.s
 .PHONY : src/walsh.cpp.s
 
 # Help Target
@@ -479,7 +613,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... compute_raw_anf"
-	@echo "... optimize_anf"
+	@echo "... optimize_anf_large"
+	@echo "... optimize_anf_opt1"
+	@echo "... optimize_anf_opt2"
 	@echo "... verify_anf"
 	@echo "... src/affine.o"
 	@echo "... src/affine.i"
@@ -499,9 +635,15 @@ help:
 	@echo "... src/io.o"
 	@echo "... src/io.i"
 	@echo "... src/io.s"
-	@echo "... src/main.o"
-	@echo "... src/main.i"
-	@echo "... src/main.s"
+	@echo "... src/main_large.o"
+	@echo "... src/main_large.i"
+	@echo "... src/main_large.s"
+	@echo "... src/main_opt1.o"
+	@echo "... src/main_opt1.i"
+	@echo "... src/main_opt1.s"
+	@echo "... src/main_opt2.o"
+	@echo "... src/main_opt2.i"
+	@echo "... src/main_opt2.s"
 	@echo "... src/moebius.o"
 	@echo "... src/moebius.i"
 	@echo "... src/moebius.s"

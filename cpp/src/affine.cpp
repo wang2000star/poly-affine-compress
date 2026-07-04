@@ -13,8 +13,9 @@
 
 MbResult evaluate_Mb_single_output(
     const uint64_t* f_tt, int n, int m,
-    const uint32_t* M_rows, uint32_t b,
-    int64_t n_words_f, int n_threads)
+    const uint32_t* M_rows, uint64_t b,
+    int64_t n_words_f, int n_threads,
+    std::vector<uint64_t>* g_tt_raw_out)
 {
     if (m <= 0) return {0, true};
 
@@ -112,6 +113,9 @@ MbResult evaluate_Mb_single_output(
 
         if (!consistent) return {INT64_MAX, false};
 
+        if (g_tt_raw_out) {
+            g_tt_raw_out->assign(per_thread_g[0].begin(), per_thread_g[0].end());
+        }
         moebius_packed(per_thread_g[0].data(), m);
         return {count_T(per_thread_g[0].data(), m), true};
     } else {
@@ -135,6 +139,7 @@ MbResult evaluate_Mb_single_output(
                     g_tt[z >> 6] ^= (1ULL << (z & 63));
                 }
             }
+            if (g_tt_raw_out) *g_tt_raw_out = g_tt;
             moebius_packed(g_tt.data(), m);
             return {count_T(g_tt.data(), m), true};
         }
@@ -150,6 +155,7 @@ MbResult evaluate_Mb_single_output(
             if (state[zi] == 3) return {INT64_MAX, false};
         }
 
+        if (g_tt_raw_out) *g_tt_raw_out = g_tt;
         moebius_packed(g_tt.data(), m);
         return {count_T(g_tt.data(), m), true};
     }
@@ -161,15 +167,17 @@ MbResult evaluate_Mb_single_output(
 
 MbCandidate evaluate_Mb_bijective(
     const TruthTable& tt,
-    const uint32_t* M_rows, uint32_t b,
+    const uint32_t* M_rows, uint64_t b,
     int m, int n, int n_threads,
     bool save_g_tt)
 {
     MbCandidate cand;
     cand.m = m;
     cand.b = b;
+    cand.M_rows.resize(m);
     for (int i = 0; i < m; i++) cand.M_rows[i] = M_rows[i];
     cand.total_T = 0;
+    cand.union_T = 0;
     cand.per_output_T.resize(tt.n_outputs, 0);
 
     int64_t n_words_g = (m < 6) ? 1 : (int64_t(1) << (m - 6));
@@ -191,6 +199,8 @@ MbCandidate evaluate_Mb_bijective(
     std::vector<uint64_t*> per_thread_g(use_threads, nullptr);
     for (int t = 0; t < use_threads; t++)
         per_thread_g[t] = (uint64_t*)calloc(n_words_g, sizeof(uint64_t));
+
+    std::vector<uint64_t> union_anf(n_words_g, 0);  // union accumulator
 
     for (int oi = 0; oi < tt.n_outputs; oi++) {
         const uint64_t* f_tt = tt.tt[oi].data();
@@ -279,7 +289,13 @@ MbCandidate evaluate_Mb_bijective(
         int64_t T = count_T(per_thread_g[0], m);
         cand.per_output_T[oi] = T;
         cand.total_T += T;
+        for (int64_t w = 0; w < n_words_g; w++)
+            union_anf[w] |= per_thread_g[0][w];
     }
+
+    cand.union_T = 0;
+    for (int64_t w = 0; w < n_words_g; w++)
+        cand.union_T += __builtin_popcountll(union_anf[w]);
 
     for (int t = 0; t < use_threads; t++)
         free(per_thread_g[t]);
@@ -293,31 +309,37 @@ MbCandidate evaluate_Mb_bijective(
 
 MbCandidate evaluate_Mb(
     const TruthTable& tt,
-    const uint32_t* M_rows, uint32_t b,
+    const uint32_t* M_rows, uint64_t b,
     int m, int n_threads,
     bool save_g_tt)
 {
     MbCandidate cand;
     cand.m = m;
     cand.b = b;
+    cand.M_rows.resize(m);
     for (int i = 0; i < m; i++) cand.M_rows[i] = M_rows[i];
     cand.total_T = 0;
+    cand.union_T = 0;
     cand.per_output_T.resize(tt.n_outputs, 0);
 
-    if (m == tt.n && (tt.n > 20 || save_g_tt)) {
+    if (m == tt.n) {
         int rank = gf2_rank(M_rows, m, tt.n);
         if (rank < m) {
             cand.total_T = INT64_MAX;
+            cand.union_T = INT64_MAX;
             return cand;
         }
         return evaluate_Mb_bijective(tt, M_rows, b, m, tt.n, n_threads, save_g_tt);
     }
 
     bool any_inconsistent = false;
+    cand.g_tt_raw.clear();
+    if (save_g_tt) cand.g_tt_raw.resize(tt.n_outputs);
     for (int oi = 0; oi < tt.n_outputs; oi++) {
+        std::vector<uint64_t>* g_out = save_g_tt ? &cand.g_tt_raw[oi] : nullptr;
         MbResult res = evaluate_Mb_single_output(
             tt.tt[oi].data(), tt.n, m, M_rows, b,
-            tt.n_words, n_threads);
+            tt.n_words, n_threads, g_out);
         if (!res.consistent) { any_inconsistent = true; break; }
         cand.per_output_T[oi] = res.T;
         cand.total_T += res.T;
@@ -325,6 +347,23 @@ MbCandidate evaluate_Mb(
 
     if (any_inconsistent) {
         cand.total_T = INT64_MAX;
+        cand.union_T = INT64_MAX;
+    } else {
+        int64_t n_words_g = (m < 6) ? 1 : (int64_t(1) << (m - 6));
+        if (save_g_tt) {
+            std::vector<uint64_t> union_anf(n_words_g, 0);
+            for (int oi = 0; oi < tt.n_outputs; oi++) {
+                std::vector<uint64_t> anf = cand.g_tt_raw[oi];
+                moebius_packed(anf.data(), m);
+                for (int64_t w = 0; w < n_words_g; w++)
+                    union_anf[w] |= anf[w];
+            }
+            cand.union_T = 0;
+            for (int64_t w = 0; w < n_words_g; w++)
+                cand.union_T += __builtin_popcountll(union_anf[w]);
+        } else {
+            cand.union_T = cand.total_T;
+        }
     }
     return cand;
 }

@@ -4,7 +4,7 @@ bool verify_transform(const TruthTable& tt,
                       const std::vector<uint64_t>& g_tt,
                       int output_idx,
                       const uint32_t* M_rows,
-                      uint32_t b, int m, int n,
+                      uint64_t b, int m, int n,
                       int n_tests)
 {
     uint32_t M_offsets[64];

@@ -3,31 +3,39 @@
 #include <thread>
 #include <vector>
 
-// In-word Möbius transform (bits 0..5) on a single 64-bit word.
-// For each i: XOR bit at position (p - 2^i) into position p, for all p where bit i of p is 1.
-// Parallel bitwise implementation:
-//   i=0: v ^= ((v & 0x5555555555555555) << 1)   -- XOR adjacent bits upward
-//   i=1: v ^= ((v & 0x3333333333333333) << 2)
-//   i=2: v ^= ((v & 0x0F0F0F0F0F0F0F0F) << 4)
-//   i=3: v ^= ((v & 0x00FF00FF00FF00FF) << 8)
-//   i=4: v ^= ((v & 0x0000FFFF0000FFFF) << 16)
-//   i=5: v ^= ((v & 0x00000000FFFFFFFF) << 32)
+// In-word Moebius transform for i-th bit (one pass).
+// Separated so moebius_packed can apply only the first n passes (n < 6).
+static uint64_t moebius_pass(uint64_t v, int i) {
+    static const uint64_t MASKS[6] = {
+        0x5555555555555555ULL,
+        0x3333333333333333ULL,
+        0x0F0F0F0F0F0F0F0FULL,
+        0x00FF00FF00FF00FFULL,
+        0x0000FFFF0000FFFFULL,
+        0x00000000FFFFFFFFULL,
+    };
+    return v ^ ((v & MASKS[i]) << (1 << i));
+}
+
+// Full 6-bit in-word Moebius (kept for backward compatibility)
 static uint64_t moebius_word(uint64_t v) {
-    v ^= ((v & 0x5555555555555555ULL) << 1);
-    v ^= ((v & 0x3333333333333333ULL) << 2);
-    v ^= ((v & 0x0F0F0F0F0F0F0F0FULL) << 4);
-    v ^= ((v & 0x00FF00FF00FF00FFULL) << 8);
-    v ^= ((v & 0x0000FFFF0000FFFFULL) << 16);
-    v ^= ((v & 0x00000000FFFFFFFFULL) << 32);
+    for (int i = 0; i < 6; i++) v = moebius_pass(v, i);
     return v;
 }
 
 void moebius_packed(uint64_t* data, int n) {
-    int64_t n_words = int64_t(1) << (n - 6);
+    int64_t n_words = (n < 6) ? 1 : (int64_t(1) << (n - 6));
 
-    // In-word pass: bits 0..5 (independent per word)
-    for (int64_t w = 0; w < n_words; w++)
-        data[w] = moebius_word(data[w]);
+    // In-word pass: only apply the first min(n, 6) passes.
+    // When n < 6, higher passes would XOR data across 2^i boundaries
+    // into the valid region, corrupting it if unused bits are non-zero.
+    int in_word_bits = (n < 6) ? n : 6;
+    for (int64_t w = 0; w < n_words; w++) {
+        uint64_t v = data[w];
+        for (int i = 0; i < in_word_bits; i++)
+            v = moebius_pass(v, i);
+        data[w] = v;
+    }
 
     // Cross-word pass: bits 6..n-1
     for (int i = 6; i < n; i++) {
@@ -49,9 +57,14 @@ void moebius_packed_mt(uint64_t* data, int n, int n_threads) {
     int64_t chunk = std::max(int64_t(1), (n_words + use_threads - 1) / use_threads);
 
     // In-word pass: parallel by word
+    int in_word_bits = (n < 6) ? n : 6;
     auto word_worker = [&](int64_t start, int64_t end) {
-        for (int64_t w = start; w < end; w++)
-            data[w] = moebius_word(data[w]);
+        for (int64_t w = start; w < end; w++) {
+            uint64_t v = data[w];
+            for (int i = 0; i < in_word_bits; i++)
+                v = moebius_pass(v, i);
+            data[w] = v;
+        }
     };
     {
         std::vector<std::thread> threads;

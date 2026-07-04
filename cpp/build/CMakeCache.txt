@@ -211,15 +211,6 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
-anf_simplify_BINARY_DIR:STATIC=/home/wangfz/bool/cpp/build
-
-//Value Computed by CMake
-anf_simplify_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-anf_simplify_SOURCE_DIR:STATIC=/home/wangfz/bool/cpp
-
-//Value Computed by CMake
 optimize_anf_BINARY_DIR:STATIC=/home/wangfz/bool/cpp/build
 
 //Value Computed by CMake

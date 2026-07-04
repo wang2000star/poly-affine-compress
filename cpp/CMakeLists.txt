@@ -23,16 +23,30 @@ set(CORE_SRC
     src/verify.cpp
 )
 
-# Main ANF optimizer
-add_executable(optimize_anf
-    src/main.cpp
+# Main ANF optimizer — opt1 (shared transform)
+add_executable(optimize_anf_opt1
+    src/main_opt1.cpp
     ${CORE_SRC}
 )
-target_include_directories(optimize_anf PRIVATE include)
+target_include_directories(optimize_anf_opt1 PRIVATE include)
+
+# Main ANF optimizer — opt2 (per-output transforms)
+add_executable(optimize_anf_opt2
+    src/main_opt2.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_opt2 PRIVATE include)
 
 # Legacy: compute_raw_anf (standalone, uses old code)
 add_executable(compute_raw_anf src/compute_raw_anf.cpp)
 target_compile_options(compute_raw_anf PRIVATE -O3 -march=native -mtune=native -pthread)
+
+# Large-n ANF optimizer (z-space evaluation, n > 20)
+add_executable(optimize_anf_large
+    src/main_large.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_large PRIVATE include)
 
 # Standalone verifier: read circuit + trans + expr, verify f(x) == g(Mx+b)
 add_executable(verify_anf

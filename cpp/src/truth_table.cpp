@@ -24,6 +24,77 @@ static uint64_t input_word_for_bit(int i, int64_t base) {
     return bit_val ? ones : ~ones;
 }
 
+FastCircuit make_fast(const Circuit& circ, const std::vector<int>& output_indices) {
+    FastCircuit fc;
+    fc.n_stmts = (int)circ.stmts.size();
+    fc.n_inputs = circ.n_inputs;
+    fc.stmt_op.resize(fc.n_stmts);
+    fc.stmt_inp1.resize(fc.n_stmts);
+    fc.stmt_inp2.resize(fc.n_stmts);
+
+    auto resolve = [&](const std::string& name) -> int {
+        auto it = circ.name_to_idx.find(name);
+        if (it == circ.name_to_idx.end()) return -1;
+        return it->second;
+    };
+
+    for (int i = 0; i < fc.n_stmts; i++) {
+        const auto& st = circ.stmts[i];
+        fc.stmt_op[i] = (uint8_t)st.op;
+        fc.stmt_inp1[i] = resolve(st.arg1);
+        fc.stmt_inp2[i] = resolve(st.arg2);
+    }
+
+    fc.out_idx.resize(output_indices.size());
+    for (size_t o = 0; o < output_indices.size(); o++) {
+        auto it = circ.name_to_idx.find(circ.outputs[output_indices[o]]);
+        fc.out_idx[o] = (it != circ.name_to_idx.end()) ? it->second : -1;
+    }
+    return fc;
+}
+
+static inline uint64_t get_val_fast(int idx, const uint64_t* input_words,
+                                     const uint64_t* eval_buf, int n_inputs) {
+    if (idx < 0) {
+        int inp = -idx - 1;
+        return (inp < n_inputs) ? input_words[inp] : 0;
+    }
+    return eval_buf[idx];
+}
+
+void eval_batch_fast(
+    const FastCircuit& fc,
+    const uint64_t* input_words,
+    uint64_t* eval_buf,
+    uint64_t* out_results, int n_outputs)
+{
+    for (int i = 0; i < fc.n_stmts; i++) {
+        uint64_t r;
+        switch ((Op)fc.stmt_op[i]) {
+            case Op::CONST0: r = 0; break;
+            case Op::CONST1: r = ~0ULL; break;
+            case Op::INPUT:  r = get_val_fast(fc.stmt_inp1[i], input_words, eval_buf, fc.n_inputs); break;
+            case Op::NOT:    r = ~get_val_fast(fc.stmt_inp1[i], input_words, eval_buf, fc.n_inputs); break;
+            case Op::AND:    r = get_val_fast(fc.stmt_inp1[i], input_words, eval_buf, fc.n_inputs)
+                             & get_val_fast(fc.stmt_inp2[i], input_words, eval_buf, fc.n_inputs); break;
+            case Op::XOR:    r = get_val_fast(fc.stmt_inp1[i], input_words, eval_buf, fc.n_inputs)
+                             ^ get_val_fast(fc.stmt_inp2[i], input_words, eval_buf, fc.n_inputs); break;
+        }
+        eval_buf[i + 1] = r;
+    }
+
+    for (int o = 0; o < n_outputs; o++) {
+        int idx = fc.out_idx[o];
+        if (idx < 0) {
+            int inp = -idx - 1;
+            out_results[o] = (inp < fc.n_inputs) ? input_words[inp] : 0;
+        } else {
+            out_results[o] = eval_buf[idx];
+        }
+    }
+}
+
+// Legacy batch evaluator (uses hash lookups — kept for compatibility)
 static void eval_batch(
     const Circuit& circ,
     const std::vector<uint64_t>& input_words,
@@ -86,6 +157,8 @@ TruthTable compute_truth_table(
     result.output_indices = output_indices;
     result.tt.resize(n_out, std::vector<uint64_t>(n_words, 0));
 
+    FastCircuit fc = make_fast(circ, output_indices);
+
     auto worker = [&](int64_t b_start, int64_t b_end) {
         std::vector<uint64_t> eval_buf(circ.stmts.size() + 1, 0);
         std::vector<uint64_t> in_words(circ.n_inputs, 0);
@@ -94,7 +167,7 @@ TruthTable compute_truth_table(
             int64_t base = b * 64;
             for (int i = 0; i < circ.n_inputs; i++)
                 in_words[i] = input_word_for_bit(i, base);
-            eval_batch(circ, in_words, eval_buf, out_vec.data(), n_out);
+            eval_batch_fast(fc, in_words.data(), eval_buf.data(), out_vec.data(), n_out);
             for (int oi = 0; oi < n_out; oi++)
                 result.tt[oi][b] = out_vec[oi];
         }

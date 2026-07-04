@@ -28,7 +28,7 @@ struct AnfOutput {
 struct Transform {
     int m = 0, n = 0;
     uint32_t M_rows[32] = {0};
-    uint32_t b = 0;
+    uint64_t b = 0;
 };
 
 // ============================================================
@@ -134,7 +134,7 @@ static Transform parse_trans_poly(const std::string& path,
         while (ss >> token) {
             if (token == "+") continue;
             if (token == "1") {
-                t.b |= (1u << row);
+                t.b |= (1ULL << row);
             } else {
                 for (int i = 0; i < (int)input_names.size(); i++) {
                     if (token == input_names[i]) {
@@ -259,10 +259,10 @@ int main(int argc, char** argv) {
 
     for (int test = 0; test < n_tests; test++) {
         uint32_t x = (uint32_t)(((uint64_t)test * 0x9e3779b97f4a7c15ULL) & mask);
-        uint32_t z = t.b;
+        uint64_t z = t.b;
         for (int row = 0; row < t.m; row++) {
             if (__builtin_popcount(t.M_rows[row] & x) & 1)
-                z ^= (1u << row);
+                z ^= (1ULL << row);
         }
 
         auto circ_vals = eval_circuit_point(circ, x);

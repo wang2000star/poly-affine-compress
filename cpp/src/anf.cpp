@@ -10,6 +10,50 @@ int64_t count_T(const uint64_t* data, int n) {
     return total;
 }
 
+int64_t count_T_paired(const uint64_t* data, int m,
+                       const uint64_t* pair_masks, int n_pairs)
+{
+    int64_t words = (m < 6) ? 1 : (int64_t(1) << (m - 6));
+    int64_t total = 0;
+    for (int64_t w = 0; w < words; w++) {
+        uint64_t val = data[w];
+        while (val) {
+            int bit = __builtin_ctzll(val);
+            val &= val - 1;
+            int64_t pos = (w << 6) | bit;
+            bool skip = false;
+            for (int p = 0; p < n_pairs; p++) {
+                if ((pos & pair_masks[p]) == pair_masks[p]) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip) total++;
+        }
+    }
+    return total;
+}
+
+void filter_pairs(uint64_t* data, int m,
+                  const uint64_t* pair_masks, int n_pairs)
+{
+    int64_t words = (m < 6) ? 1 : (int64_t(1) << (m - 6));
+    for (int64_t w = 0; w < words; w++) {
+        uint64_t val = data[w];
+        while (val) {
+            int bit = __builtin_ctzll(val);
+            val &= val - 1;
+            int64_t pos = (w << 6) | bit;
+            for (int p = 0; p < n_pairs; p++) {
+                if ((pos & pair_masks[p]) == pair_masks[p]) {
+                    data[w] &= ~(1ULL << bit);
+                    break;
+                }
+            }
+        }
+    }
+}
+
 RawANFInfo compute_raw_anf_info(TruthTable& tt) {
     RawANFInfo info;
     info.per_output_T.resize(tt.n_outputs, 0);
