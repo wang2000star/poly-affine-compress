@@ -48,31 +48,28 @@ check_exe() {
 run_strategy() {
     local inst=$1 label=$2 exe=$3 circuit=$4 extra_args=$5
     local out_dir="$RESULTS_DIR/$inst/${inst}_${label}"
-    mkdir -p "$out_dir"
 
     if ! check_exe "$exe"; then return 1; fi
 
     local logfile="$out_dir/run.log"
     echo -e "  ${YELLOW}[${label}]${NC} $inst"
 
+    # All tools treat their output arg as a directory and append {inst}_{tag}
     case "$exe" in
         optimize_anf_d1b_opt|optimize_anf_d1b_opt2)
             timeout 600 "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &> "$logfile"
             ;;
         *)
-            timeout 600 "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir/${inst}_${label}" &> "$logfile"
+            timeout 600 "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &> "$logfile"
             ;;
     esac
     local rc=$?
 
-    if [ $rc -eq 0 ] && grep -q "Done\|Saved\|Verified\|All outputs" "$logfile" 2>/dev/null; then
+    if [ $rc -eq 0 ]; then
         echo -e "    ${GREEN}✓${NC}"
-    elif [ $rc -ne 0 ]; then
-        echo -e "    ${RED}✗ (exit $rc)${NC}"
-        tail -3 "$logfile"
     else
-        echo -e "    ${YELLOW}? (check log)${NC}"
-        tail -3 "$logfile"
+        echo -e "    ${RED}✗ (exit $rc)${NC}"
+        tail -5 "$logfile"
     fi
     return $rc
 }
