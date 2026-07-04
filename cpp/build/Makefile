@@ -207,6 +207,19 @@ optimize_anf_gatebuilder/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/build
 .PHONY : optimize_anf_gatebuilder/fast
 
+#=============================================================================
+# Target rules for targets named preprocess
+
+# Build rule for target.
+preprocess: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preprocess
+.PHONY : preprocess
+
+# fast build rule for target.
+preprocess/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/build
+.PHONY : preprocess/fast
+
 src/affine.o: src/affine.cpp.o
 .PHONY : src/affine.o
 
@@ -284,6 +297,7 @@ src/circuit.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/circuit.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/circuit.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/src/circuit.cpp.o
 .PHONY : src/circuit.cpp.o
 
 src/circuit.i: src/circuit.cpp.i
@@ -297,6 +311,7 @@ src/circuit.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/circuit.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/circuit.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/src/circuit.cpp.i
 .PHONY : src/circuit.cpp.i
 
 src/circuit.s: src/circuit.cpp.s
@@ -310,6 +325,7 @@ src/circuit.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/circuit.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/src/circuit.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/src/circuit.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/src/circuit.cpp.s
 .PHONY : src/circuit.cpp.s
 
 src/compute_raw_anf.o: src/compute_raw_anf.cpp.o
@@ -579,6 +595,30 @@ src/moebius.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_sparse_g.dir/build.make CMakeFiles/optimize_anf_sparse_g.dir/src/moebius.cpp.s
 .PHONY : src/moebius.cpp.s
 
+src/preprocess.o: src/preprocess.cpp.o
+.PHONY : src/preprocess.o
+
+# target to build an object file
+src/preprocess.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/src/preprocess.cpp.o
+.PHONY : src/preprocess.cpp.o
+
+src/preprocess.i: src/preprocess.cpp.i
+.PHONY : src/preprocess.i
+
+# target to preprocess a source file
+src/preprocess.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/src/preprocess.cpp.i
+.PHONY : src/preprocess.cpp.i
+
+src/preprocess.s: src/preprocess.cpp.s
+.PHONY : src/preprocess.s
+
+# target to generate assembly for a file
+src/preprocess.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/src/preprocess.cpp.s
+.PHONY : src/preprocess.cpp.s
+
 src/search.o: src/search.cpp.o
 .PHONY : src/search.o
 
@@ -773,6 +813,7 @@ help:
 	@echo "... optimize_anf_opt1"
 	@echo "... optimize_anf_opt2"
 	@echo "... optimize_anf_sparse_g"
+	@echo "... preprocess"
 	@echo "... verify_anf"
 	@echo "... src/affine.o"
 	@echo "... src/affine.i"
@@ -813,6 +854,9 @@ help:
 	@echo "... src/moebius.o"
 	@echo "... src/moebius.i"
 	@echo "... src/moebius.s"
+	@echo "... src/preprocess.o"
+	@echo "... src/preprocess.i"
+	@echo "... src/preprocess.s"
 	@echo "... src/search.o"
 	@echo "... src/search.i"
 	@echo "... src/search.s"

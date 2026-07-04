@@ -4,6 +4,14 @@
  * Core idea: given f(x) computed via truth table, search for affine
  * transform z = Mx + b (over GF(2)) such that g(z) = g(Mx + b) = f(x)
  * has fewer ANF terms (T(g) < T(f)).
+ *
+ * Output (with --save-results DIR):
+ *   {DIR}/{inst}_d1a_opt1.affine     — affine transform matrix
+ *   {DIR}/{inst}_d1a_opt1.poly       — ANF polynomial matrix
+ *   {DIR}/{inst}_d1a_opt1_stats.txt  — 5-line stats
+ *   {DIR}/{inst}_d1a_opt1_verify.txt — verification results
+ *   {DIR}/{inst}_raw.poly            — raw ANF (with --anf-out DIR)
+ *   {DIR}/{inst}_raw_stats.txt       — raw stats (with --anf-out DIR)
  */
 
 #include "circuit.h"
@@ -11,6 +19,7 @@
 #include "search.h"
 #include <iostream>
 #include <thread>
+#include <filesystem>
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -24,14 +33,20 @@ int main(int argc, char** argv) {
         std::cerr << "  --use-progressive 0/1  progressive M construction (default 1)\n";
         std::cerr << "  --progressive-max-m N  max m for progressive search (default auto)\n";
         std::cerr << "  --dep-filter 0/1  dependency-set row filtering (default 1)\n";
-        std::cerr << "  --anf-out PREF save raw ANF to PREFIX_expr.poly + PREFIX_T.poly (n<=16 only)\n";
-        std::cerr << "  --save-results PREFIX  save best candidate: PREFIX_trans.poly,\n";
-        std::cerr << "                          PREFIX_expr.poly, PREFIX_T.poly, PREFIX_verify.txt\n";
+        std::cerr << "  --anf-out DIR  save raw ANF to {DIR}/{inst}_raw.poly + _stats.txt\n";
+        std::cerr << "  --save-results DIR  save best candidate to {DIR}/{inst}_d1a_opt1.*\n";
         return 1;
     }
 
     std::cout << std::unitbuf;
     std::string path = argv[1];
+
+    // Extract instance name: "examples/hd08.txt" -> "hd08"
+    std::string inst = path;
+    size_t slash = inst.find_last_of('/');
+    if (slash != std::string::npos) inst = inst.substr(slash + 1);
+    size_t dot = inst.find_last_of('.');
+    if (dot != std::string::npos) inst = inst.substr(0, dot);
 
     std::cout << "--- Circuit ---\n";
     Circuit circ = read_circuit(path);
@@ -47,6 +62,7 @@ int main(int argc, char** argv) {
     }
 
     SearchParams params;
+    params.inst_name = inst;
     params.n_threads = std::thread::hardware_concurrency();
     if (params.n_threads < 1) params.n_threads = 1;
 
@@ -65,9 +81,9 @@ int main(int argc, char** argv) {
         else if (arg == "--hill-climb" && a + 1 < argc)
             params.n_hill_climb = std::stoi(argv[++a]);
         else if (arg == "--anf-out" && a + 1 < argc)
-            params.anf_out_prefix = argv[++a];
+            params.anf_out_dir = argv[++a];
         else if (arg == "--save-results" && a + 1 < argc)
-            params.save_results_prefix = argv[++a];
+            params.results_dir = argv[++a];
         else if (arg == "--use-progressive" && a + 1 < argc)
             params.use_progressive = (std::stoi(argv[++a]) != 0);
         else if (arg == "--progressive-max-m" && a + 1 < argc)

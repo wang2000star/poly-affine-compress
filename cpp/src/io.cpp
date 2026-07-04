@@ -4,10 +4,10 @@
 #include "verify.h"
 #include <fstream>
 #include <iostream>
-#include <iomanip>
 
 // ============================================================
-//  Save raw ANF — _expr.poly
+//  Save raw ANF — {inst}_raw.poly (matrix format)
+//  m = n (original x-variables), per-output term rows
 // ============================================================
 
 void save_raw_anf(const TruthTable& tt, const Circuit& circ,
@@ -17,49 +17,64 @@ void save_raw_anf(const TruthTable& tt, const Circuit& circ,
     std::ofstream f(fname);
     if (!f) { std::cerr << "  ERROR: cannot write " << fname << "\n"; return; }
 
-    f << "# Raw ANF for circuit (n=" << tt.n << ", k=" << tt.n_outputs << " outputs)\n";
-    if (tt.n <= 16) {
-        f << "# Variables:";
-        for (int i = tt.n - 1; i >= 0; i--)
-            f << " " << circ.inputs[i];
-        f << "\n";
+    int m = tt.n;
+    int k = tt.n_outputs;
+    int64_t n_words = tt.n_words;
+
+    // Count terms per output and overall max degree
+    std::vector<int> term_counts(k, 0);
+    int max_deg = 0;
+    for (int oi = 0; oi < k; oi++) {
+        std::vector<uint64_t> anf(tt.tt[oi]);
+        moebius_packed(anf.data(), m);
+        for (int64_t w = 0; w < n_words; w++) {
+            uint64_t word = anf[w];
+            while (word) {
+                int bit = __builtin_ctzll(word);
+                word &= word - 1;
+                term_counts[oi]++;
+                int deg = __builtin_popcountll((w << 6) | bit);
+                if (deg > max_deg) max_deg = deg;
+            }
+        }
     }
 
-    int total_terms = 0;
-    for (int oi = 0; oi < tt.n_outputs; oi++) {
-        std::string out_name = circ.outputs[output_indices[oi]];
-        f << out_name << " = ";
+    // Header
+    f << m << "\n" << k << "\n";
+    for (int oi = 0; oi < k; oi++) {
+        if (oi > 0) f << " ";
+        f << term_counts[oi];
+    }
+    f << "\n";
 
-        int64_t n_words_g = (tt.n < 6) ? 1 : (int64_t(1) << (tt.n - 6));
-        int count = 0;
-        for (int64_t w = 0; w < n_words_g; w++) {
-            uint64_t word = tt.tt[oi][w];
+    // Terms: [e_0 , e_1 , ... , e_{m-1} , coeff]
+    for (int oi = 0; oi < k; oi++) {
+        std::vector<uint64_t> anf(tt.tt[oi]);
+        moebius_packed(anf.data(), m);
+        for (int64_t w = 0; w < n_words; w++) {
+            uint64_t word = anf[w];
             while (word) {
                 int bit = __builtin_ctzll(word);
                 word &= word - 1;
                 int64_t pos = (w << 6) | bit;
-                if (count > 0) f << " + ";
-                if (pos == 0) { f << "1"; count++; continue; }
-                bool first = true;
-                for (int j = 0; j < tt.n; j++) {
-                    if ((pos >> j) & 1) {
-                        if (!first) f << " * ";
-                        f << circ.inputs[j];
-                        first = false;
-                    }
+                f << "[";
+                for (int b = 0; b < m; b++) {
+                    if (b > 0) f << " , ";
+                    f << ((pos >> b) & 1);
                 }
-                count++;
+                f << " , 1]\n";
             }
         }
-        if (count == 0) f << "0";
-        f << "\n";
-        total_terms += count;
     }
-    std::cout << "  Saved ANF: " << fname << " (" << total_terms << " terms)\n";
+
+    int total = 0;
+    for (int c : term_counts) total += c;
+    std::cout << "  Saved raw poly: " << fname << " (m=" << m << ", "
+              << k << " outputs, " << total << " terms)\n";
 }
 
 // ============================================================
-//  Save raw term counts — _T.poly
+//  Save raw stats — {inst}_raw_stats.txt (5-line numeric)
 // ============================================================
 
 static int64_t count_union_T(const TruthTable& tt) {
@@ -82,23 +97,46 @@ void save_raw_T(const TruthTable& tt, const Circuit& circ,
     std::ofstream f(fname);
     if (!f) { std::cerr << "  ERROR: cannot write " << fname << "\n"; return; }
 
+    int m = tt.n;
+    int k = tt.n_outputs;
+    int64_t n_words = tt.n_words;
+
     int64_t sum_T = 0;
-    for (int oi = 0; oi < tt.n_outputs; oi++)
-        sum_T += count_T(tt.tt[oi].data(), tt.n);
+    int max_deg = 0;
+    for (int oi = 0; oi < k; oi++) {
+        std::vector<uint64_t> anf(tt.tt[oi]);
+        moebius_packed(anf.data(), m);
+        sum_T += count_T(anf.data(), m);
+        for (int64_t w = 0; w < n_words; w++) {
+            uint64_t word = anf[w];
+            while (word) {
+                int bit = __builtin_ctzll(word);
+                word &= word - 1;
+                int64_t pos = (w << 6) | bit;
+                int deg = __builtin_popcountll(pos);
+                if (deg > max_deg) max_deg = deg;
+            }
+        }
+    }
+
+    // Raw ANF union = union of original truth tables (pre-Möbius)
     int64_t union_T = count_union_T(tt);
 
-    f << "# Raw ANF term counts for circuit (n=" << tt.n << ", k=" << tt.n_outputs << " outputs)\n";
-    f << "# sum T = " << sum_T << "\n";
-    f << "# union T = " << union_T << "\n";
-    for (int oi = 0; oi < tt.n_outputs; oi++) {
-        int64_t T = count_T(tt.tt[oi].data(), tt.n);
-        f << circ.outputs[output_indices[oi]] << ": T=" << T << "\n";
-    }
-    std::cout << "  Saved T: " << fname << " (sum=" << sum_T << ", union=" << union_T << ")\n";
+    // 5-line pure numeric
+    f << tt.n << "\n";
+    f << k << "\n";
+    f << sum_T << "\n";
+    f << union_T << "\n";
+    f << max_deg << "\n";
+
+    std::cout << "  Saved raw stats: " << fname << " (n=" << tt.n
+              << ", k=" << k << ", sum_T=" << sum_T
+              << ", union_T=" << union_T << ")\n";
 }
 
 // ============================================================
-//  Save optimized ANF — _expr.poly (z-space)
+//  Save optimized ANF — {inst}_{combo}.poly (matrix format)
+//  m = number of z-variables, per-output term rows
 // ============================================================
 
 void save_opt_expr(const std::vector<std::vector<uint64_t>>& g_tt_raw,
@@ -109,46 +147,55 @@ void save_opt_expr(const std::vector<std::vector<uint64_t>>& g_tt_raw,
     std::ofstream f(fname);
     if (!f) { std::cerr << "  ERROR: cannot write " << fname << "\n"; return; }
 
-    f << "# opt1 ANF (z-space, m=" << m << ")\n";
-    int64_t n_words_g = (m < 6) ? 1 : (int64_t(1) << (m - 6));
-    int total_terms = 0;
+    int k = (int)g_tt_raw.size();
+    if (k == 0) return;
+    int64_t n_words = (m < 6) ? 1 : (int64_t(1) << (m - 6));
 
-    for (int oi = 0; oi < (int)g_tt_raw.size(); oi++) {
-        std::string out_name = circ.outputs[output_indices[oi]];
-        f << out_name << " = ";
-
+    // Count terms per output
+    std::vector<int> term_counts(k, 0);
+    for (int oi = 0; oi < k; oi++) {
         std::vector<uint64_t> anf(g_tt_raw[oi]);
         moebius_packed(anf.data(), m);
+        for (int64_t w = 0; w < n_words; w++)
+            term_counts[oi] += __builtin_popcountll(anf[w]);
+    }
 
-        int count = 0;
-        for (int64_t w = 0; w < n_words_g; w++) {
+    // Header
+    f << m << "\n" << k << "\n";
+    for (int oi = 0; oi < k; oi++) {
+        if (oi > 0) f << " ";
+        f << term_counts[oi];
+    }
+    f << "\n";
+
+    // Terms
+    for (int oi = 0; oi < k; oi++) {
+        std::vector<uint64_t> anf(g_tt_raw[oi]);
+        moebius_packed(anf.data(), m);
+        for (int64_t w = 0; w < n_words; w++) {
             uint64_t word = anf[w];
             while (word) {
                 int bit = __builtin_ctzll(word);
                 word &= word - 1;
                 int64_t pos = (w << 6) | bit;
-                if (count > 0) f << " + ";
-                if (pos == 0) { f << "1"; count++; continue; }
-                bool first = true;
-                for (int j = 0; j < m; j++) {
-                    if ((pos >> j) & 1) {
-                        if (!first) f << " * ";
-                        f << "z_" << j;
-                        first = false;
-                    }
+                f << "[";
+                for (int b = 0; b < m; b++) {
+                    if (b > 0) f << " , ";
+                    f << ((pos >> b) & 1);
                 }
-                count++;
+                f << " , 1]\n";
             }
         }
-        if (count == 0) f << "0";
-        f << "\n";
-        total_terms += count;
     }
-    std::cout << "  Saved ANF: " << fname << " (" << total_terms << " terms)\n";
+
+    int total = 0;
+    for (int c : term_counts) total += c;
+    std::cout << "  Saved poly: " << fname << " (m=" << m << ", "
+              << k << " outputs, " << total << " terms)\n";
 }
 
 // ============================================================
-//  Save optimized term counts — _T.poly
+//  Save optimized stats — {inst}_{combo}_stats.txt (5-line numeric)
 // ============================================================
 
 void save_opt_T(const std::vector<std::vector<uint64_t>>& g_tt_raw,
@@ -159,36 +206,54 @@ void save_opt_T(const std::vector<std::vector<uint64_t>>& g_tt_raw,
     std::ofstream f(fname);
     if (!f) { std::cerr << "  ERROR: cannot write " << fname << "\n"; return; }
 
-    int64_t n_words_g = (m < 6) ? 1 : (int64_t(1) << (m - 6));
-    int64_t sum_T = 0;
-    std::vector<int64_t> per_T;
+    int k = (int)g_tt_raw.size();
+    if (k == 0) return;
+    int64_t n_words = (m < 6) ? 1 : (int64_t(1) << (m - 6));
 
-    std::vector<uint64_t> union_data(n_words_g, 0);
-    for (int oi = 0; oi < (int)g_tt_raw.size(); oi++) {
+    int64_t sum_T = 0;
+    int max_deg = 0;
+
+    std::vector<uint64_t> union_data(n_words, 0);
+    for (int oi = 0; oi < k; oi++) {
         std::vector<uint64_t> anf(g_tt_raw[oi]);
         moebius_packed(anf.data(), m);
         int64_t T = count_T(anf.data(), m);
-        per_T.push_back(T);
         sum_T += T;
-        for (int64_t w = 0; w < n_words_g; w++)
+        for (int64_t w = 0; w < n_words; w++) {
             union_data[w] |= anf[w];
+            uint64_t word = anf[w];
+            while (word) {
+                int bit = __builtin_ctzll(word);
+                word &= word - 1;
+                int64_t pos = (w << 6) | bit;
+                int deg = __builtin_popcountll(pos);
+                if (deg > max_deg) max_deg = deg;
+            }
+        }
     }
 
     int64_t union_T = 0;
-    for (int64_t w = 0; w < n_words_g; w++)
+    for (int64_t w = 0; w < n_words; w++)
         union_T += __builtin_popcountll(union_data[w]);
 
-    f << "# opt1 T(g) (m=" << m << ")\n";
-    f << "# sum T = " << sum_T << "\n";
-    f << "# union T = " << union_T << "\n";
-    for (int oi = 0; oi < (int)g_tt_raw.size(); oi++) {
-        f << circ.outputs[output_indices[oi]] << ": T=" << per_T[oi] << "\n";
-    }
-    std::cout << "  Saved T: " << fname << " (sum=" << sum_T << ", union=" << union_T << ")\n";
+    // 5-line pure numeric
+    f << circ.n_inputs << "\n";
+    f << k << "\n";
+    f << sum_T << "\n";
+    f << union_T << "\n";
+    f << max_deg << "\n";
+
+    std::cout << "  Saved stats: " << fname << " (n=" << circ.n_inputs
+              << ", k=" << k << ", sum_T=" << sum_T
+              << ", union_T=" << union_T << ")\n";
 }
 
 // ============================================================
-//  Save transform — _trans.poly
+//  Save affine transform — {inst}_{combo}.affine (matrix format)
+//  Header: s t
+//          s t n
+//  Then: M (s×n), C (t×n), b (s bits), d (t bits)
+//  When t=0: no C rows, no d line
 // ============================================================
 
 void save_trans(const MbCandidate& best, const Circuit& circ,
@@ -197,31 +262,37 @@ void save_trans(const MbCandidate& best, const Circuit& circ,
     std::ofstream f(fname);
     if (!f) { std::cerr << "  ERROR: cannot write " << fname << "\n"; return; }
 
-    f << "# opt1 transform z = Mx + b (GF(2))\n";
-    f << "# m=" << best.m << ", n=" << n << "\n";
-    for (int row = 0; row < best.m; row++) {
-        f << "z_" << row << " = ";
-        bool first = true;
-        for (int i = 0; i < n; i++) {
-            if ((best.M_rows[row] >> i) & 1) {
-                if (!first) f << " + ";
-                f << circ.inputs[i];
-                first = false;
-            }
-        }
-        if ((best.b >> row) & 1) {
-            if (!first) f << " + ";
-            f << "1";
-        } else if (first) {
-            f << "0";
+    int s = best.m;
+    int t = 0;  // MbCandidate has no Cx+d
+
+    f << s << " " << t << "\n";
+    f << s << " " << t << " " << n << "\n";
+
+    // M rows (s × n)
+    for (int row = 0; row < s; row++) {
+        for (int col = 0; col < n; col++) {
+            if (col > 0) f << " ";
+            f << ((best.M_rows[row] >> col) & 1);
         }
         f << "\n";
     }
-    std::cout << "  Saved: " << fname << "\n";
+
+    // No C rows (t=0)
+
+    // b vector
+    for (int bit = 0; bit < s; bit++) {
+        if (bit > 0) f << " ";
+        f << ((best.b >> bit) & 1);
+    }
+    f << "\n";
+
+    // No d vector (t=0)
+
+    std::cout << "  Saved affine: " << fname << " (s=" << s << ", t=" << t << ")\n";
 }
 
 // ============================================================
-//  Save verification — _verify.txt
+//  Save verification — {inst}_{combo}_verify.txt
 // ============================================================
 
 void save_verify(const TruthTable& tt,
@@ -234,17 +305,14 @@ void save_verify(const TruthTable& tt,
     std::ofstream f_ver(fname);
     if (!f_ver) { std::cerr << "  ERROR: cannot write " << fname << "\n"; return; }
 
-    f_ver << "# Verification for (n=" << n << ", k=" << tt.n_outputs << " outputs)\n";
-    f_ver << "# Strategy: opt1\n";
-    f_ver << "# Transform: z = Mx + b (m=" << best.m << ")\n";
+    f_ver << "# Verification: f(x) = g(Mx+b) + Cx+d\n";
+    f_ver << "# n=" << n << ", s=" << best.m << ", t=0\n";
     f_ver << "# Tests: 5000\n\n";
 
     int n_tests = 5000;
     uint32_t mask = (n == 32) ? 0xFFFFFFFF : ((1u << n) - 1);
     int n_mismatch = 0;
     int first_mismatch_oi = -1;
-
-    f_ver << "# x  f(x)  z  g(z)\n";
 
     bool has_g_data = !g_tt_raw.empty() && g_tt_raw.size() == (size_t)tt.n_outputs;
 
@@ -266,17 +334,6 @@ void save_verify(const TruthTable& tt,
             }
         }
 
-        auto to_bits = [](uint32_t val, int bits) -> std::string {
-            std::string s(bits, '0');
-            for (int b = bits - 1; b >= 0; b--, val >>= 1)
-                if (val & 1) s[b] = '1';
-            return s;
-        };
-        f_ver << to_bits(x, n) << "  "
-              << to_bits(f_vec, tt.n_outputs) << "  "
-              << to_bits(z, best.m) << "  "
-              << to_bits(g_vec, tt.n_outputs) << "\n";
-
         if (f_vec != g_vec) {
             n_mismatch++;
             if (first_mismatch_oi < 0) {
@@ -288,11 +345,11 @@ void save_verify(const TruthTable& tt,
 
     f_ver << "\n";
     if (n_mismatch == 0) {
-        f_ver << "✅ All outputs verified! (5000 tests, 0 mismatches)\n";
+        f_ver << "All outputs PASS (" << n_tests << " tests)\n";
     } else {
-        f_ver << "❌ " << n_mismatch << " mismatches out of " << n_tests << " tests\n";
-        f_ver << "   First mismatch at output: "
+        f_ver << n_mismatch << "/" << n_tests << " mismatches\n";
+        f_ver << "First mismatch at output: "
               << circ.outputs[output_indices[first_mismatch_oi]] << "\n";
     }
-    std::cout << "  Saved: " << fname << " (" << n_mismatch << "/" << n_tests << " mismatches)\n";
+    std::cout << "  Saved verify: " << fname << " (" << n_mismatch << "/" << n_tests << " mismatches)\n";
 }

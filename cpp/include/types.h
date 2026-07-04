@@ -99,8 +99,9 @@ struct SearchParams {
     bool use_dep_filter = true;    // filter pool rows by dependency set
     bool use_progressive = true;   // progressive M construction (n≤20)
     int progressive_max_m = 0;     // max m for progressive search (0 = auto = n)
-    std::string anf_out_prefix;
-    std::string save_results_prefix;
+    std::string inst_name;              // circuit instance name (e.g. "hd08"), set by caller
+    std::string anf_out_dir;            // output dir for raw ANF (results/{inst}/)
+    std::string results_dir;            // output dir for optimized results (results/{inst}/)
 };
 
 #endif // TYPES_H

@@ -70,6 +70,7 @@ all: CMakeFiles/optimize_anf_large.dir/all
 all: CMakeFiles/optimize_anf_sparse_g.dir/all
 all: CMakeFiles/verify_anf.dir/all
 all: CMakeFiles/optimize_anf_gatebuilder.dir/all
+all: CMakeFiles/preprocess.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
@@ -80,6 +81,7 @@ codegen: CMakeFiles/optimize_anf_large.dir/codegen
 codegen: CMakeFiles/optimize_anf_sparse_g.dir/codegen
 codegen: CMakeFiles/verify_anf.dir/codegen
 codegen: CMakeFiles/optimize_anf_gatebuilder.dir/codegen
+codegen: CMakeFiles/preprocess.dir/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
@@ -94,6 +96,7 @@ clean: CMakeFiles/optimize_anf_large.dir/clean
 clean: CMakeFiles/optimize_anf_sparse_g.dir/clean
 clean: CMakeFiles/verify_anf.dir/clean
 clean: CMakeFiles/optimize_anf_gatebuilder.dir/clean
+clean: CMakeFiles/preprocess.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -263,7 +266,7 @@ CMakeFiles/optimize_anf_sparse_g.dir/clean:
 CMakeFiles/verify_anf.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=56,57,58 "Built target verify_anf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=59,60,61 "Built target verify_anf"
 .PHONY : CMakeFiles/verify_anf.dir/all
 
 # Build rule for subdir invocation for target.
@@ -280,7 +283,7 @@ verify_anf: CMakeFiles/verify_anf.dir/rule
 # codegen rule for target.
 CMakeFiles/verify_anf.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/verify_anf.dir/build.make CMakeFiles/verify_anf.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=56,57,58 "Finished codegen for target verify_anf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=59,60,61 "Finished codegen for target verify_anf"
 .PHONY : CMakeFiles/verify_anf.dir/codegen
 
 # clean rule for target.
@@ -319,6 +322,38 @@ CMakeFiles/optimize_anf_gatebuilder.dir/codegen:
 CMakeFiles/optimize_anf_gatebuilder.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/optimize_anf_gatebuilder.dir/build.make CMakeFiles/optimize_anf_gatebuilder.dir/clean
 .PHONY : CMakeFiles/optimize_anf_gatebuilder.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/preprocess.dir
+
+# All Build rule for target.
+CMakeFiles/preprocess.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=56,57,58 "Built target preprocess"
+.PHONY : CMakeFiles/preprocess.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/preprocess.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/preprocess.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/wangfz/bool/cpp/build/CMakeFiles 0
+.PHONY : CMakeFiles/preprocess.dir/rule
+
+# Convenience name for target.
+preprocess: CMakeFiles/preprocess.dir/rule
+.PHONY : preprocess
+
+# codegen rule for target.
+CMakeFiles/preprocess.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/wangfz/bool/cpp/build/CMakeFiles --progress-num=56,57,58 "Finished codegen for target preprocess"
+.PHONY : CMakeFiles/preprocess.dir/codegen
+
+# clean rule for target.
+CMakeFiles/preprocess.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preprocess.dir/build.make CMakeFiles/preprocess.dir/clean
+.PHONY : CMakeFiles/preprocess.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

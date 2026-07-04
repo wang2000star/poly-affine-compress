@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <random>
 #include <thread>
+#include <filesystem>
 
 // ============================================================
 //  CandidateGenerator
@@ -893,9 +894,12 @@ void run_search(const TruthTable& tt, const Circuit& circ,
     }
 
     // Save raw ANF if requested
-    if (!params.anf_out_prefix.empty() && n <= 16) {
-        save_raw_anf(tt_copy, circ, output_indices, params.anf_out_prefix + "_expr.poly");
-        save_raw_T(tt_copy, circ, output_indices, params.anf_out_prefix + "_T.poly");
+    if (!params.anf_out_dir.empty()) {
+        namespace fs = std::filesystem;
+        fs::create_directories(params.anf_out_dir);
+        std::string base = params.anf_out_dir + "/" + params.inst_name + "_raw";
+        save_raw_anf(tt_copy, circ, output_indices, base + ".poly");
+        save_raw_T(tt_copy, circ, output_indices, base + "_stats.txt");
     }
 
     // Phase 2b: Theory-guided analysis (Aut(F) basis + dependency set)
@@ -1252,20 +1256,22 @@ void run_search(const TruthTable& tt, const Circuit& circ,
             std::cout << "✅ All outputs verified!\n";
 
         // Save results to files
-        if (!params.save_results_prefix.empty()) {
-            std::string prefix = params.save_results_prefix;
+        if (!params.results_dir.empty()) {
+            namespace fs = std::filesystem;
+            fs::create_directories(params.results_dir);
+            std::string base = params.results_dir + "/" + params.inst_name + "_d1a_opt1";
 
-            save_trans(best, circ, n, prefix + "_trans.poly");
+            save_trans(best, circ, n, base + ".affine");
 
             if (!verified_cand.g_tt_raw.empty()) {
                 save_opt_expr(verified_cand.g_tt_raw, circ, output_indices, best.m,
-                             prefix + "_expr.poly");
+                             base + ".poly");
                 save_opt_T(verified_cand.g_tt_raw, circ, output_indices, best.m,
-                          prefix + "_T.poly");
+                          base + "_stats.txt");
             }
 
             save_verify(tt_copy, verified_cand.g_tt_raw, best, n, output_indices, circ,
-                       prefix + "_verify.txt");
+                       base + "_verify.txt");
         }
     }
 

@@ -5,5 +5,6 @@
 /home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_sparse_g.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/verify_anf.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/optimize_anf_gatebuilder.dir
+/home/wangfz/bool/cpp/build/CMakeFiles/preprocess.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/edit_cache.dir
 /home/wangfz/bool/cpp/build/CMakeFiles/rebuild_cache.dir

@@ -24,7 +24,8 @@ examples/int2float.txt  11 输入    7 输出
 
 ```
   {inst}.eqn             重命名电路（x_i, y_j, t_k）
-  {inst}_stats.txt       统计（9 行纯数字）
+  {inst}.bij             变量名映射（原始→x_i/y_j/t_k）
+  {inst}_stats.txt       统计（5 行纯数字）
   {inst}_const.txt       常量输出
   {inst}_affine.txt      仿射输出
   {inst}_nonlinear.txt   非线性输出
@@ -36,7 +37,7 @@ examples/int2float.txt  11 输入    7 输出
 每组合生成 4 文件，combo 取值：d1a_opt2, d1a_opt1, d1b_opt2, d1b_opt1, d2_opt2, d3_opt2, d3_opt1
 
 ```
-  {inst}_{combo}.affine      变换矩阵（Mx⊕b）
+  {inst}_{combo}.affine      变换矩阵（Z=[Mx+b; Cx+d]）
   {inst}_{combo}.poly        g(z) 多项式
   {inst}_{combo}_stats.txt   T 统计
   {inst}_{combo}_verify.txt  验证结果
