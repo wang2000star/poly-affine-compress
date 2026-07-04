@@ -99,9 +99,9 @@ static void write_affine(const std::string& path,
 
     f << s << "\n" << s << " " << (n + 1) << "\n";
 
-    // s × (n+1) matrix: [M | b]
+    // s × (n+1) matrix: [M | b] — write only m_used rows per output
     for (const auto& r : results) {
-        for (int ri = 0; ri < (int)r.M_rows.size(); ri++) {
+        for (int ri = 0; ri < r.m_used; ri++) {
             for (int c = 0; c < n; c++) {
                 if (c > 0) f << " ";
                 f << ((r.M_rows[ri] >> c) & 1);
