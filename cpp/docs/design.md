@@ -394,21 +394,19 @@ t_2 = t_0 * t_1;
 
 ### 10.2 统计文件 `{inst}_stats.txt`
 
-9 行纯数字，按行号索引，无等号无注释：
+预处理和优化输出的 `_stats.txt` 格式统一。5 行纯数字，按行号索引，无等号无注释：
 
 ```
 行 1: n_inputs      输入变量数
 行 2: n_outputs     输出变量数
-行 3: n_internal    中间信号数
-行 4: n_and         AND 门数
-行 5: n_xor         XOR 门数
-行 6: n_not         NOT 门数
-行 7: sum_T_raw     原始非线性项数总和（仅 n≤16）
-行 8: union_T_raw   原始非线性项并集大小（仅 n≤16）
-行 9: max_deg       最高 ANF 度数
+行 3: sum_T         非线性项数总和（degree ≥ 2）
+行 4: union_T       非线性项并集大小
+行 5: max_deg       最高 ANF 度数
 ```
 
-n=32 实例第 7-9 行为 0（无法计算完整 ANF）。
+预处理时 sum_T/union_T/max_deg 通过 Möbius 计算（n≤16）。  
+n=32 无法计算完整 ANF，三值为 -1。  
+优化输出时三值为优化后的统计值。
 
 ### 10.3 常量文件 `{inst}_const.txt`
 
@@ -548,71 +546,15 @@ t_0 t_1 ...    ← 第3行: 各分量对应的项数
 
 ### 11.4 _stats.txt 文件格式
 
-```
-sum_T = 32
-union_T = 32
----
-y_0:  T=0  m=1
-y_1:  T=1  m=2
-...
-```
+与预处理 `{inst}_stats.txt` 格式一致（见 10.2）：5 行纯数字。
 
 ```
-# T(g) results for hd01
-# direction=1, strategy=opt2
-# a1=0, a2=0, a3=32
-sum_T = 32
-union_T = 32
----
-om_9:  T=0  m=1  nonlinear_terms=0
-om_8:  T=0  m=1  nonlinear_terms=0
-om_7:  T=1  m=2  nonlinear_terms=1
-...
-om_0:  AFFINE  (constant 0)
+行 1: n_inputs
+行 2: n_outputs
+行 3: sum_T
+行 4: union_T
+行 5: max_deg
 ```
-
-说明：
-- `AFFINE` 行列出具体表达式
-- `m` 是该输出所用 z 变量数
-- `nonlinear_terms` 是 T(gⱼ)
-
-### 11.3 变换文件（trans.poly）
-
-```
-# Transform z = Mx + b for hd01
-# direction=1, strategy=opt2
-# merged rows: A1 + B2（或 A1 + C3）
-# om_9: z_0 = x_3
-z_0 = i0            # om_9
-# om_8: z_1 = x_7
-z_1 = i1            # om_8
-# om_0: AFFINE (constant 0)
-# om_1: z_0 = x_0 (shared with om_9)
-```
-
-每行格式：`z_{idx} = {input_list}  [+ 1]`
-- 等号右边为输入变量用 `+` 连接，最后可选 `+ 1` 表示 b_bit=1
-- 若 mask=0 则写 `z_{idx} = 0`
-- 注释行标注对应输出
-
-### 11.4 ANF 文件（anf.poly）
-
-```
-# ANF for hd01
-# direction=1, strategy=opt2
-# om_9
-  z_0
-
-# om_7
-  z_0 * z_1
-
-# om_12
-  z_0 * z_3
-  z_2 * z_4
-```
-
-每个输出下列出其 g 的 ANF 中所有 degree ≥ 2 的项。
-每行一项，格式：`z_i * z_j * ...`（AND 链）。
 
 ### 11.5 验证文件（verify.txt）
 
