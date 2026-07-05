@@ -86,3 +86,35 @@ void moebius_packed_mt(uint64_t* data, int n, int n_threads) {
         }
     }
 }
+
+void moebius_upward_packed(uint64_t* data, int n) {
+    int64_t n_words = (n < 6) ? 1 : (int64_t(1) << (n - 6));
+
+    // In-word pass: reverse direction (lo ^= hi instead of hi ^= lo)
+    int in_word_bits = (n < 6) ? n : 6;
+    for (int i = 0; i < in_word_bits; i++) {
+        int b = 1 << i;
+        uint64_t mask = (1ULL << b) - 1;
+        for (int64_t w = 0; w < n_words; w++) {
+            uint64_t v = data[w];
+            uint64_t res = 0;
+            for (int g = 0; g < 64; g += 2 * b) {
+                uint64_t lo = (v >> g) & mask;
+                uint64_t hi = (v >> (g + b)) & mask;
+                lo ^= hi;          // upward: low gets XOR of low and high
+                res |= lo << g;
+                res |= hi << (g + b);
+            }
+            data[w] = res;
+        }
+    }
+
+    // Cross-word pass: upward direction
+    for (int i = 6; i < n; i++) {
+        int64_t step_words = int64_t(1) << (i - 6);
+        for (int64_t w = 0; w + step_words < n_words; w++) {
+            if (!((w / step_words) & 1))
+                data[w] ^= data[w + step_words];  // upward: low ^= high
+        }
+    }
+}

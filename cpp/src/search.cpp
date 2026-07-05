@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <random>
 #include <thread>
+#include <cstring>
 #include <filesystem>
 
 // ============================================================
@@ -870,6 +871,129 @@ MbCandidate hill_climb(const TruthTable& tt, const MbCandidate& start,
 }
 
 // ============================================================
+// ============================================================
+//  d1c: Product-based ANF simplification via exhaustive b-search
+// ============================================================
+
+int64_t count_T_nl_packed(const uint64_t* anf, int n) {
+    int64_t words = int64_t(1) << (n - 6);
+    uint64_t deg1_mask = 0;
+    for (int b = 0; b < 64; b++)
+        if (__builtin_popcountll(b) == 1) deg1_mask |= (1ULL << b);
+    int64_t total = 0;
+    for (int64_t w = 0; w < words; w++) {
+        uint64_t val = anf[w];
+        if (val == 0) continue;
+        int pw = __builtin_popcountll(w);
+        int cnt = __builtin_popcountll(val);
+        int deg1 = 0;
+        if (pw == 0)
+            deg1 += __builtin_popcountll(val & deg1_mask);
+        else if (pw == 1)
+            if (val & 1) deg1++;
+        total += (cnt - deg1);
+    }
+    if (anf[0] & 1) total--;
+    return total;
+}
+
+// Apply upward Möbius pass for ONE bit i on packed ANF.
+// For all indices with bit i = 0: data[idx] ^= data[idx | (1<<i)]
+void upward_pass_bit(uint64_t* data, int n, int i) {
+    int64_t words = int64_t(1) << (n - 6);
+    if (i >= 6) {
+        int64_t step_words = int64_t(1) << (i - 6);
+        for (int64_t w = 0; w + step_words < words; w++)
+            if (!((w / step_words) & 1))
+                data[w] ^= data[w + step_words];
+    } else {
+        int b = 1 << i;
+        uint64_t mask = (1ULL << b) - 1;
+        for (int64_t w = 0; w < words; w++) {
+            uint64_t v = data[w];
+            uint64_t res = 0;
+            for (int g = 0; g < 64; g += 2 * b) {
+                uint64_t lo = (v >> g) & mask;
+                uint64_t hi = (v >> (g + b)) & mask;
+                lo ^= hi;
+                res |= lo << g;
+                res |= hi << (g + b);
+            }
+            data[w] = res;
+        }
+    }
+}
+
+// Exhaustive search for best b ∈ {0,1}^t for one output.
+// g(z) = f(z⊕b).  Tries all 2^t b-vectors via selective upward Möbius on f's ANF.
+// Returns T_nl(g_best), sets best_b.  Returns -1 if t too large.
+int64_t exhaustive_search_best_b(const uint64_t* f_anf, int n,
+                                        uint64_t support_mask,
+                                        int max_exhaustive_t,
+                                        uint64_t& best_b)
+{
+    // Extract support variable indices
+    std::vector<int> svars;
+    for (int i = 0; i < n; i++)
+        if (support_mask & (1ULL << i)) svars.push_back(i);
+    int t = (int)svars.size();
+    if (t > max_exhaustive_t) return -1;
+
+    int64_t words = int64_t(1) << (n - 6);
+    std::vector<uint64_t> buf(words);
+    uint64_t n_masks = 1ULL << t;
+
+    int64_t best_T = count_T_nl_packed(f_anf, n);
+    best_b = 0;
+
+    for (uint64_t mask = 0; mask < n_masks; mask++) {
+        uint64_t b = 0;
+        for (int j = 0; j < t; j++)
+            if (mask & (1ULL << j)) b |= (1ULL << svars[j]);
+
+        // Copy ANF and apply selective upward Möbius for bits where b_i=1
+        memcpy(buf.data(), f_anf, words * sizeof(uint64_t));
+        for (int i = 0; i < n; i++)
+            if (b & (1ULL << i)) upward_pass_bit(buf.data(), n, i);
+
+        int64_t T = count_T_nl_packed(buf.data(), n);
+        if (T < best_T) { best_T = T; best_b = b; }
+    }
+    return best_T;
+}
+
+// Compute support mask + T_nl for each output (handles tt in-place: Möbius→analyze→restore)
+void compute_output_info(TruthTable& tt, int n, std::vector<OutputInfo>& info) {
+    int n_out = tt.n_outputs;
+    info.resize(n_out);
+    int64_t words = int64_t(1) << (n - 6);
+
+    for (int oi = 0; oi < n_out; oi++) {
+        moebius_packed(tt.tt[oi].data(), n);
+        uint64_t* anf = tt.tt[oi].data();
+
+        // Support set
+        uint64_t support = 0, lower = 0;
+        for (int64_t w = 0; w < words; w++) {
+            uint64_t val = anf[w];
+            if (val == 0) continue;
+            support |= ((uint64_t)w << 6);
+            if (val == UINT64_MAX) { lower |= 0x3F; }
+            else { for (uint64_t v = val; v; v &= v - 1)
+                       lower |= (uint64_t)__builtin_ctzll(v); }
+        }
+        support |= lower;
+        if (n < 64) support &= (1ULL << n) - 1;
+
+        info[oi].support_mask = support;
+        info[oi].t = __builtin_popcountll(support);
+        info[oi].T_nl = count_T_nl_packed(anf, n);
+
+        moebius_packed(anf, n);  // restore truth table
+    }
+}
+
+// ============================================================
 //  run_search — full pipeline (Phase 1..6)
 // ============================================================
 
@@ -879,6 +1003,7 @@ void run_search(const TruthTable& tt, const Circuit& circ,
 {
     int n = tt.n;
     auto t0 = std::chrono::steady_clock::now();
+    std::vector<MbCandidate> results;
 
     // Phase 2: Raw ANF baseline
     std::cout << "\nPhase 2: Raw ANF baseline...\n";
@@ -899,6 +1024,68 @@ void run_search(const TruthTable& tt, const Circuit& circ,
         std::string base = params.anf_out_dir + "/" + params.inst_name + "_raw";
         save_raw_anf(tt_copy, circ, output_indices, base + ".poly");
         save_raw_T(tt_copy, circ, output_indices, base + "_stats.txt");
+    }
+
+    // Phase 2c: d1c — product-based ANF simplification via exhaustive b-search
+    // For n ≤ 20 and t ≤ max_exhaustive_t, try all 2^t b-vectors and pick the best.
+    {
+        auto t_d1c0 = std::chrono::steady_clock::now();
+        int max_exhaustive_t = 20;
+        bool do_d1c = (n <= 20);
+        std::cout << "\nPhase 2c: d1c product-based simplification"
+                  << (do_d1c ? "" : " (n>20, skipped)") << "...\n";
+
+        if (do_d1c) {
+            // Get ANF + support info for all outputs (handles Moebius→restore)
+            std::vector<OutputInfo> out_info;
+            compute_output_info(tt_copy, n, out_info);
+
+            // For each output with small t, run exhaustive b-search
+            int n_searched = 0, n_improved = 0;
+            for (int oi = 0; oi < tt.n_outputs; oi++) {
+                auto& oi_i = out_info[oi];
+                if (oi_i.t > max_exhaustive_t) continue;
+                n_searched++;
+
+                // Apply Moebius to get ANF for exhaustive search
+                moebius_packed(tt_copy.tt[oi].data(), n);
+                uint64_t* anf = tt_copy.tt[oi].data();
+
+                uint64_t best_b = 0;
+                int64_t best_T = exhaustive_search_best_b(anf, n,
+                    oi_i.support_mask, max_exhaustive_t, best_b);
+
+                moebius_packed(anf, n);  // restore truth table
+
+                if (best_T >= 0 && best_T < oi_i.T_nl) {
+                    n_improved++;
+                    std::cout << "    [d1c] output " << oi
+                              << " (t=" << oi_i.t << "): T_nl "
+                              << oi_i.T_nl << " → " << best_T
+                              << " (b=0x" << std::hex << best_b << std::dec << ")\n";
+
+                    // Build M=I, b=best_b candidate and evaluate on ALL outputs
+                    uint32_t M[32] = {0};
+                    for (int i = 0; i < n && i < 32; i++)
+                        M[i] = (1u << i);
+
+                    auto cand = evaluate_Mb(tt_copy, M, best_b, n, params.n_threads);
+                    if (cand.union_T < INT64_MAX) {
+                        results.push_back(cand);
+                        std::cout << "      → T_union=" << cand.union_T << "\n";
+                    }
+                }
+            }
+
+            if (n_searched == 0)
+                std::cout << "    (all outputs have t > " << max_exhaustive_t << ")\n";
+            else
+                std::cout << "    Searched " << n_searched << " output(s), "
+                          << n_improved << " improved\n";
+        }
+        auto t_d1c1 = std::chrono::steady_clock::now();
+        std::cout << "    d1c time: "
+                  << std::chrono::duration<double>(t_d1c1 - t_d1c0).count() << " s\n";
     }
 
     // Phase 2b: Theory-guided analysis (Aut(F) basis + dependency set)
@@ -957,7 +1144,6 @@ void run_search(const TruthTable& tt, const Circuit& circ,
 
     // Phase 4: Generate and evaluate candidates
     std::cout << "\nPhase 4: Searching for M,b...\n";
-    std::vector<MbCandidate> results;
 
     // 4a-c: Walsh-guided + random (n ≤ 20 full search; 21-32 permutation only)
     if (n <= 20) {

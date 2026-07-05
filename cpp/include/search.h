@@ -39,4 +39,31 @@ MbCandidate progressive_m_search(const TruthTable& tt,
                                   const std::vector<uint64_t>& aut_basis,
                                   int n, int max_m, int n_threads);
 
+// ---- d1c: product-based ANF simplification via exhaustive b-search ----
+
+// Count degree-2+ nonlinear terms in a packed ANF (excludes constant + degree-1).
+int64_t count_T_nl_packed(const uint64_t* anf, int n);
+
+// Upward Möbius transform for a single bit position (selective complement).
+// Applies the transform for bit i on packed ANF data: g(z) = f(z ⊕ e_i).
+void upward_pass_bit(uint64_t* data, int n, int i);
+
+// Exhaustive search over all 2^t b-vectors for optimal complement.
+// Returns best T_nl, sets best_b to the corresponding t-bit pattern.
+// Returns -1 if t > max_exhaustive_t.
+int64_t exhaustive_search_best_b(const uint64_t* f_anf, int n,
+                                  uint64_t support_mask, int max_exhaustive_t,
+                                  uint64_t& best_b);
+
+// Per-output info: support mask and T_nl (for all outputs).
+struct OutputInfo {
+    uint64_t support_mask;
+    int t;
+    int64_t T_nl;
+};
+
+// Compute T_nl and support for all outputs in tt_copy.
+// Applies Möbius, computes info, restores truth table.
+void compute_output_info(TruthTable& tt, int n, std::vector<OutputInfo>& info);
+
 #endif // SEARCH_H

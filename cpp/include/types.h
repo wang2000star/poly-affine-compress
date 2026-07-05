@@ -7,6 +7,20 @@
 #include <unordered_map>
 
 // ============================================================
+//  Dense ANF decomposition info per output
+// ============================================================
+
+struct DenseOutputInfo {
+    int output_idx;
+    uint64_t support_mask;  // bit i → variable i appears in this output's ANF
+    int t;                  // popcount(support_mask) = number of variables in support
+    int64_t T_nl;           // degree-2+ term count
+    int64_t max_possible;   // 2^t - t - 1 (max degree-2+ terms for t variables)
+    double density;         // T_nl / max_possible (NaN if t <= 1)
+    bool is_dense;          // density >= 0.7 threshold
+};
+
+// ============================================================
 //  Circuit types
 // ============================================================
 

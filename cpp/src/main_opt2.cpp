@@ -95,6 +95,53 @@ static MbCandidate search_single_output(
         candidates.push_back(cand);
     }
 
+    // Phase 1b: d1c product-based exhaustive b-search
+    if (n <= 20) {
+        int64_t n_words = tt1.n_words;
+        // Compute ANF from truth table copy
+        TruthTable tc_d1c = tt1;
+        moebius_packed(tc_d1c.tt[0].data(), n);
+        const uint64_t* anf = tc_d1c.tt[0].data();
+
+        // Compute support mask (same logic as compute_output_info in search.cpp)
+        uint64_t support = 0, lower = 0;
+        for (int64_t w = 0; w < n_words; w++) {
+            uint64_t val = anf[w];
+            if (val == 0) continue;
+            support |= ((uint64_t)w << 6);
+            if (val == UINT64_MAX) { lower |= 0x3F; }
+            else { for (uint64_t v = val; v; v &= v - 1)
+                       lower |= (uint64_t)__builtin_ctzll(v); }
+        }
+        uint64_t support_mask = support | lower;
+        if (n < 64) support_mask &= (1ULL << n) - 1;
+        int t = __builtin_popcountll(support_mask);
+
+        if (t > 0 && t <= 20) {
+            uint64_t best_b = 0;
+            int64_t best_T = exhaustive_search_best_b(anf, n, support_mask,
+                                                       20, best_b);
+            if (best_T >= 0) {
+                int64_t raw_T = 0;
+                for (int64_t w = 0; w < n_words; w++)
+                    raw_T += __builtin_popcountll(anf[w]);
+                std::cerr << "    d1c: support=" << support_mask << " t=" << t
+                          << " raw_T=" << raw_T << " best_T=" << best_T
+                          << " best_b=" << best_b << "\n";
+                {
+                    // best_b from exhaustive_search_best_b is already a full n-bit b vector
+                    uint32_t M_d1c[32] = {0};
+                    for (int i = 0; i < n && i < 32; i++)
+                        M_d1c[i] = (1u << i);
+                    auto cand = evaluate_Mb(tt1, M_d1c, best_b, n, n_threads);
+                    cand.m = n;
+                    if (cand.total_T >= 0 && cand.total_T <= raw_T)
+                        candidates.push_back(cand);
+                }
+            }
+        }
+    }
+
     // Phase 2: Walsh multi-row (for n ≤ 20)
     if (n <= 20) {
         auto walsh_vec = compute_walsh_correlations(tt1, n_threads);
@@ -177,8 +224,8 @@ static MbCandidate search_single_output(
         }
     }
 
-    // Also try hill climbing from identity
-    {
+    // Also try hill climbing from identity (only if we have hill climb iterations)
+    if (params.n_hill_climb > 0) {
         TruthTable tc = tt1;
         moebius_packed(tc.tt[0].data(), n);
         int64_t ident_T = 0;

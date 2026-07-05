@@ -5,8 +5,18 @@
 int64_t count_T(const uint64_t* data, int n) {
     int64_t total = 0;
     int64_t words = (n < 6) ? 1 : (int64_t(1) << (n - 6));
-    for (int64_t w = 0; w < words; w++)
-        total += __builtin_popcountll(data[w]);
+    for (int64_t w = 0; w < words; w++) {
+        uint64_t word = data[w];
+        // Exclude constant (index 0) and degree-1 terms (indices 2^i)
+        if (w == 0) {
+            // Constant at bit 0, degree-1 at bits 1,2,4,8,16,32
+            word &= ~0x100010117ULL;
+        } else if ((w & (w - 1)) == 0) {
+            // Power-of-2 word index → degree-1 term at bit 0 (x_{k} where k=6+log2(w))
+            word &= ~1ULL;
+        }
+        total += __builtin_popcountll(word);
+    }
     return total;
 }
 
