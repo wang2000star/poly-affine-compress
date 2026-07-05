@@ -243,6 +243,44 @@ static void moebius_packed(uint64_t* data, int n) {
     }
 }
 
+/** In-place upward Möbius transform on bit-packed array.
+ *  For each bit i: data[w] ^= data[w | (1<<i)] for w without bit i.
+ *  This computes: c[T] = sum_{S ⊇ T} a[S] over GF(2).
+ *  Applying this to ANF coefficients gives the ANF of g(z) = f(z ⊕ 1)
+ *  (the complement transform z_i = x_i ⊕ 1).
+ *  Its own inverse (involution over GF(2)).
+ */
+static void moebius_upward_packed(uint64_t* data, int n) {
+    int64_t words = int64_t(1) << (n - 6);
+
+    for (int i = 0; i < n; i++) {
+        int64_t step = int64_t(1) << i;
+
+        if (step >= 64) {
+            int ws = (int)(step / 64);
+            for (int64_t w = 0; w + ws < words; w++) {
+                if (!((w / ws) & 1))
+                    data[w] ^= data[w + ws];
+            }
+        } else {
+            int b = (int)step;
+            uint64_t mask_lo = (1ULL << b) - 1;
+            for (int64_t w = 0; w < words; w++) {
+                uint64_t val = data[w];
+                uint64_t res = 0;
+                for (int g = 0; g < 64; g += 2 * b) {
+                    uint64_t lo = (val >> g) & mask_lo;
+                    uint64_t hi = (val >> (g + b)) & mask_lo;
+                    lo ^= hi;
+                    res |= lo << g;
+                    res |= hi << (g + b);
+                }
+                data[w] = res;
+            }
+        }
+    }
+}
+
 // ============================================================
 //  Main computation
 // ============================================================
@@ -369,8 +407,36 @@ static std::optional<RawANFResult> compute_raw_anf(
         result.output_max_deg[oi] = max_deg;
         result.sum_T += T;
         if (max_deg > result.overall_max_deg) result.overall_max_deg = max_deg;
+
+        // Complement transform test: g(z) = f(z ⊕ 1)
+        // For dense ANFs (T_nl ≈ 2^t-t-1), complement can collapse terms.
+        int64_t comp_T_nl = -1;
+        // Complement transform test for dense ANFs (T_nl > 10000).
+        // g(z) = f(z ⊕ 1) can collapse near-saturated ANFs into few terms.
+        if (n <= 32 && T_nl > 100) {  // complement test for all outputs with T_nl > 100
+            moebius_upward_packed(tts[oi].data(), n);
+            comp_T_nl = 0;
+            for (int64_t w = 0; w < words; w++) {
+                uint64_t val = tts[oi][w];
+                if (val == 0) continue;
+                int cnt = __builtin_popcountll(val);
+                int pw = __builtin_popcountll(w);
+                int deg1 = 0;
+                if (pw == 0)
+                    deg1 += __builtin_popcountll(val & deg1_mask);
+                else if (pw == 1)
+                    if (val & 1) deg1++;
+                comp_T_nl += (cnt - deg1);
+            }
+            if (tts[oi][0] & 1) comp_T_nl--;
+            moebius_upward_packed(tts[oi].data(), n);  // restore
+        }
+
         std::cout << "    " << circ.outputs[output_indices[oi]]
-                  << ": T=" << T_nl << " (raw=" << T << "), m=" << max_deg << "\n";
+                  << ": T_nl=" << T_nl << " (raw=" << T << "), m=" << max_deg;
+        if (comp_T_nl >= 0)
+            std::cout << ", comp_T_nl=" << comp_T_nl;
+        std::cout << "\n";
     }
     std::cout << "  Sum T = " << result.sum_T << "\n";
 
