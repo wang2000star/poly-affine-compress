@@ -317,12 +317,35 @@ static std::optional<RawANFResult> compute_raw_anf(
 
     for (int oi = 0; oi < n_out; oi++) {
         moebius_packed(tts[oi].data(), n);
-        int64_t T = 0;
+        int64_t T = 0, T_nl = 0;
         int max_deg = 0;
         int64_t words = int64_t(1) << (n - 6);
-        // Count T in forward pass (fast)
-        for (int64_t w = 0; w < words; w++)
-            T += __builtin_popcountll(tts[oi][w]);
+        // Precomputed mask: bits in word 0 that are degree-1 (bit positions 1,2,4,8,16,32)
+        uint64_t deg1_mask = 0;
+        for (int b = 0; b < 64; b++) {
+            int pop = __builtin_popcountll(b);
+            if (pop == 1) deg1_mask |= (1ULL << b);
+        }
+        for (int64_t w = 0; w < words; w++) {
+            uint64_t val = tts[oi][w];
+            if (val == 0) continue;
+            int pw = __builtin_popcountll(w);
+            // Count total terms in this word
+            int cnt = __builtin_popcountll(val);
+            T += cnt;
+            // Count degree-1 terms in this word: deg = pw + popcount(b)
+            // degree-1 when (pw=0 ∧ popcount(b)=1) ∨ (pw=1 ∧ b=0)
+            int deg1 = 0;
+            if (pw == 0) {
+                deg1 += __builtin_popcountll(val & deg1_mask);
+            } else if (pw == 1) {
+                // popcount(w)=1: b=0 → check bit 0 of this word
+                if (val & 1) deg1++;
+            }
+            T_nl += (cnt - deg1);  // subtract degree-1 terms
+        }
+        // Subtract constant term (degree 0) if present (word 0, bit 0)
+        if (tts[oi][0] & 1) T_nl--;
         // Compute max degree: scan from high to low for early exit.
         // deg(packed_idx) = popcount(packed_idx).
         // Each word w covers indices [w*64, w*64+63]. For bit b in [0,63],
@@ -347,7 +370,7 @@ static std::optional<RawANFResult> compute_raw_anf(
         result.sum_T += T;
         if (max_deg > result.overall_max_deg) result.overall_max_deg = max_deg;
         std::cout << "    " << circ.outputs[output_indices[oi]]
-                  << ": T=" << T << ", m=" << max_deg << "\n";
+                  << ": T=" << T_nl << " (raw=" << T << "), m=" << max_deg << "\n";
     }
     std::cout << "  Sum T = " << result.sum_T << "\n";
 
