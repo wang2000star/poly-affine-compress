@@ -34,6 +34,8 @@
 #include <sstream>
 #include <thread>
 #include <algorithm>
+#include <map>
+#include <set>
 #include <filesystem>
 
 struct Opt2Result {
@@ -247,7 +249,7 @@ static MbCandidate search_single_output(
 
     if (!found) best_candidate = candidates[0];
 
-    // Evaluate the best candidate to get g_tt_raw
+    // Evaluate the best candidate
     best_candidate = evaluate_Mb(tt1, best_candidate.M_rows.data(), best_candidate.b,
                                   best_candidate.m, n_threads);
     return best_candidate;
@@ -387,6 +389,84 @@ int main(int argc, char** argv) {
 
     std::cout << "  Sum T = " << result.sum_T << "\n";
     std::cout << "  Union T = " << result.union_T << "\n";
+
+    // Phase 3c: Shared z-space union_T via per-output row deduplication
+    // If two outputs use the same (M_row, b_bit), map to same shared z variable
+    {
+        // Step 1: Build mapping from (M_row, b_bit) → shared variable index
+        std::map<std::pair<uint32_t, int>, int> sig_to_idx;
+        std::vector<std::vector<int>> out_var_map(k);
+
+        for (int oi = 0; oi < k; oi++) {
+            int mi = per_output[oi].m;
+            out_var_map[oi].resize(mi);
+            for (int r = 0; r < mi; r++) {
+                uint32_t M_row = per_output[oi].M_rows[r];
+                int b_bit = (per_output[oi].b >> r) & 1;
+                auto key = std::make_pair(M_row, b_bit);
+                auto it = sig_to_idx.find(key);
+                if (it == sig_to_idx.end())
+                    it = sig_to_idx.insert({key, (int)sig_to_idx.size()}).first;
+                out_var_map[oi][r] = it->second;
+            }
+        }
+
+        int shared_m = (int)sig_to_idx.size();
+        // Phase 3c: Shared z-space union_T
+        // Compute ANF in shared z-space and count unique remapped monomials.
+        // Union_T counts all terms (including degree-1) to match existing
+        // union_T convention (see Phase 3 small-m union_T computation).
+        {
+            std::set<std::vector<int>> shared_terms;
+
+            for (int oi = 0; oi < k; oi++) {
+                const auto& cand = per_output[oi];
+                if (cand.m == 0) continue;
+
+                TruthTable tt_oi;
+                tt_oi.n = n;
+                tt_oi.n_outputs = 1;
+                tt_oi.n_words = tt.n_words;
+                tt_oi.tt = {tt.tt[oi]};
+
+                auto ev = evaluate_Mb(tt_oi, cand.M_rows.data(), cand.b,
+                                      cand.m, params.n_threads, true);
+                if (ev.g_tt_raw.empty()) continue;
+
+                std::vector<uint64_t> anf(ev.g_tt_raw[0]);
+                moebius_packed(anf.data(), cand.m);
+
+                int64_t nw = (cand.m < 6) ? 1 : (int64_t(1) << (cand.m - 6));
+                for (int64_t w = 0; w < nw; w++) {
+                    uint64_t word = anf[w];
+                    while (word) {
+                        int bit_idx = __builtin_ctzll(word);
+                        word &= word - 1;
+                        int mono_mask = (int)((w << 6) | bit_idx);
+
+                        std::vector<int> svars;
+                        int rem = mono_mask;
+                        while (rem) {
+                            int j = __builtin_ctzll(rem);
+                            rem &= rem - 1;
+                            if (j < (int)out_var_map[oi].size())
+                                svars.push_back(out_var_map[oi][j]);
+                        }
+                        std::sort(svars.begin(), svars.end());
+                        shared_terms.insert(std::move(svars));
+                    }
+                }
+            }
+
+            int64_t shared_union_T = (int64_t)shared_terms.size();
+            if (shared_union_T < result.union_T) {
+                int64_t old_ut = result.union_T;
+                result.union_T = shared_union_T;
+                std::cout << "  Shared-z union T = " << shared_union_T
+                          << " (was " << old_ut << ")\n";
+            }
+        }
+    }
 
     // Save results
     if (!save_prefix.empty()) {
