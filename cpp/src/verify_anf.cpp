@@ -30,8 +30,8 @@ struct AffineTransform {
 };
 
 struct PolyTerm {
-    uint64_t mask;   // which z-variables appear (bits 0..m-1)
-    int coeff;       // 0 or 1
+    std::vector<uint64_t> mask_words; // multi-word mask (one bit per z-variable)
+    int coeff;                        // 0 or 1
 };
 
 struct PolyOutput {
@@ -58,7 +58,6 @@ static AffineTransform parse_affine(const std::string& path) {
         return tfm;
     }
 
-    // s × (n+1) matrix: [M | b]
     tfm.M_rows.resize(tfm.s);
     tfm.b.resize(tfm.s);
     for (int i = 0; i < tfm.s; i++) {
@@ -76,7 +75,7 @@ static AffineTransform parse_affine(const std::string& path) {
 }
 
 // ====================================================================
-//  Parse .poly (matrix format)
+//  Parse .poly (matrix format), supports s > 64 via multi-word masks
 // ====================================================================
 
 static std::vector<PolyOutput> parse_poly(const std::string& path, int& m) {
@@ -85,6 +84,7 @@ static std::vector<PolyOutput> parse_poly(const std::string& path, int& m) {
     if (!f) { std::cerr << "  ERROR: cannot open " << path << "\n"; return outputs; }
 
     f >> m;
+    int n_words = (m + 63) / 64;
     int k; f >> k;
     std::vector<int> term_counts(k);
     for (int i = 0; i < k; i++) f >> term_counts[i];
@@ -93,31 +93,38 @@ static std::vector<PolyOutput> parse_poly(const std::string& path, int& m) {
     for (int oi = 0; oi < k; oi++) {
         outputs[oi].terms.resize(term_counts[oi]);
         for (int ti = 0; ti < term_counts[oi]; ti++) {
-            // Parse [e_0, e_1, ..., e_{m-1}, coeff]
             char c; f >> c; // skip '['
-            uint64_t mask = 0;
+            PolyTerm pt;
+            pt.mask_words.resize(n_words, 0);
+            pt.coeff = 1;
             for (int b = 0; b < m; b++) {
                 int bit; f >> bit; f >> c; // read bit and comma/']
-                if (bit) mask |= (1ULL << b);
+                if (bit) pt.mask_words[b >> 6] |= (1ULL << (b & 63));
             }
-            int coeff; f >> coeff;
+            f >> pt.coeff;
             f >> c; // skip ']'
-            outputs[oi].terms[ti] = {mask, coeff};
+            outputs[oi].terms[ti] = pt;
         }
     }
     return outputs;
 }
 
 // ====================================================================
-//  Evaluate ANF at given z-value
+//  Evaluate ANF at given z-value (multi-word z)
 // ====================================================================
 
-static bool eval_poly(const PolyOutput& out, uint64_t z) {
+static bool eval_poly(const PolyOutput& out, const std::vector<uint64_t>& z) {
     bool result = false;
     for (const auto& term : out.terms) {
         if (term.coeff == 0) continue;
-        if ((z & term.mask) == term.mask)
-            result ^= true;
+        bool all_set = true;
+        for (size_t w = 0; w < term.mask_words.size(); w++) {
+            if ((z[w] & term.mask_words[w]) != term.mask_words[w]) {
+                all_set = false;
+                break;
+            }
+        }
+        if (all_set) result ^= true;
     }
     return result;
 }
@@ -188,10 +195,12 @@ int main(int argc, char** argv) {
     printf("  ANF: m=%d, %zu outputs\n", m, poly_outputs.size());
 
     // ---- Verification: f(x) == g(Mx+b) ----
-    // For n ≤ 16, exhaustive enumeration is cheap and guarantees correctness.
     int n_total = (n <= 16) ? (1 << n) : n_tests;
     uint32_t mask = (n == 32) ? 0xFFFFFFFF : ((1u << n) - 1);
     std::vector<int> mismatch_per_output(k, 0);
+
+    // Pre-allocate multi-word z (one word per 64 z-bits)
+    int n_z_words = (tfm.s + 63) / 64;
 
     std::ofstream f_out;
     std::ostream* out = &std::cout;
@@ -211,11 +220,11 @@ int main(int argc, char** argv) {
     for (int test = 0; test < n_total; test++) {
         uint32_t x = (n <= 16) ? (uint32_t)test
                                : (uint32_t)(((uint64_t)test * 0x9e3779b97f4a7c15ULL) & mask);
-        // z = Mx+b (z can be up to 64 bits for s > 32)
-        uint64_t z = 0;
+        // z = Mx+b (multi-word, supports s > 64)
+        std::vector<uint64_t> z(n_z_words, 0);
         for (int j = 0; j < tfm.s; j++) {
             if ((__builtin_popcount(tfm.M_rows[j] & x) & 1) ^ tfm.b[j])
-                z |= (1ULL << j);
+                z[j >> 6] |= (1ULL << (j & 63));
         }
 
         auto f_vals = eval_circuit_point(circ, x);

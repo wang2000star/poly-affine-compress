@@ -84,14 +84,12 @@ static void compute_input_words(
 }
 
 // ============================================================
-//  Verification with generalized c-correction
-//  Checks: f(x) = g(Mx⊕b) ⊕ ⟨c,x⟩ ⊕ d
+//  Standard verification: f(x) = g(Mx⊕b)
 // ============================================================
 
-static bool verify_candidate_generalized(
+static bool verify_candidate(
     const FastCircuit& fc,
     const uint32_t* M_rows, uint64_t b,
-    const std::vector<uint64_t>& c_vec, uint64_t d,
     int m, int n,
     const std::vector<uint64_t>& g_tt_raw,
     int output_idx,
@@ -99,36 +97,23 @@ static bool verify_candidate_generalized(
 {
     if (n_verify <= 0) return true;
 
-    // Pack c_vec into bitmask for fast inner product
-    uint64_t c_mask = 0;
-    for (int i = 0; i < n && i < 64; i++)
-        if (c_vec[i]) c_mask |= (1ULL << i);
-
     auto test_x = [&](uint64_t x) -> bool {
-        // f(x) via circuit evaluation
         uint64_t in_words[64];
         for (int j = 0; j < n; j++)
             in_words[j] = ((x >> j) & 1) ? ~0ULL : 0;
-        uint64_t eval_buf[1024], out_vec[32];
-        eval_batch_fast(fc, in_words, eval_buf, out_vec, (int)fc.out_idx.size());
+        std::vector<uint64_t> eval_buf(fc.n_stmts + 1, 0);
+        std::vector<uint64_t> out_vec(fc.out_idx.size(), 0);
+        eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
         uint64_t fx = (out_vec[output_idx] & 1);
 
-        // z = Mx ⊕ b
         uint64_t z = 0;
         for (int r = 0; r < m; r++)
             if (__builtin_popcount(M_rows[r] & (uint32_t)(x & 0xFFFFFFFFULL)) & 1)
                 z |= (1ULL << r);
         z ^= b;
 
-        // g(z) from truth table
         uint64_t gz = (g_tt_raw[z / 64] >> (z % 64)) & 1;
-
-        // ⟨c,x⟩ ⊕ d
-        uint64_t cx = (__builtin_popcountll(c_mask & x) & 1);
-
-        // Check: f(x) = g(z) ⊕ ⟨c,x⟩ ⊕ d
-        // i.e., fx ⊕ gz ⊕ cx ⊕ d == 0
-        return ((fx ^ gz ^ cx ^ (d & 1)) == 0);
+        return (fx == gz);
     };
 
     if (!test_x(0)) return false;
@@ -184,7 +169,7 @@ static std::vector<PoolRow> build_pool(int n)
     return pool;
 }
 
-// Score pool rows by T(g) for m=1 with c-correction
+// Score pool rows by T(g) for m=1 (raw ANF, no c-correction)
 // Returns g_tt_raw for each scored row (to avoid re-computing later)
 static void score_rows_by_t(
     const FastCircuit& fc, int n, int n_threads,
@@ -215,8 +200,9 @@ static void score_rows_by_t(
                 if (__builtin_popcount(P_rows[j] & (uint32_t)b) & 1)
                     in_words[j] ^= ~0ULL;
             }
-            uint64_t eval_buf[1024], out_vec[32];
-            eval_batch_fast(fc, in_words, eval_buf, out_vec, (int)fc.out_idx.size());
+            std::vector<uint64_t> eval_buf(fc.n_stmts + 1, 0);
+            std::vector<uint64_t> out_vec(fc.out_idx.size(), 0);
+            eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
             if (out_vec[output_idx] & 1)
                 g_tt[0] |= (1ULL << z);
         }
@@ -232,19 +218,7 @@ static void score_rows_by_t(
         for (size_t w = 0; w < anf.size(); w++)
             T_raw += __builtin_popcountll(anf[w]);
 
-        // Remove linear term (z_0) via c-correction: set c such that
-        // the linear term cancels. For m=1, M⁺ is n×1 and M⁺ᵀ·c = L
-        // where L = ANF coefficient of z_0 (0 or 1).
-        // If L=1, we can cancel it by setting c = M⁺ (any row of M⁺ = P_rows).
-        int has_linear = (int)((anf[0] >> 1) & 1);
-        int T_corrected = T_raw - has_linear;
-        // Also optimize constant via d: T_corrected = min(T_corrected, T_corrected - (has_const?1:0) + 1)
-        // Actually: d selects constant = 0 or 1. If T_raw has constant=1, removing it via d
-        // reduces T by 1; if constant=0, adding it via d increases T by 1.
-        int has_const = (int)(anf[0] & 1);
-        int T_opt = std::min(T_corrected, T_corrected - has_const + (1 - has_const));
-
-        pool[ri].score = T_opt;
+        pool[ri].score = T_raw;
 
         // Also check b=1 (complement row)
         if (pool[ri].type != 1) {
@@ -261,8 +235,9 @@ static void score_rows_by_t(
                     if (__builtin_popcount(P_rows[j] & (uint32_t)b) & 1)
                         in_words[j] ^= ~0ULL;
                 }
-                uint64_t eval_buf[1024], out_vec[32];
-                eval_batch_fast(fc, in_words, eval_buf, out_vec, (int)fc.out_idx.size());
+                std::vector<uint64_t> eval_buf(fc.n_stmts + 1, 0);
+                std::vector<uint64_t> out_vec(fc.out_idx.size(), 0);
+                eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
                 if (out_vec[output_idx] & 1)
                     g_tt_b1[0] |= (1ULL << z);
             }
@@ -273,21 +248,15 @@ static void score_rows_by_t(
             for (size_t w = 0; w < anf_b1.size(); w++)
                 T_raw_b1 += __builtin_popcountll(anf_b1[w]);
 
-            int has_linear_b1 = (int)((anf_b1[0] >> 1) & 1);
-            int T_corrected_b1 = T_raw_b1 - has_linear_b1;
-            int has_const_b1 = (int)(anf_b1[0] & 1);
-            int T_opt_b1 = std::min(T_corrected_b1, T_corrected_b1 - has_const_b1 + (1 - has_const_b1));
-
-            if (T_opt_b1 < pool[ri].score) {
-                pool[ri].score = T_opt_b1;
-                // Don't update g_tt — caller will re-evaluate with chosen b
+            if (T_raw_b1 < pool[ri].score) {
+                pool[ri].score = T_raw_b1;
             }
         }
     }
 }
 
 // ============================================================
-//  Evaluate M,b with c-correction
+//  Evaluate M,b (direct, no c-correction)
 // ============================================================
 
 // Structure to hold evaluation result
@@ -295,22 +264,15 @@ struct EvalResult {
     int m;
     uint32_t M_rows[32];
     uint64_t b;
-    int64_t total_T;          // T(g) after c-correction
-    int64_t T_raw;            // T(g) before c-correction
-    std::vector<uint64_t> g_tt_raw;   // raw g truth table (pre-Möbius, post c-correction)
-    std::vector<uint64_t> anf_coeffs;  // ANF coefficients (post-correction)
-    std::vector<uint64_t> raw_anf_coeffs; // ANF coefficients (pre-correction, all terms)
-    std::vector<uint64_t> c_vec;       // output-side linear coefficients (size n)
-    uint64_t d;               // output-side constant
+    int64_t total_T;          // T(g) raw ANF term count
+    std::vector<uint64_t> g_tt_raw;   // g truth table
+    std::vector<uint64_t> raw_anf_coeffs; // ANF coefficients (all terms)
     bool valid;
 };
 
-// Evaluate a single M,b candidate with c-correction
-// The c-correction removes linear terms from g(z) by solving:
-//   M⁺ᵀ · c = L  where L = linear term coefficients of g_raw
-// Result: g_corrected(z) = g_raw(z) ⊕ ⟨L, z⊕b⟩
-// Verification: f(x) = g_corrected(Mx⊕b) ⊕ ⟨c,x⟩ ⊕ d
-static EvalResult evaluate_Mb_ccorrect(
+// Evaluate a single M,b candidate directly.
+// Computes g_raw and its ANF. No c-correction: f(x) = g(Mx⊕b).
+static EvalResult evaluate_Mb(
     const FastCircuit& fc,
     const uint32_t* M_rows, uint64_t b,
     int m, int n,
@@ -318,13 +280,17 @@ static EvalResult evaluate_Mb_ccorrect(
     int output_idx,
     int n_verify = 200)
 {
+    // For small n with m=1, use exhaustive verification to eliminate false
+    // positives. m=1 candidates with T=0 can slip through 200 random tests and
+    // block the identity fallback (which has higher T but is always correct).
+    int n_verify_actual = n_verify;
+    if (n_verify_actual > 0 && n_verify_actual < (int64_t(1) << n) && n <= 10 && m == 1)
+        n_verify_actual = int64_t(1) << n;
+
     EvalResult r;
     r.valid = false;
     r.m = m;
     r.total_T = INT64_MAX;
-    r.T_raw = INT64_MAX;
-    r.d = 0;
-    r.c_vec.assign(n, 0);
 
     if (m <= 0) { r.valid = true; r.total_T = 0; return r; }
 
@@ -351,8 +317,9 @@ static EvalResult evaluate_Mb_ccorrect(
         for (int j = 0; j < n; j++)
             in_words[j] ^= cb[j];
 
-        uint64_t eval_buf[1024], out_vec[32];
-        eval_batch_fast(fc, in_words, eval_buf, out_vec, (int)fc.out_idx.size());
+        std::vector<uint64_t> eval_buf(fc.n_stmts + 1, 0);
+        std::vector<uint64_t> out_vec(fc.out_idx.size(), 0);
+        eval_batch_fast(fc, in_words, eval_buf.data(), out_vec.data(), (int)fc.out_idx.size());
         g_tt_raw[batch] = out_vec[output_idx];
     }
 
@@ -361,109 +328,22 @@ static EvalResult evaluate_Mb_ccorrect(
         g_tt_raw[0] &= mask;
     }
 
-    // Step 1: Compute c from linear terms of g_raw's ANF
-    // Möbius to get ANF of raw g
+    // Möbius to get raw ANF
     std::vector<uint64_t> raw_anf = g_tt_raw;
     moebius_packed(raw_anf.data(), m);
 
-    // Extract which linear terms exist in g_raw (L[r] = coefficient of z_r)
-    uint64_t L_mask = 0;
-    for (int r = 0; r < m; r++) {
-        int bit_pos = 1 << r;
-        if ((raw_anf[bit_pos / 64] >> (bit_pos % 64)) & 1)
-            L_mask |= (1ULL << r);
-    }
-
-    // Solve M⁺ᵀ · c = L for c
-    // M⁺ᵀ[r][j] = bit r of P_rows[j]
-    uint32_t selected_cols[32];
-    int n_selected = 0;
-    for (int j = 0; j < n && n_selected < m; j++) {
-        uint32_t test_rows[32];
-        for (int k = 0; k < n_selected; k++)
-            test_rows[k] = P_rows[selected_cols[k]];
-        test_rows[n_selected] = P_rows[j];
-        uint32_t work[32];
-        for (int k = 0; k <= n_selected; k++) work[k] = test_rows[k];
-        int rx = gf2_rank(work, n_selected + 1, m);
-        if (rx > n_selected)
-            selected_cols[n_selected++] = j;
-    }
-
-    if (L_mask != 0 && n_selected == m) {
-        uint32_t A[32];
-        for (int s = 0; s < m; s++) A[s] = P_rows[selected_cols[s]];
-        uint32_t B[32] = {0};
-        for (int r = 0; r < m; r++)
-            for (int s = 0; s < m; s++)
-                if ((A[s] >> r) & 1) B[r] |= (1u << s);
-        uint32_t Bw[32];
-        uint64_t Lw[32];
-        for (int r = 0; r < m; r++) {
-            Bw[r] = B[r];
-            Lw[r] = (L_mask >> r) & 1;
-        }
-        for (int col = 0; col < m; col++) {
-            int pivot = -1;
-            for (int r = col; r < m; r++)
-                if ((Bw[r] >> col) & 1) { pivot = r; break; }
-            if (pivot < 0) continue;
-            std::swap(Bw[col], Bw[pivot]);
-            std::swap(Lw[col], Lw[pivot]);
-            for (int r = 0; r < m; r++)
-                if (r != col && ((Bw[r] >> col) & 1)) {
-                    Bw[r] ^= Bw[col];
-                    Lw[r] ^= Lw[col];
-                }
-        }
-        for (int s = 0; s < m; s++)
-            if (Lw[s]) r.c_vec[selected_cols[s]] = 1;
-    }
-
-    // Step 2: Apply c-correction to g_raw:
-    // g_corrected(z) = g_raw(z) ⊕ ⟨L, z⊕b⟩
-    // This gives g_corrected with NO linear ANF terms.
-    std::vector<uint64_t> g_corrected = g_tt_raw;
-    if (L_mask != 0) {
-        for (int64_t z = 0; z < n_z; z++) {
-            uint64_t zb = (uint64_t)z ^ b;
-            if (__builtin_popcountll(zb & L_mask) & 1)
-                g_corrected[z / 64] ^= (1ULL << (z % 64));
-        }
-    }
-
-    // Step 3: Verify g_corrected with c-correction
-    // Check: f(x) = g_corrected(Mx⊕b) ⊕ ⟨c, x⟩ ⊕ d
-    if (n_verify > 0) {
-        if (!verify_candidate_generalized(fc, M_rows, b, r.c_vec, 0,
-                                           m, n, g_corrected, output_idx, n_verify)) {
-            if (!verify_candidate_generalized(fc, M_rows, b, r.c_vec, 1,
-                                               m, n, g_corrected, output_idx, n_verify)) {
-                return r;
-            }
-            r.d = 1;
-        }
-    }
-
-    // Step 4: Compute ANF and T of corrected g
-    std::vector<uint64_t> g_anf = g_corrected;
-    moebius_packed(g_anf.data(), m);
-
-    int64_t T_corrected = 0;
-    for (size_t w = 0; w < g_anf.size(); w++)
-        T_corrected += __builtin_popcountll(g_anf[w]);
-
-    int has_const = (int)(g_anf[0] & 1);
-    int64_t T_opt = std::min(T_corrected, T_corrected - has_const + (1 - has_const));
-
-    int64_t T_raw_val = 0;
+    int64_t T_raw = 0;
     for (size_t w = 0; w < raw_anf.size(); w++)
-        T_raw_val += __builtin_popcountll(raw_anf[w]);
+        T_raw += __builtin_popcountll(raw_anf[w]);
 
-    r.total_T = T_opt;
-    r.T_raw = T_raw_val;
-    r.g_tt_raw = g_corrected;
-    r.anf_coeffs = g_anf;
+    // Verify: f(x) = g(Mx⊕b)
+    if (n_verify_actual > 0) {
+        if (!verify_candidate(fc, M_rows, b, m, n, g_tt_raw, output_idx, n_verify_actual))
+            return r;
+    }
+
+    r.total_T = T_raw;
+    r.g_tt_raw = g_tt_raw;
     r.raw_anf_coeffs = raw_anf;
     r.valid = true;
 
@@ -482,12 +362,8 @@ struct Candidate {
     uint32_t M_rows[32];
     uint64_t b;
     int64_t total_T;
-    int64_t T_raw;
-    std::vector<uint64_t> g_tt_raw;   // corrected raw TT
-    std::vector<uint64_t> anf_coeffs;  // ANF of corrected g
-    std::vector<uint64_t> raw_anf_coeffs; // ANF before correction (all terms)
-    std::vector<uint64_t> c_vec;       // output-side linear coefficients
-    uint64_t d;               // output-side constant
+    std::vector<uint64_t> g_tt_raw;
+    std::vector<uint64_t> raw_anf_coeffs;
 
     // Affine flag: output f(x) = affine_b ⊕ Σ a_i·x_i (degree ≤ 1)
     bool is_affine;
@@ -504,8 +380,8 @@ static bool cmp_candidate(const Candidate& a, const Candidate& b) {
 // ============================================================
 
 // Detect if output f(x) is affine: f(x) = b ⊕ Σ a_i·x_i (including constants 0/1)
-// Uses n+1 circuit evaluations + random verification via batch evaluation.
-// Returns true with affine_mask (bit i = a_i) and affine_b properly set.
+// Uses n+1 circuit evaluations + exhaustive verification for n ≤ 16,
+// or 200 random tests for n > 16.
 static bool detect_affine_output(const FastCircuit& fc, int n, int output_idx,
                                   uint32_t& affine_mask, int& affine_b) {
     uint64_t in_words[64] = {0};
@@ -527,13 +403,14 @@ static bool detect_affine_output(const FastCircuit& fc, int n, int output_idx,
 
     if (n > 63) return false;
 
-    if (n > 63) return false;
-
+    int n_tests = (n <= 16) ? (1 << n) : 200;
     srand(12345);
-    for (int t = 0; t < 30; t++) {
-        uint64_t x = 0;
-        for (int j = 0; j < n; j++)
-            if (rand() & 1) x |= (1ULL << j);
+    for (int t = 0; t < n_tests; t++) {
+        uint64_t x = (n <= 16) ? (uint64_t)t : 0;
+        if (n > 16) {
+            for (int j = 0; j < n; j++)
+                if (rand() & 1) x |= (1ULL << j);
+        }
 
         memset(in_words, 0, sizeof(in_words));
         for (int j = 0; j < n; j++)
@@ -559,7 +436,6 @@ static Candidate search_sparse_g(
 {
     Candidate best;
     best.total_T = INT64_MAX;
-    best.T_raw = INT64_MAX;
     best.m = 0;
     best.is_affine = false;
     best.affine_mask = 0;
@@ -574,7 +450,6 @@ static Candidate search_sparse_g(
             best.affine_mask = amask;
             best.affine_b = ab;
             best.total_T = 0;
-            best.T_raw = 0;
             return best;
         }
     }
@@ -582,7 +457,7 @@ static Candidate search_sparse_g(
     // Build 3n-row pool
     std::vector<PoolRow> pool = build_pool(n);
 
-    // Score rows by m=1 T(g) with c-correction
+    // Score rows by m=1 T(g) (raw ANF, no c-correction)
     std::cout << "    Scoring " << pool.size() << " pool rows...\n";
     std::vector<std::vector<uint64_t>> row_g_tt(pool.size());
     score_rows_by_t(fc, n, n_threads, output_idx, pool, row_g_tt);
@@ -606,17 +481,13 @@ static Candidate search_sparse_g(
             if (pool[ri].type == 1 && bval == 0) continue; // complement needs b=1
             if (pool[ri].type == 0 && bval == 1) continue; // identity uses b=0 (b=1 checked in next block)
 
-            auto er = evaluate_Mb_ccorrect(fc, M, b, 1, n, n_threads, output_idx);
+            auto er = evaluate_Mb(fc, M, b, 1, n, n_threads, output_idx);
             if (er.valid && er.total_T < best.total_T) {
                 best.total_T = er.total_T;
-                best.T_raw = er.T_raw;
                 best.m = 1;
                 best.M_rows[0] = M[0];
                 best.b = b;
                 best.g_tt_raw = er.g_tt_raw;
-                best.c_vec = er.c_vec;
-                best.d = er.d;
-                best.anf_coeffs = er.anf_coeffs;
                 best.raw_anf_coeffs = er.raw_anf_coeffs;
             }
         }
@@ -642,17 +513,13 @@ static Candidate search_sparse_g(
                 M[r] = pool[sorted_idx[comb[r]]].mask;
 
             // Try b=0 (all zeros)
-            auto er = evaluate_Mb_ccorrect(fc, M, 0, m_val, n, n_threads, output_idx);
+            auto er = evaluate_Mb(fc, M, 0, m_val, n, n_threads, output_idx);
             if (er.valid && er.total_T < best.total_T) {
                 best.total_T = er.total_T;
-                best.T_raw = er.T_raw;
                 best.m = m_val;
                 for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
                 best.b = 0;
                 best.g_tt_raw = er.g_tt_raw;
-                best.c_vec = er.c_vec;
-                best.d = er.d;
-                best.anf_coeffs = er.anf_coeffs;
                 best.raw_anf_coeffs = er.raw_anf_coeffs;
             }
 
@@ -662,15 +529,13 @@ static Candidate search_sparse_g(
                 if (pool[sorted_idx[comb[r]]].type == 1) b_compl |= (1ULL << r);
 
             if (b_compl != 0) {
-                auto er2 = evaluate_Mb_ccorrect(fc, M, b_compl, m_val, n, n_threads, output_idx);
+                auto er2 = evaluate_Mb(fc, M, b_compl, m_val, n, n_threads, output_idx);
                 if (er2.valid && er2.total_T < best.total_T) {
                     best.total_T = er2.total_T;
-                    best.T_raw = er2.T_raw;
                     best.m = m_val;
                     for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
                     best.b = b_compl;
                     best.g_tt_raw = er2.g_tt_raw;
-                    best.anf_coeffs = er2.anf_coeffs;
                     best.raw_anf_coeffs = er2.raw_anf_coeffs;
                 }
             }
@@ -721,18 +586,14 @@ static Candidate search_sparse_g(
                 }
                 // Try b=0
                 {
-                    auto er = evaluate_Mb_ccorrect(fc, M, 0, m_val, n, n_threads, output_idx);
+                    auto er = evaluate_Mb(fc, M, 0, m_val, n, n_threads, output_idx);
                     if (er.valid && er.total_T < best.total_T) {
                         best.total_T = er.total_T;
-                        best.T_raw = er.T_raw;
-                        best.m = m_val;
+                            best.m = m_val;
                         for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
                         best.b = 0;
                         best.g_tt_raw = er.g_tt_raw;
-                        best.c_vec = er.c_vec;
-                        best.d = er.d;
-                        best.anf_coeffs = er.anf_coeffs;
-                best.raw_anf_coeffs = er.raw_anf_coeffs;
+                        best.raw_anf_coeffs = er.raw_anf_coeffs;
                     }
                 }
                 // Try complement b: set b bits for complement-type pool rows
@@ -741,18 +602,14 @@ static Candidate search_sparse_g(
                     for (int r = 0; r < m_val; r++)
                         if (pool[picked_idx[r]].type == 1) b |= (1ULL << r);
                     if (b != 0) {
-                        auto er = evaluate_Mb_ccorrect(fc, M, b, m_val, n, n_threads, output_idx);
+                        auto er = evaluate_Mb(fc, M, b, m_val, n, n_threads, output_idx);
                         if (er.valid && er.total_T < best.total_T) {
                             best.total_T = er.total_T;
-                            best.T_raw = er.T_raw;
-                            best.m = m_val;
+                                    best.m = m_val;
                             for (int r = 0; r < m_val; r++) best.M_rows[r] = M[r];
                             best.b = b;
                             best.g_tt_raw = er.g_tt_raw;
-                            best.c_vec = er.c_vec;
-                            best.d = er.d;
-                            best.anf_coeffs = er.anf_coeffs;
-                best.raw_anf_coeffs = er.raw_anf_coeffs;
+                            best.raw_anf_coeffs = er.raw_anf_coeffs;
                         }
                     }
                 }
@@ -781,20 +638,16 @@ static Candidate search_sparse_g(
                         for (int bp = 0; bp < 2; bp++) {
                             cur.b ^= ((uint64_t)bp << r);
 
-                            auto er = evaluate_Mb_ccorrect(
+                            auto er = evaluate_Mb(
                                 fc, cur.M_rows, cur.b, cur.m, n, n_threads, output_idx, 0);
 
                             if (er.valid && er.total_T < best.total_T) {
                                 best.total_T = er.total_T;
-                                best.T_raw = er.T_raw;
-                                best.m = cur.m;
+                                            best.m = cur.m;
                                 for (int rr = 0; rr < cur.m; rr++) best.M_rows[rr] = cur.M_rows[rr];
                                 best.b = cur.b;
                                 best.g_tt_raw = er.g_tt_raw;
-                                best.c_vec = er.c_vec;
-                                best.d = er.d;
-                                best.anf_coeffs = er.anf_coeffs;
-                best.raw_anf_coeffs = er.raw_anf_coeffs;
+                                best.raw_anf_coeffs = er.raw_anf_coeffs;
                                 improved = true;
                             }
 
@@ -819,20 +672,16 @@ static Candidate search_sparse_g(
                             if (bp == 1) b_try |= (1ULL << new_r);
                             else b_try &= ~(1ULL << new_r);
 
-                            auto er = evaluate_Mb_ccorrect(
+                            auto er = evaluate_Mb(
                                 fc, cur.M_rows, b_try, cur.m, n, n_threads, output_idx, 0);
 
                             if (er.valid && er.total_T < best.total_T) {
                                 best.total_T = er.total_T;
-                                best.T_raw = er.T_raw;
-                                best.m = cur.m;
+                                            best.m = cur.m;
                                 for (int rr = 0; rr < cur.m; rr++) best.M_rows[rr] = cur.M_rows[rr];
                                 best.b = b_try;
                                 best.g_tt_raw = er.g_tt_raw;
-                                best.c_vec = er.c_vec;
-                                best.d = er.d;
-                                best.anf_coeffs = er.anf_coeffs;
-                best.raw_anf_coeffs = er.raw_anf_coeffs;
+                                best.raw_anf_coeffs = er.raw_anf_coeffs;
                                 improved = true;
                             }
                         }
@@ -845,21 +694,17 @@ static Candidate search_sparse_g(
     } // end Phase 3 hill climbing
     } // end if (best.total_T < INT64_MAX) — Phase 2
 
-    // Fallback: identity transform (only for n ≤ 20, where truth table fits)
+    // Fallback: identity transform (truth table fits for n ≤ 20)
     if (best.total_T >= INT64_MAX && n <= 20) {
         uint32_t M_ident[32] = {0};
         for (int r = 0; r < n; r++) M_ident[r] = (1u << r);
-        auto er = evaluate_Mb_ccorrect(fc, M_ident, 0, n, n, n_threads, output_idx, 0);
+        auto er = evaluate_Mb(fc, M_ident, 0, n, n, n_threads, output_idx, 0);
         if (er.valid && er.total_T < best.total_T) {
             best.total_T = er.total_T;
-            best.T_raw = er.T_raw;
             best.m = n;
             for (int r = 0; r < n; r++) best.M_rows[r] = M_ident[r];
             best.b = 0;
             best.g_tt_raw = er.g_tt_raw;
-            best.c_vec = er.c_vec;
-            best.d = er.d;
-            best.anf_coeffs = er.anf_coeffs;
             best.raw_anf_coeffs = er.raw_anf_coeffs;
         }
     }
@@ -980,19 +825,37 @@ int main(int argc, char** argv) {
 
         // Post-search verification
         if (cand.total_T < INT64_MAX && cand.total_T >= 0 && cand.m > 0 && !cand.g_tt_raw.empty()) {
-            bool verified = verify_candidate_generalized(fc, cand.M_rows, cand.b,
-                                             cand.c_vec, cand.d, cand.m, n, cand.g_tt_raw, oi, 5000);
+            bool verified = verify_candidate(fc, cand.M_rows, cand.b,
+                                             cand.m, n, cand.g_tt_raw, oi, 5000);
             if (!verified) {
-                cand.total_T = INT64_MAX;
-                cand.m = 0;
-                cand.g_tt_raw.clear();
-                std::cout << "    ❌ POST-VERIFY FAILED (5000 tests) — rejecting candidate\n";
+                // Second chance: identity transform is always a safe fallback
+                if (n <= 20) {
+                    uint32_t M_id[32] = {0};
+                    for (int r = 0; r < n; r++) M_id[r] = (1u << r);
+                    auto er = evaluate_Mb(fc, M_id, 0, n, n, n_threads, oi, 0);
+                    if (er.valid) {
+                        cand.total_T = er.total_T;
+                        cand.m = n;
+                        for (int r = 0; r < n; r++) cand.M_rows[r] = M_id[r];
+                        cand.b = 0;
+                        cand.g_tt_raw = er.g_tt_raw;
+                        cand.raw_anf_coeffs = er.raw_anf_coeffs;
+                        verified = verify_candidate(fc, cand.M_rows, cand.b,
+                                                     cand.m, n, cand.g_tt_raw, oi, 5000);
+                    }
+                }
+                if (!verified) {
+                    cand.total_T = INT64_MAX;
+                    cand.m = 0;
+                    cand.g_tt_raw.clear();
+                    std::cout << "    ❌ POST-VERIFY FAILED (5000 tests) — rejecting candidate\n";
+                }
             }
         }
 
         results[oi] = cand;
         if (cand.total_T < INT64_MAX && !cand.is_affine)
-            total_sum_T += cand.T_raw;
+            total_sum_T += cand.total_T;
 
         if (cand.is_affine) {
             uint32_t mask = cand.affine_mask;
@@ -1011,7 +874,7 @@ int main(int argc, char** argv) {
             std::cout << " [" << sec << " s]\n";
         } else {
             std::cout << "    m=" << cand.m << " T=" << cand.total_T
-                      << " (raw T=" << cand.T_raw << ") [" << sec << " s]\n";
+                      << " [" << sec << " s]\n";
         }
     }
 
@@ -1044,7 +907,7 @@ int main(int argc, char** argv) {
                       << std::dec << ", b=" << results[oi].affine_b << ")\n";
         } else {
             std::cout << "  " << circ.outputs[all_outputs[oi]] << ": T=" << results[oi].total_T
-                      << " (raw=" << results[oi].T_raw << ") m=" << results[oi].m << "\n";
+                      << " m=" << results[oi].m << "\n";
         }
     }
 
@@ -1127,7 +990,11 @@ int main(int argc, char** argv) {
 
             for (int oi = 0; oi < k; oi++) {
                 auto& r = results[oi];
-                if (r.is_affine || r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
+                if (r.is_affine) {
+                    if (r.affine_b) term_counts[oi] = 1; // constant 1
+                    continue;
+                }
+                if (r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
                 int64_t n_z = int64_t(1) << r.m;
                 for (int64_t zi = 0; zi < n_z; zi++) {
                     if ((r.raw_anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
@@ -1149,17 +1016,30 @@ int main(int argc, char** argv) {
 
                 for (int oi = 0; oi < k; oi++) {
                     auto& r = results[oi];
-                    if (r.is_affine || r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
+                    if (r.is_affine) {
+                        // constant-1 output: write [0,0,...,0,1]
+                        if (r.affine_b) {
+                            f << "[";
+                            for (int b = 0; b < s; b++) {
+                                if (b > 0) f << " , ";
+                                f << "0";
+                            }
+                            f << " , 1]\n";
+                        }
+                        continue;
+                    }
+                    if (r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
                     int off = z_off[oi];
                     int64_t n_z = int64_t(1) << r.m;
 
                     for (int64_t zi = 0; zi < n_z; zi++) {
                         if ((r.raw_anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
-                            int64_t shared_pos = (int64_t)zi << off;
                             f << "[";
                             for (int b = 0; b < s; b++) {
                                 if (b > 0) f << " , ";
-                                f << ((shared_pos >> b) & 1);
+                                int bit = 0;
+                                if (b >= off && b < off + r.m) bit = (zi >> (b - off)) & 1;
+                                f << bit;
                             }
                             f << " , 1]\n";
                         }
@@ -1175,7 +1055,11 @@ int main(int argc, char** argv) {
             int max_deg = 0;
             for (int oi = 0; oi < k; oi++) {
                 auto& r = results[oi];
-                if (r.is_affine || r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
+                if (r.is_affine) {
+                    if (r.affine_b) sum_T++;
+                    continue;
+                }
+                if (r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
                 int64_t n_z = int64_t(1) << r.m;
                 for (int64_t zi = 0; zi < n_z; zi++) {
                     if ((r.raw_anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
@@ -1197,7 +1081,7 @@ int main(int argc, char** argv) {
         {
             std::ofstream f(base + "_verify.txt");
             if (f) {
-                f << "# Verification: f(x) = g(Mx+b) + Cx+d\n";
+                f << "# Verification: f(x) = g(Mx+b)\n";
                 f << "# n=" << n << "\n\n";
                 bool all_pass = true;
                 for (int oi = 0; oi < k; oi++) {
@@ -1211,7 +1095,7 @@ int main(int argc, char** argv) {
                         all_pass = false;
                         continue;
                     }
-                    bool ok = verify_candidate_generalized(fc, r.M_rows, r.b, r.c_vec, r.d,
+                    bool ok = verify_candidate(fc, r.M_rows, r.b,
                                                 r.m, n, r.g_tt_raw, oi, 5000);
                     f << circ.outputs[all_outputs[oi]] << ": "
                       << (ok ? "PASS" : "FAIL") << " T=" << r.total_T

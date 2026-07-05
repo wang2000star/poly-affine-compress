@@ -931,11 +931,12 @@ int main(int argc, char** argv) {
                     int64_t n_z = int64_t(1) << r.m;
                     for (int64_t zi = 0; zi < n_z; zi++) {
                         if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
-                            int64_t shared_pos = (int64_t)zi << off;
-                            f << "[";
+                                    f << "[";
                             for (int b = 0; b < s; b++) {
                                 if (b > 0) f << " , ";
-                                f << ((shared_pos >> b) & 1);
+                                int bit = 0;
+                                if (b >= off && b < off + r.m) bit = (zi >> (b - off)) & 1;
+                                f << bit;
                             }
                             f << " , 1]\n";
                         }

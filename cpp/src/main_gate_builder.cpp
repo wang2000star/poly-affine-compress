@@ -183,11 +183,13 @@ static void write_poly(const std::string& path,
         if (results[oi].g_all.T() > 0) {
             for (auto& [mask, v] : results[oi].g_all.terms()) {
                 if (!v) continue;
-                uint64_t shared_pos = (uint64_t)mask << off;
                 f << "[";
                 for (int b = 0; b < s; b++) {
                     if (b > 0) f << " , ";
-                    f << ((shared_pos >> b) & 1);
+                    int bit = 0;
+                    int mi = results[oi].m_used;
+                    if (b >= off && b < off + mi) bit = (mask >> (b - off)) & 1;
+                    f << bit;
                 }
                 f << " , 1]\n";
             }
