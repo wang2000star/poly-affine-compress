@@ -40,7 +40,31 @@ elif [ "$MODE" = "--list" ]; then
     echo ""
     echo "n=32 实例 (仅 d1a_opt2 / d3_opt2 / d1b_opt2):"
     echo "  hd10 hd01 hd02 hd09 hd11 hd12"
+    echo ""
+    echo "---"
+    echo "其他用法:"
+    echo "  ./run_complete.sh              快速测试"
+    echo "  ./run_complete.sh --full       完整运行"
+    echo "  ./run_complete.sh --clean      清理 results/ 下除 results.md 外的所有文件"
+    echo "  ./run_complete.sh --update-md  从数据文件重新生成 results.md"
     exit 0
+
+elif [ "$MODE" = "--clean" ]; then
+    echo "=== Cleaning results/ (keeping results.md) ==="
+    for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02 hd09 hd11 hd12; do
+        if [ -d "$RESULTS_DIR/$inst" ]; then
+            find "$RESULTS_DIR/$inst" -type f ! -name 'results.md' -delete 2>/dev/null
+            rmdir "$RESULTS_DIR/$inst" 2>/dev/null || true
+        fi
+    done
+    echo "  Done (kept results/results.md)"
+    exit 0
+
+elif [ "$MODE" = "--update-md" ]; then
+    echo "=== Regenerating results.md ==="
+    python3 "$SCRIPT_DIR/update_results.py"
+    exit $?
+fi
 else
     # 快速测试
     P_COMMON="--random 20 --walsh-k 10 --hill-climb 2"
