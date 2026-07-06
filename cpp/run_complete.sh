@@ -28,14 +28,40 @@ TIMEOUT="${TIMEOUT:-86400}"
 if [ "$MODE" = "--full" ]; then
     # 共享/单输出搜索（跑一次）→ 最大力度
     P_COMMON="--random 100000 --hill-climb 100000"
-    # n=32 实例（32 输出中仅 2-3 非线性，稀疏评估较慢）
-    P_N32="--random 50000 --hill-climb 50000 --n32-random 2000"
-    # n≤16 多输出（每输出独立搜索，k× 时间）
-    P_D1A_OPT2="--random 50000 --hill-climb 50000 --max-m 12"
     # m≤6 枚举极快
     P_D2="--random 100000 --hill-climb 100000 --max-m 6"
     # 补码搜索只做 Phase 1b，不需要随机/爬山
     P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
+
+    # ---- per-output 搜索参数（按实例规模定制） ----
+    # n=16 评估最慢，k=8 → 15000/15000
+    # n=10-11 中等，k=7-11 → 50000/50000
+    # n=7-8 评估极快，k=8-256 → 50000~100000/50000~100000
+    # n=32 稀疏评估 → 20000/20000
+    declare -A OPT2_P  # d1a_opt2
+    OPT2_P[hd03]="--random 15000 --hill-climb 15000 --max-m 12"
+    OPT2_P[hd04]="--random 15000 --hill-climb 15000 --max-m 12"
+    OPT2_P[int2float]="--random 50000 --hill-climb 50000 --max-m 12"
+    OPT2_P[cavlc]="--random 50000 --hill-climb 50000 --max-m 12"
+    OPT2_P[hd07]="--random 100000 --hill-climb 100000 --max-m 12"
+    OPT2_P[ctrl]="--random 100000 --hill-climb 100000 --max-m 12"
+    OPT2_P[dec]="--random 50000 --hill-climb 50000 --max-m 12"
+
+    declare -A D3_P  # d3_opt2
+    D3_P[hd03]="--random 15000 --hill-climb 15000"
+    D3_P[hd04]="--random 15000 --hill-climb 15000"
+    D3_P[int2float]="--random 50000 --hill-climb 50000"
+    D3_P[cavlc]="--random 50000 --hill-climb 50000"
+    D3_P[hd07]="--random 100000 --hill-climb 100000"
+    D3_P[ctrl]="--random 100000 --hill-climb 100000"
+    D3_P[dec]="--random 50000 --hill-climb 50000"
+
+    declare -A N32_P  # n=32 per-output
+    for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
+        N32_P[$inst]="--random 20000 --hill-climb 20000 --n32-random 1000"
+    done
+
+    P_DEFAULT_OPT2="--random 30000 --hill-climb 30000 --max-m 12"
 elif [ "$MODE" = "--list" ]; then
     echo "=== Instance × Strategy Matrix ==="
     echo ""
@@ -75,10 +101,16 @@ elif [ "$MODE" = "--update-md" ]; then
 else
     # 快速测试
     P_COMMON="--random 20 --walsh-k 10 --hill-climb 2"
-    P_N32="--random 10 --walsh-k 5 --n32-random 5 --hill-climb 1"
-    P_D1A_OPT2="--random 20 --walsh-k 10 --hill-climb 2 --max-m 8"
     P_D2="--random 20 --hill-climb 2 --max-m 4"
     P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
+    declare -A OPT2_P D3_P N32_P
+    for inst in hd07 hd03 hd04 int2float cavlc ctrl dec; do
+        OPT2_P[$inst]="--random 20 --hill-climb 2 --max-m 8"
+        D3_P[$inst]="--random 20 --hill-climb 2"
+    done
+    for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
+        N32_P[$inst]="--random 10 --n32-random 5 --hill-climb 1"
+    done
 fi
 
 # ---- 配色 ----
@@ -163,11 +195,11 @@ run_multi_output() {
     echo ""
     echo ">> $inst (7 strategies)"
     run_strat "$inst" "d1a_opt1" "$circuit" "$P_COMMON"
-    run_strat "$inst" "d1a_opt2" "$circuit" "$P_D1A_OPT2"
+    run_strat "$inst" "d1a_opt2" "$circuit" "${OPT2_P[$inst]:-$P_DEFAULT_OPT2}"
     run_strat "$inst" "d1b_opt2" "$circuit" ""
     run_strat "$inst" "d2_opt2"  "$circuit" "$P_D2"
     run_strat "$inst" "d3_opt1"  "$circuit" "$P_COMMON"
-    run_strat "$inst" "d3_opt2"  "$circuit" "$P_COMMON"
+    run_strat "$inst" "d3_opt2"  "$circuit" "${D3_P[$inst]:-$P_DEFAULT_OPT2}"
     run_strat "$inst" "d1c_opt2" "$circuit" "$P_D1C"
 }
 
@@ -230,9 +262,9 @@ echo "=== n=32 实例 ==="
 for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
     echo ""
     echo ">> $inst"
-    run_strat "$inst" "d1a_opt2" "$EXAMPLES_DIR/${inst}.txt" "$P_N32"
+    run_strat "$inst" "d1a_opt2" "$EXAMPLES_DIR/${inst}.txt" "${N32_P[$inst]}"
     run_strat "$inst" "d1b_opt2" "$EXAMPLES_DIR/${inst}.txt" ""
-    run_strat "$inst" "d3_opt2"  "$EXAMPLES_DIR/${inst}.txt" "$P_N32"
+    run_strat "$inst" "d3_opt2"  "$EXAMPLES_DIR/${inst}.txt" "${N32_P[$inst]}"
 done
 
 # ---- 验证 ----
