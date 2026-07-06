@@ -128,6 +128,28 @@ target_include_directories(optimize_anf_d3_opt2 PRIVATE include)
 target_compile_definitions(optimize_anf_d3_opt2 PRIVATE STRATEGY_TAG="opt2")
 
 # ====================================================================
+# Direction 1c: Complement-only search (z = x ⊕ b, M = I)
+#   Phase 1b in main_opt2.cpp, only identity + complement b search
+#   opt  = single-output
+#   opt2 = per-output transforms
+#   opt1 (shared) not applicable — complement is per-output by nature
+# ====================================================================
+
+add_executable(optimize_anf_d1c_opt
+    src/main_opt2.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_d1c_opt PRIVATE include)
+target_compile_definitions(optimize_anf_d1c_opt PRIVATE DIRECTION_TAG="d1c" STRATEGY_TAG="opt")
+
+add_executable(optimize_anf_d1c_opt2
+    src/main_opt2.cpp
+    ${CORE_SRC}
+)
+target_include_directories(optimize_anf_d1c_opt2 PRIVATE include)
+target_compile_definitions(optimize_anf_d1c_opt2 PRIVATE DIRECTION_TAG="d1c" STRATEGY_TAG="opt2")
+
+# ====================================================================
 # Auxiliary tools
 # ====================================================================
 

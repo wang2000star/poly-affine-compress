@@ -23,13 +23,11 @@ MODE="${1:-test}"
 
 # ---- 参数集 ----
 if [ "$MODE" = "--full" ]; then
-    # 仅做 d1c (complement-only) 的参数：关闭其他阶段
-    P_D1C="--walsh-k 0 --random 0 --hill-climb 0 --complement 0"
-    # 其他策略沿用全量参数
     P_COMMON="--random 500 --walsh-k 40 --hill-climb 30"
     P_N32="--random 500 --walsh-k 40 --n32-random 50 --hill-climb 5"
     P_D1A_OPT2="--random 500 --walsh-k 40 --hill-climb 10 --max-m 12"
     P_D2="--random 300 --hill-climb 10 --max-m 6"
+    P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
 elif [ "$MODE" = "--list" ]; then
     echo "=== Instance × Strategy Matrix ==="
     echo ""
@@ -37,36 +35,31 @@ elif [ "$MODE" = "--list" ]; then
     echo "  hd08 → d1a_opt  d1b_opt  d2_opt  d3_opt  d1c_opt"
     echo ""
     echo "多输出 (k_nl>1, 7 strategies):"
-    echo "  hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02"
+    echo "  hd07 hd03 hd04 ctrl dec int2float cavlc"
     echo "  → d1a_opt1  d1a_opt2  d1b_opt2  d2_opt2  d3_opt1  d3_opt2  d1c_opt2"
+    echo ""
+    echo "n=32 实例 (仅 d1a_opt2 / d3_opt2 / d1b_opt2):"
+    echo "  hd10 hd01 hd02 hd09 hd11 hd12"
     exit 0
 else
     # 快速测试
-    P_D1C="--walsh-k 0 --random 0 --hill-climb 0 --complement 0"
     P_COMMON="--random 20 --walsh-k 10 --hill-climb 2"
     P_N32="--random 10 --walsh-k 5 --n32-random 5 --hill-climb 1"
     P_D1A_OPT2="--random 20 --walsh-k 10 --hill-climb 2 --max-m 8"
     P_D2="--random 20 --hill-climb 2 --max-m 4"
+    P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
 fi
 
 # ---- 配色 ----
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 pass_cnt=0; fail_cnt=0; skip_cnt=0
 
-# ---- 检测可执行文件 ----
 check_exe() {
     if [ ! -f "$BUILD_DIR/$1" ]; then
         echo -e "  ${RED}SKIP: $1 not found${NC}"
         return 1
     fi
     return 0
-}
-
-# ---- 从 .txt 路径提取实例名 ----
-inst_name() {
-    local p=$1
-    p=$(basename "$p")
-    echo "${p%.*}"
 }
 
 # ---- 运行单一策略 ----
@@ -82,7 +75,6 @@ run_strat() {
         return 1
     fi
 
-    # 判断执行类型
     local is_gb=0
     case "$strat" in
         d1b_opt|d1b_opt2) is_gb=1 ;;
@@ -100,16 +92,23 @@ run_strat() {
     local rc=$?
     set -e
 
-    # 检查结果：d1c 策略可能没有 "Verified" 消息（因为只运行 Phase 1b）
-    if [ $rc -eq 0 ] && grep -q "Verified\|All outputs verified\|Skipping verification\|Done\.\|Phase" "$logfile" 2>/dev/null; then
-        echo -e "    ${GREEN}✓ PASS${NC}"
-        pass_cnt=$((pass_cnt + 1))
+    if [ $rc -eq 0 ] && grep -q "Verified\|All outputs verified\|Done\.\|Phase" "$logfile" 2>/dev/null; then
+        # Check for "no valid transform" in log — means search failed to find anything
+        if grep -q "no valid transform" "$logfile" 2>/dev/null; then
+            local nv=$(grep -c "no valid transform" "$logfile")
+            echo -e "    ${RED}✗ ${nv} outputs have no valid transform${NC}"
+            tail -3 "$logfile" | sed 's/^/      /'
+            fail_cnt=$((fail_cnt + 1))
+        else
+            echo -e "    ${GREEN}✓ PASS${NC}"
+            pass_cnt=$((pass_cnt + 1))
+        fi
     elif [ $rc -ne 0 ]; then
         echo -e "    ${RED}✗ FAIL (exit $rc)${NC}"
         tail -5 "$logfile" | sed 's/^/      /'
         fail_cnt=$((fail_cnt + 1))
     else
-        echo -e "    ${YELLOW}? CHECK (exit=0, check log)${NC}"
+        echo -e "    ${YELLOW}? CHECK (exit=0)${NC}"
         tail -3 "$logfile" | sed 's/^/      /'
         pass_cnt=$((pass_cnt + 1))
     fi
@@ -119,46 +118,29 @@ run_strat() {
 run_single_output() {
     local inst=$1 circuit=$2
     echo ""
-    echo ">> $inst (5 strategies: d1a_opt d1b_opt d2_opt d3_opt d1c_opt)"
-
-    # d1c_opt: complement-only (先跑，结果从 d3_opt 重命名为 d1c_opt)
-    run_strat "$inst" "d3_opt"  "$circuit" "$P_D1C"
-    for ext in affine poly stats.txt verify.txt; do
-        src="$RESULTS_DIR/$inst/${inst}_d3_opt.$ext"
-        dst="$RESULTS_DIR/$inst/${inst}_d1c_opt.$ext"
-        [ -f "$src" ] && cp "$src" "$dst" 2>/dev/null || true
-    done
+    echo ">> $inst (5 strategies)"
     run_strat "$inst" "d1a_opt" "$circuit" "$P_COMMON"
     run_strat "$inst" "d1b_opt" "$circuit" ""
     run_strat "$inst" "d2_opt"  "$circuit" "$P_D2"
     run_strat "$inst" "d3_opt"  "$circuit" "$P_COMMON"
+    run_strat "$inst" "d1c_opt" "$circuit" "$P_D1C"
 }
 
 # ---- 多输出实例：7 种策略 ----
 run_multi_output() {
     local inst=$1 circuit=$2
     echo ""
-    echo ">> $inst (7 strategies: d1a_opt1 d1a_opt2 d1b_opt2 d2_opt2 d3_opt1 d3_opt2 d1c_opt2)"
-
+    echo ">> $inst (7 strategies)"
     run_strat "$inst" "d1a_opt1" "$circuit" "$P_COMMON"
     run_strat "$inst" "d1a_opt2" "$circuit" "$P_D1A_OPT2"
     run_strat "$inst" "d1b_opt2" "$circuit" ""
     run_strat "$inst" "d2_opt2"  "$circuit" "$P_D2"
-    # d1c_opt2: complement-only (先跑，结果要从 d3_opt2 重命名为 d1c_opt2)
-    run_strat "$inst" "d3_opt2"  "$circuit" "$P_D1C"
-    # 在普通 d3_opt2 覆盖之前，把 d1c 结果存为 d1c_opt2
-    for ext in affine poly stats.txt verify.txt; do
-        src="$RESULTS_DIR/$inst/${inst}_d3_opt2.$ext"
-        dst="$RESULTS_DIR/$inst/${inst}_d1c_opt2.$ext"
-        [ -f "$src" ] && cp "$src" "$dst" 2>/dev/null || true
-    done
     run_strat "$inst" "d3_opt1"  "$circuit" "$P_COMMON"
     run_strat "$inst" "d3_opt2"  "$circuit" "$P_COMMON"
+    run_strat "$inst" "d1c_opt2" "$circuit" "$P_D1C"
 }
 
-# ====================================================================
-# 验证
-# ====================================================================
+# ---- 验证 ----
 run_verify() {
     local inst=$1
     local eqn="$PREPROCESS_DIR/$inst/$inst.eqn"
@@ -174,8 +156,7 @@ run_verify() {
         poly="${base}.poly"
         [ -f "$poly" ] || continue
         verify_out="${base}_verify.txt"
-        # 跳过已验证的
-        [ -f "$verify_out" ] && grep -q "All outputs PASS" "$verify_out" 2>/dev/null && continue
+        # Re-verify regardless of existing verify file
         echo -e "    verify: $(basename $base)"
         "$VERIFY_EXE" "$eqn" "$aff" "$poly" 2000 --output "$verify_out" &> /dev/null && \
             echo -e "      ${GREEN}✓ PASS${NC}" || \
@@ -194,10 +175,10 @@ echo ""
 
 # ---- 预处理 ----
 echo "--- Preprocessing ---"
-for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc; do
+for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02 hd09 hd11 hd12; do
     mkdir -p "$PREPROCESS_DIR/$inst"
-    "$BUILD_DIR/preprocess" "$EXAMPLES_DIR/${inst}.txt" --out-dir "$PREPROCESS_DIR/$inst" &> /dev/null
-    echo "  $inst ✓"
+    # hd10/hd01/hd02 use .txt, others .txt as well
+    "$BUILD_DIR/preprocess" "$EXAMPLES_DIR/${inst}.txt" --out-dir "$PREPROCESS_DIR/$inst" &> /dev/null && echo "  $inst ✓" || echo "  $inst ✗"
 done
 echo ""
 
@@ -214,18 +195,19 @@ done
 
 # ---- n=32 实例 ----
 echo ""
-echo "=== n=32 实例 (Walsh 引导排列搜索 + 随机满秩) ==="
-for inst in hd10 hd01 hd02; do
+echo "=== n=32 实例 ==="
+for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
     echo ""
     echo ">> $inst"
     run_strat "$inst" "d1a_opt2" "$EXAMPLES_DIR/${inst}.txt" "$P_N32"
+    run_strat "$inst" "d1b_opt2" "$EXAMPLES_DIR/${inst}.txt" ""
     run_strat "$inst" "d3_opt2"  "$EXAMPLES_DIR/${inst}.txt" "$P_N32"
 done
 
 # ---- 验证 ----
 echo ""
 echo "=== 验证 f(x) = g(Mx+b) ==="
-for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc; do
+for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02 hd09 hd11 hd12; do
     run_verify "$inst"
 done
 
@@ -237,12 +219,9 @@ echo "============================================"
 echo -e " ${GREEN}${pass_cnt} passed${NC}, ${RED}${fail_cnt} failed${NC}, ${YELLOW}${skip_cnt} skipped${NC}"
 echo "============================================"
 
-# 打印最佳结果
 echo ""
 echo "--- Best union_T per instance ---"
-printf "  %-12s %-12s %s\n" "Instance" "Best union_T" "Strategy"
-printf "  %-12s %-12s %s\n" "--------" "------------" "--------"
-for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc; do
+for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02 hd09 hd11 hd12; do
     best_ut=999999999
     best_st=0
     best_name=""

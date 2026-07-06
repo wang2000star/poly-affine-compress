@@ -866,6 +866,10 @@ int main(int argc, char** argv) {
     // === Save results ===
     std::string results_dir = save_prefix;  // --save-results DIR
     if (!results_dir.empty()) {
+        // Don't save if all non-affine outputs failed
+        if (any_failed && total_sum_T == 0) {
+            std::cout << "  ** No valid transforms for any nonlinear output — skipping save **\n";
+        } else {
         namespace fs = std::filesystem;
         fs::create_directories(results_dir);
         std::string inst_name = fs::path(path).stem().string();
@@ -990,11 +994,15 @@ int main(int argc, char** argv) {
                     f << circ.outputs[all_outputs[oi]] << ": PASS"
                       << " T=" << r.total_T << " m=" << r.m << "\n";
                 }
-                f << "\nAll outputs PASS\n";
+                if (all_pass)
+                    f << "\nAll outputs PASS\n";
+                else
+                    f << "\nSome outputs FAILED — transform is PARTIAL\n";
                 std::cout << "  Saved: " << base << "_verify.txt\n";
-            }
-        }
-    }
+            }   // if (f)
+        }       // verify scoped block
+        }       // else body
+    }           // if (!results_dir.empty())
     std::cout << "\nTotal time: " << total_sec << " s\n";
     return 0;
 }

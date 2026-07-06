@@ -57,6 +57,8 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/optimize_anf_d3_opt.dir/DependInfo.cmake"
   "CMakeFiles/optimize_anf_d3_opt1.dir/DependInfo.cmake"
   "CMakeFiles/optimize_anf_d3_opt2.dir/DependInfo.cmake"
+  "CMakeFiles/optimize_anf_d1c_opt.dir/DependInfo.cmake"
+  "CMakeFiles/optimize_anf_d1c_opt2.dir/DependInfo.cmake"
   "CMakeFiles/compute_raw_anf.dir/DependInfo.cmake"
   "CMakeFiles/verify_anf.dir/DependInfo.cmake"
   "CMakeFiles/preprocess.dir/DependInfo.cmake"

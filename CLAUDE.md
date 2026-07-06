@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 基本要求
+每一次修改都要进行git同步。
+使用 trash 命令而不是 rm，以便恢复误删文件。
+
 ## Project Overview
 
 布尔函数 ANF（Algebraic Normal Form）简化研究。

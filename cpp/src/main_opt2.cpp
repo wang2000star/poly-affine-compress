@@ -29,8 +29,10 @@
 #include "io.h"
 #include "search.h"
 #include "walsh.h"
+#include "gf2.h"
 #include <iostream>
 #include <fstream>
+#include <random>
 #include <sstream>
 #include <thread>
 #include <algorithm>
@@ -97,8 +99,8 @@ static MbCandidate search_single_output(
         candidates.push_back(cand);
     }
 
-    // Phase 1b: d1c product-based exhaustive b-search
-    if (n <= 20) {
+    // Phase 1b: d1c product-based exhaustive b-search (n ≤ 32, support t ≤ 20)
+    if (n <= 32) {
         int64_t n_words = tt1.n_words;
         // Compute ANF from truth table copy
         TruthTable tc_d1c = tt1;
@@ -144,8 +146,8 @@ static MbCandidate search_single_output(
         }
     }
 
-    // Phase 2: Walsh multi-row (for n ≤ 20)
-    if (n <= 20) {
+    // Phase 2: Walsh correlations (n ≤ 32, skip if walsh-k=0)
+    if (n <= 32 && params.walsh_single_top > 0) {
         auto walsh_vec = compute_walsh_correlations(tt1, n_threads);
         WalshInfo walsh = walsh_vec[0];
 
@@ -156,42 +158,121 @@ static MbCandidate search_single_output(
         });
 
         int top_k = std::min(n, params.walsh_single_top);
-        for (int m_rows = 2; m_rows <= std::min(8, n); m_rows++) {
-            uint32_t M[32] = {0};
-            for (int r = 0; r < m_rows && r < top_k; r++)
-                M[r] = (1u << order[r]);
-            uint64_t b_cand = 0;
-            auto cand = evaluate_Mb(tt1, M, b_cand, m_rows, n_threads);
-            cand.m = m_rows;
-            if (cand.total_T <= raw_T)
-                candidates.push_back(cand);
-        }
 
-        // XOR pairs of top bits
-        for (int i = 0; i < std::min(16, top_k); i++) {
-            for (int j = i + 1; j < std::min(16, top_k); j++) {
+        if (n <= 20) {
+            // Small n: direct evaluate_Mb with m < n (fast consistency check)
+            for (int m_rows = 2; m_rows <= std::min(8, n); m_rows++) {
                 uint32_t M[32] = {0};
-                M[0] = (1u << order[i]) | (1u << order[j]);
+                for (int r = 0; r < m_rows && r < top_k; r++)
+                    M[r] = (1u << order[r]);
                 uint64_t b_cand = 0;
-                auto cand = evaluate_Mb(tt1, M, b_cand, 1, n_threads);
-                cand.m = 1;
+                auto cand = evaluate_Mb(tt1, M, b_cand, m_rows, n_threads);
+                cand.m = m_rows;
                 if (cand.total_T <= raw_T)
                     candidates.push_back(cand);
+            }
+
+            // XOR pairs of top bits (as single combined row)
+            for (int i = 0; i < std::min(16, top_k); i++) {
+                for (int j = i + 1; j < std::min(16, top_k); j++) {
+                    uint32_t M[32] = {0};
+                    M[0] = (1u << order[i]) | (1u << order[j]);
+                    uint64_t b_cand = 0;
+                    auto cand = evaluate_Mb(tt1, M, b_cand, 1, n_threads);
+                    cand.m = 1;
+                    if (cand.total_T <= raw_T)
+                        candidates.push_back(cand);
+                }
+            }
+        } else {
+            // n=21..32: bijective evaluation path (pad permutation rows to full rank)
+            auto eval_padded = [&](const uint32_t* M_in, int m_in, uint64_t b_in) -> MbCandidate {
+                uint32_t M[32] = {0};
+                for (int j = 0; j < m_in; j++) M[j] = M_in[j];
+                int r = m_in;
+                for (int i = 0; i < n && r < n; i++) {
+                    M[r] = (1u << i);
+                    int ra_before = gf2_rank(M, r, n);
+                    int ra_after  = gf2_rank(M, r + 1, n);
+                    if (ra_after > ra_before) r++;
+                    else M[r] = 0;
+                }
+                if (r < n) { MbCandidate bad; bad.total_T = INT64_MAX; return bad; }
+                return evaluate_Mb_bijective(tt1, M, b_in, n, n, n_threads, false);
+            };
+
+            // Single-row Walsh: each top bit as a permutation row, padded to full rank
+            for (int i = 0; i < top_k; i++) {
+                uint32_t M_row[1] = {1u << order[i]};
+                auto c0 = eval_padded(M_row, 1, 0);
+                if (c0.total_T < INT64_MAX && c0.total_T <= raw_T)
+                    candidates.push_back(c0);
+                auto c1 = eval_padded(M_row, 1, 1);
+                if (c1.total_T < INT64_MAX && c1.total_T <= raw_T)
+                    candidates.push_back(c1);
+            }
+
+            // Multi-row progressive: top Walsh bits as separate rows
+            for (int m_rows = 2; m_rows <= std::min(8, n); m_rows++) {
+                uint32_t M[32] = {0};
+                for (int r = 0; r < m_rows && r < top_k; r++)
+                    M[r] = (1u << order[r]);
+                auto c = eval_padded(M, m_rows, 0);
+                if (c.total_T < INT64_MAX && c.total_T <= raw_T)
+                    candidates.push_back(c);
+            }
+
+            // XOR pairs of top bits (as single combined row, padded)
+            for (int i = 0; i < std::min(16, top_k); i++) {
+                for (int j = i + 1; j < std::min(16, top_k); j++) {
+                    uint32_t M[32] = {0};
+                    M[0] = (1u << order[i]) | (1u << order[j]);
+                    auto c = eval_padded(M, 1, 0);
+                    if (c.total_T < INT64_MAX && c.total_T <= raw_T)
+                        candidates.push_back(c);
+                }
             }
         }
     }
 
     // Phase 3: Random candidates
-    for (int i = 0; i < params.n_random; i++) {
-        int m_cand = 1 + (rand() % max_m_local);
-        uint32_t M[32] = {0};
-        for (int r = 0; r < m_cand; r++)
-            M[r] = (uint32_t)(rand() & ((1u << n) - 1));
-        uint64_t b_cand = (uint64_t)(rand() & ((1ULL << m_cand) - 1));
-        auto cand = evaluate_Mb(tt1, M, b_cand, m_cand, n_threads);
-        cand.m = m_cand;
-        if (cand.total_T <= raw_T)
-            candidates.push_back(cand);
+    if (params.n_random > 0) {
+        if (n <= 20) {
+            for (int i = 0; i < params.n_random; i++) {
+                int m_cand = 1 + (rand() % max_m_local);
+                uint32_t M[32] = {0};
+                for (int r = 0; r < m_cand; r++)
+                    M[r] = (uint32_t)(rand() & ((1u << n) - 1));
+                uint64_t b_cand = (uint64_t)(rand() & ((1ULL << m_cand) - 1));
+                auto cand = evaluate_Mb(tt1, M, b_cand, m_cand, n_threads);
+                cand.m = m_cand;
+                if (cand.total_T <= raw_T)
+                    candidates.push_back(cand);
+            }
+        } else {
+            // n=21..32: full-rank random M only (bijective path is much faster)
+            std::mt19937_64 rng_n32(42 + oi);
+            int generated = 0, attempts = 0;
+            const int MAX_ATTEMPTS = params.n_random * 20;
+            while (generated < params.n_random && attempts < MAX_ATTEMPTS) {
+                attempts++;
+                uint32_t M[32] = {0};
+                for (int r = 0; r < n; r++)
+                    for (int i = 0; i < n; i++)
+                        if (rng_n32() & 1) M[r] |= (1u << i);
+                uint64_t b = 0;
+                for (int r = 0; r < n; r++)
+                    if (rng_n32() & 1) b |= (1ULL << r);
+                if (gf2_rank(M, n, n) < n) continue;
+                auto cand = evaluate_Mb(tt1, M, b, n, n_threads);
+                if (cand.total_T < INT64_MAX && cand.total_T <= raw_T) {
+                    candidates.push_back(cand);
+                    generated++;
+                } else {
+                    generated++; // count even if not better, to limit runtime
+                }
+            }
+        }
     }
 
     // Sort by total_T ascending
@@ -476,7 +557,10 @@ int main(int argc, char** argv) {
 #ifndef STRATEGY_TAG
 #define STRATEGY_TAG "opt2"
 #endif
-        std::string tag = "_d3_" + std::string(STRATEGY_TAG);
+#ifndef DIRECTION_TAG
+#define DIRECTION_TAG "d3"
+#endif
+        std::string tag = std::string("_") + DIRECTION_TAG + "_" + std::string(STRATEGY_TAG);
         std::string prefix = dir + "/" + inst_name + tag;
 
         // ---- .affine: s × (n+1) matrix [M | b] ----
