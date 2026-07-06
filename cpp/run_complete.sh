@@ -22,13 +22,13 @@ PREPROCESS_DIR="$SCRIPT_DIR/preprocessed"
 MODE="${1:-test}"
 
 # Strategy timeout per run (seconds). Override: TIMEOUT=1800 ./run_complete.sh --full
-TIMEOUT="${TIMEOUT:-600}"
+TIMEOUT="${TIMEOUT:-3600}"
 
 # ---- 参数集 ----
 if [ "$MODE" = "--full" ]; then
     P_COMMON="--random 10000 --walsh-k 10000 --hill-climb 10000"
     P_N32="--random 10000 --walsh-k 10000 --n32-random 500 --hill-climb 10000"
-    P_D1A_OPT2="--random 10000 --walsh-k 10000 --hill-climb 10000 --max-m 12"
+    P_D1A_OPT2="--random 5000 --walsh-k 5000 --hill-climb 5000 --max-m 12"
     P_D2="--random 10000 --hill-climb 10000 --max-m 6"
     P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
 elif [ "$MODE" = "--list" ]; then
