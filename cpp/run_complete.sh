@@ -67,7 +67,6 @@ elif [ "$MODE" = "--update-md" ]; then
     echo "=== Regenerating results.md ==="
     python3 "$SCRIPT_DIR/update_results.py"
     exit $?
-fi
 else
     # 快速测试
     P_COMMON="--random 20 --walsh-k 10 --hill-climb 2"
