@@ -209,21 +209,19 @@ static void write_stats(const std::string& path,
     int64_t sum_T = 0;
     int max_deg = 0;
     for (int oi = 0; oi < k; oi++) {
-        int t = results[oi].g_all.T();
-        sum_T += t;
-        if (t > 0) {
+        sum_T += results[oi].g_all.T_nonlinear();
+        if (results[oi].g_all.T() > 0) {
             for (auto& [mask, v] : results[oi].g_all.terms()) {
-                if (v) {
-                    int deg = __builtin_popcountll(mask);
-                    if (deg > max_deg) max_deg = deg;
-                }
+                int deg = __builtin_popcountll(mask);
+                if (deg > max_deg) max_deg = deg;
             }
         }
     }
 
-    // Each output has disjoint z, so sum_T == union_T
-    f << n << "\n" << k << "\n" << sum_T << "\n" << sum_T << "\n" << max_deg << "\n";
-    std::cout << "  Saved: " << path << " (sum_T=" << sum_T << ")\n";
+    // Each output has disjoint z → no cross-output overlap, union_T == sum_T
+    int64_t union_T = sum_T;
+    f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
+    std::cout << "  Saved: " << path << " (sum_T=" << sum_T << ", union_T=" << union_T << ")\n";
 }
 
 // ====================================================================

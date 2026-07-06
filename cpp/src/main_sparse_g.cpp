@@ -33,6 +33,8 @@
 #include "moebius.h"
 #include "anf.h"
 #include "io.h"
+#include <set>
+#include <vector>
 #include "walsh.h"
 #include <iostream>
 #include <fstream>
@@ -911,34 +913,44 @@ int main(int argc, char** argv) {
         }
     }
 
-    // Union T (skip affine outputs)
-    int max_m_all = 0;
-    for (int oi = 0; oi < k; oi++)
-        if (!results[oi].is_affine && results[oi].m > max_m_all) max_m_all = results[oi].m;
-
-    int64_t union_T = total_sum_T;
-    if (max_m_all <= 20) {
-        int64_t n_words_union = (max_m_all < 6) ? 1 : (int64_t(1) << (max_m_all - 6));
-        std::vector<uint64_t> union_data(std::max(int64_t(1), n_words_union), 0);
-
-        for (int oi = 0; oi < k; oi++) {
-            if (results[oi].is_affine) continue;
-            if (results[oi].m <= 0 || results[oi].raw_anf_coeffs.empty()) continue;
-            int m_out = results[oi].m;
-            int64_t nw = (m_out < 6) ? 1 : (int64_t(1) << (m_out - 6));
-            std::vector<uint64_t> anf(results[oi].raw_anf_coeffs.begin(),
-                                      results[oi].raw_anf_coeffs.begin() + nw);
-            if (nw < (int64_t)union_data.size())
-                anf.resize(union_data.size(), 0);
-            for (size_t w = 0; w < union_data.size(); w++)
-                union_data[w] |= anf[w];
-        }
-
-        union_T = 0;
-        for (size_t w = 0; w < union_data.size(); w++)
-            union_T += __builtin_popcountll(union_data[w]);
-        std::cout << "  Union T = " << union_T << "\n";
+    // Compute sum_T (deg≥2) and union_T from shared z-space (per-output disjoint z)
+    int64_t sum_T_d2 = 0;
+    int max_deg = 0;
+    // Compute per-output z-offsets
+    std::vector<int> z_off_union(k, 0);
+    int s_union = 0;
+    for (int oi = 0; oi < k; oi++) {
+        z_off_union[oi] = s_union;
+        if (!results[oi].is_affine && results[oi].m > 0)
+            s_union += results[oi].m;
     }
+    std::set<std::vector<int>> shared_terms_union;
+    for (int oi = 0; oi < k; oi++) {
+        auto& r = results[oi];
+        if (r.is_affine || r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
+        int off = z_off_union[oi];
+        int64_t n_z = int64_t(1) << r.m;
+        for (int64_t zi = 0; zi < n_z; zi++) {
+            if ((r.raw_anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                int deg = __builtin_popcountll(zi);
+                if (deg > max_deg) max_deg = deg;
+                if (deg >= 2) {
+                    sum_T_d2++;
+                    std::vector<int> svars;
+                    uint64_t rem = (uint64_t)zi;
+                    while (rem) {
+                        int j = __builtin_ctzll(rem);
+                        rem &= rem - 1;
+                        svars.push_back(off + j);
+                    }
+                    shared_terms_union.insert(std::move(svars));
+                }
+            }
+        }
+    }
+    int64_t union_T = (int64_t)shared_terms_union.size();
+    std::cout << "  Sum T = " << sum_T_d2 << "\n";
+    std::cout << "  Union T = " << union_T << "\n";
 
     // Save results
     if (!save_prefix.empty()) {
@@ -1049,31 +1061,60 @@ int main(int argc, char** argv) {
             }
         }
 
-        // ---- _stats.txt: 5-line numeric (from raw ANF) ----
+        // ---- _stats.txt: 5-line numeric ----
         {
             int64_t sum_T = 0;
             int max_deg = 0;
+            // Compute per-output z-offsets for shared-space union
+            std::vector<int> z_off(k, 0);
+            int s_tot = 0;
+            std::set<std::vector<int>> shared_terms;
+            for (int oi = 0; oi < k; oi++) {
+                auto& r = results[oi];
+                if (!r.is_affine && r.m > 0 && !r.raw_anf_coeffs.empty()) {
+                    z_off[oi] = s_tot;
+                    s_tot += r.m;
+                } else {
+                    z_off[oi] = s_tot;
+                }
+            }
             for (int oi = 0; oi < k; oi++) {
                 auto& r = results[oi];
                 if (r.is_affine) {
-                    if (r.affine_b) sum_T++;
+                    if (r.affine_b) {
+                        // constant-1 term: deg=0, skip for sum_T/union_T but track max_deg
+                        if (0 > max_deg) max_deg = 0;
+                    }
                     continue;
                 }
                 if (r.m <= 0 || r.raw_anf_coeffs.empty()) continue;
+                int off = z_off[oi];
                 int64_t n_z = int64_t(1) << r.m;
                 for (int64_t zi = 0; zi < n_z; zi++) {
                     if ((r.raw_anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
-                        sum_T++;
                         int deg = __builtin_popcountll(zi);
                         if (deg > max_deg) max_deg = deg;
+                        if (deg >= 2) {
+                            sum_T++;
+                            std::vector<int> svars;
+                            uint64_t rem = (uint64_t)zi;
+                            while (rem) {
+                                int j = __builtin_ctzll(rem);
+                                rem &= rem - 1;
+                                svars.push_back(off + j);
+                            }
+                            shared_terms.insert(std::move(svars));
+                        }
                     }
                 }
             }
-            // For per-output disjoint z, union_T == sum_T
+            // For per-output disjoint z (opt2), union_T = unique deg≥2 in shared space
+            int64_t union_T = (int64_t)shared_terms.size();
             std::ofstream f(base + "_stats.txt");
             if (f) {
                 f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
-                std::cout << "  Saved: " << base << "_stats.txt (sum_T=" << sum_T << ")\n";
+                std::cout << "  Saved: " << base << "_stats.txt (sum_T=" << sum_T
+                          << ", union_T=" << union_T << ")\n";
             }
         }
 

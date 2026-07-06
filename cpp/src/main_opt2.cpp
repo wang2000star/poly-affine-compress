@@ -523,6 +523,7 @@ int main(int argc, char** argv) {
     std::cout << "  Sum T = " << result.sum_T << "\n";
     std::cout << "  Union T = " << result.union_T << "\n";
 
+
     // ---- Save results ----
     if (!save_prefix.empty()) {
         std::string inst_name = std::filesystem::path(path).stem().string();

@@ -494,19 +494,25 @@ static std::optional<RawANFResult> compute_raw_anf(
         std::cout << "  Saved: " << T_path << "\n";
     }
 
-    // Union T: OR all arrays then popcount
-    // For n ≤ 24: exact (needs ≤ 256 MB bitmap)
-    // For n = 25..32: exact (OR in-place on one array, needs 512 MB peak)
+    // Union T: OR all arrays then count deg≥2 only
     if (n_out == 1) {
         result.union_T = result.sum_T;
     } else {
-        // OR all but first into first, then popcount
         for (int oi = 1; oi < n_out; oi++)
             for (int w = 0; w < words_per_output; w++)
                 tts[0][w] |= tts[oi][w];
+        // count_T equivalent: exclude constant and deg-1 terms
         result.union_T = 0;
-        for (auto w : tts[0])
-            result.union_T += __builtin_popcountll(w);
+        for (int64_t w = 0; w < (int64_t)words_per_output; w++) {
+            uint64_t val = tts[0][w];
+            if (val == 0) continue;
+            if (w == 0) {
+                val &= ~0x100010117ULL;  // exclude const (bit 0) + deg-1 (bits 1,2,4,8,16,32)
+            } else if ((w & (w - 1)) == 0) {
+                val &= ~1ULL;  // power-of-2 word: bit 0 is deg-1 for var (6+log2(w))
+            }
+            result.union_T += __builtin_popcountll(val);
+        }
         std::cout << "  Union T = " << result.union_T << "\n";
     }
 

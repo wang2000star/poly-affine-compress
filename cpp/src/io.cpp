@@ -77,19 +77,6 @@ void save_raw_anf(const TruthTable& tt, const Circuit& circ,
 //  Save raw stats — {inst}_raw_stats.txt (5-line numeric)
 // ============================================================
 
-static int64_t count_union_T(const TruthTable& tt) {
-    if (tt.n_outputs == 0) return 0;
-    int64_t n_words = tt.n_words;
-    int64_t union_T = 0;
-    for (int64_t w = 0; w < n_words; w++) {
-        uint64_t or_val = 0;
-        for (int oi = 0; oi < tt.n_outputs; oi++)
-            or_val |= tt.tt[oi][w];
-        union_T += __builtin_popcountll(or_val);
-    }
-    return union_T;
-}
-
 void save_raw_T(const TruthTable& tt, const Circuit& circ,
                 const std::vector<int>& output_indices,
                 const std::string& fname)
@@ -100,15 +87,20 @@ void save_raw_T(const TruthTable& tt, const Circuit& circ,
     int m = tt.n;
     int k = tt.n_outputs;
     int64_t n_words = tt.n_words;
+    // tt is assumed to be Möbius-transformed (ANF coefficients)
 
     int64_t sum_T = 0;
     int max_deg = 0;
+    std::vector<uint64_t> union_anf(n_words, 0);
     for (int oi = 0; oi < k; oi++) {
-        std::vector<uint64_t> anf(tt.tt[oi]);
-        moebius_packed(anf.data(), m);
-        sum_T += count_T(anf.data(), m);
+        // tt is already ANF — count_T correctly filters deg≥2
+        sum_T += count_T(tt.tt[oi].data(), m);
+        // OR into union_anf for unique ANF terms
+        for (int64_t w = 0; w < n_words; w++)
+            union_anf[w] |= tt.tt[oi][w];
+        // Find max degree
         for (int64_t w = 0; w < n_words; w++) {
-            uint64_t word = anf[w];
+            uint64_t word = tt.tt[oi][w];
             while (word) {
                 int bit = __builtin_ctzll(word);
                 word &= word - 1;
@@ -119,8 +111,8 @@ void save_raw_T(const TruthTable& tt, const Circuit& circ,
         }
     }
 
-    // Raw ANF union = union of original truth tables (pre-Möbius)
-    int64_t union_T = count_union_T(tt);
+    // Union = unique deg≥2 ANF terms across all outputs in x-space
+    int64_t union_T = count_T(union_anf.data(), m);
 
     // 5-line pure numeric
     f << tt.n << "\n";

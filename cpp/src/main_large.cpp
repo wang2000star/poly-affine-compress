@@ -28,6 +28,8 @@
 #include <fstream>
 #include <sstream>
 #include <thread>
+#include <set>
+#include <vector>
 #include <algorithm>
 #include <cstring>
 #include <cstdlib>
@@ -820,7 +822,6 @@ int main(int argc, char** argv) {
     auto t_end = std::chrono::steady_clock::now();
     double total_sec = std::chrono::duration<double>(t_end - t_start).count();
     std::cout << "\n=== Results ===\n";
-    std::cout << "  Sum T = " << total_sum_T << "\n";
     int n_affine = 0;
     for (int oi = 0; oi < k; oi++) {
         if (results[oi].is_affine) {
@@ -833,38 +834,49 @@ int main(int argc, char** argv) {
                       << " m=" << results[oi].m << "\n";
         }
     }
-    // Compute union T (only for small m, skip affine outputs)
-    int max_m_all = 0;
-    for (int oi = 0; oi < k; oi++)
-        if (!results[oi].is_affine && results[oi].m > max_m_all)
-            max_m_all = results[oi].m;
-    int64_t union_T = total_sum_T; // default (already excludes affine)
-    if (max_m_all <= 20) {
-        // Compute union of ANF monomials across outputs
-        int64_t n_words_union = (max_m_all < 6) ? 1 : (int64_t(1) << (max_m_all - 6));
-        std::vector<uint64_t> union_data(
-            std::max(int64_t(1), n_words_union), 0);
-        for (int oi = 0; oi < k; oi++) {
-            if (results[oi].is_affine) continue;
-            if (results[oi].m <= 0 || results[oi].anf_coeffs.empty()) continue;
-            int m_out = results[oi].m;
-            int64_t nw = (m_out < 6) ? 1 : (int64_t(1) << (m_out - 6));
-            std::vector<uint64_t> anf(results[oi].anf_coeffs.begin(),
-                                      results[oi].anf_coeffs.begin() + nw);
-            if (nw < (int64_t)union_data.size())
-                anf.resize(union_data.size(), 0);
-            for (size_t w = 0; w < union_data.size(); w++)
-                union_data[w] |= anf[w];
-        }
-        union_T = 0;
-        for (size_t w = 0; w < union_data.size(); w++)
-            union_T += __builtin_popcountll(union_data[w]);
-        // Use count_T to exclude constant and degree-1 terms
-        union_T = count_T(union_data.data(), max_m_all);
-        std::cout << "  Union T = " << union_T;
-        if (n_affine > 0) std::cout << " (" << n_affine << " affine outputs not counted)";
-        std::cout << "\n";
+    // Compute sum_T (deg≥2 only), union_T, max_deg from shared z-space poly data.
+    // For opt2 (per-output transforms), M is block-diagonal: each output's z variables
+    // occupy disjoint ranges, so union_T is computed by deduplicating terms in shared space.
+    // First compute per-output z-offsets in shared space
+    std::vector<int> z_offsets_union(k, 0);
+    int s_union = 0;
+    for (int oi = 0; oi < k; oi++) {
+        z_offsets_union[oi] = s_union;
+        if (!results[oi].is_affine && results[oi].m > 0)
+            s_union += results[oi].m;
     }
+
+    int64_t sum_T_d2 = 0;   // deg≥2 only
+    int max_deg = 0;
+    std::set<std::vector<int>> shared_terms; // unique deg≥2 terms (variable indices in shared space)
+    for (int oi = 0; oi < k; oi++) {
+        auto& r = results[oi];
+        if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
+        int off = z_offsets_union[oi];
+        int64_t n_z = int64_t(1) << r.m;
+        for (int64_t zi = 0; zi < n_z; zi++) {
+            if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
+                int deg = __builtin_popcountll(zi);
+                if (deg > max_deg) max_deg = deg;
+                if (deg >= 2) {
+                    sum_T_d2++;
+                    std::vector<int> svars;
+                    uint64_t rem = (uint64_t)zi;
+                    while (rem) {
+                        int j = __builtin_ctzll(rem);
+                        rem &= rem - 1;
+                        svars.push_back(off + j);
+                    }
+                    shared_terms.insert(std::move(svars));
+                }
+            }
+        }
+    }
+    int64_t union_T = (int64_t)shared_terms.size();
+    std::cout << "  Sum T = " << sum_T_d2 << "\n";
+    std::cout << "  Union T = " << union_T;
+    if (n_affine > 0) std::cout << " (" << n_affine << " affine outputs not counted)";
+    std::cout << "\n";
     // === Save results ===
     std::string results_dir = save_prefix;  // --save-results DIR
     if (!results_dir.empty()) {
@@ -956,23 +968,9 @@ int main(int argc, char** argv) {
         {
             std::ofstream f(base + "_stats.txt");
             if (f) {
-                int64_t sum_T = total_sum_T;
-                int max_deg = 0;
-                // Recompute max_deg across all outputs
-                for (int oi = 0; oi < k; oi++) {
-                    auto& r = results[oi];
-                    if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
-                    int64_t n_z = int64_t(1) << r.m;
-                    for (int64_t zi = 0; zi < n_z; zi++) {
-                        if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
-                            int deg = __builtin_popcountll(zi);
-                            if (deg > max_deg) max_deg = deg;
-                        }
-                    }
-                }
-                f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
+                f << n << "\n" << k << "\n" << sum_T_d2 << "\n" << union_T << "\n" << max_deg << "\n";
                 std::cout << "  Saved: " << base << "_stats.txt (n=" << n
-                          << ", k=" << k << ", sum_T=" << sum_T << ")\n";
+                          << ", k=" << k << ", sum_T=" << sum_T_d2 << ", union_T=" << union_T << ")\n";
             }
         }
         // ---- Write _verify.txt ----
