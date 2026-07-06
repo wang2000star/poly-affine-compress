@@ -21,6 +21,9 @@ PREPROCESS_DIR="$SCRIPT_DIR/preprocessed"
 
 MODE="${1:-test}"
 
+# Strategy timeout per run (seconds). Override: TIMEOUT=1800 ./run_complete.sh --full
+TIMEOUT="${TIMEOUT:-600}"
+
 # ---- 参数集 ----
 if [ "$MODE" = "--full" ]; then
     P_COMMON="--random 10000 --walsh-k 10000 --hill-climb 10000"
@@ -109,9 +112,9 @@ run_strat() {
 
     set +e
     if [ "$is_gb" -eq 1 ]; then
-        timeout 600 "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &> "$logfile"
+        timeout "$TIMEOUT" "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &> "$logfile"
     else
-        timeout 600 "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &> "$logfile"
+        timeout "$TIMEOUT" "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &> "$logfile"
     fi
     local rc=$?
     set -e
