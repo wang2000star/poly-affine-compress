@@ -23,10 +23,10 @@ MODE="${1:-test}"
 
 # ---- 参数集 ----
 if [ "$MODE" = "--full" ]; then
-    P_COMMON="--random 500 --walsh-k 40 --hill-climb 30"
-    P_N32="--random 500 --walsh-k 40 --n32-random 50 --hill-climb 5"
-    P_D1A_OPT2="--random 500 --walsh-k 40 --hill-climb 10 --max-m 12"
-    P_D2="--random 300 --hill-climb 10 --max-m 6"
+    P_COMMON="--random 10000 --walsh-k 10000 --hill-climb 10000"
+    P_N32="--random 10000 --walsh-k 10000 --n32-random 500 --hill-climb 10000"
+    P_D1A_OPT2="--random 10000 --walsh-k 10000 --hill-climb 10000 --max-m 12"
+    P_D2="--random 10000 --hill-climb 10000 --max-m 6"
     P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
 elif [ "$MODE" = "--list" ]; then
     echo "=== Instance × Strategy Matrix ==="
