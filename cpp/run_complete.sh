@@ -22,14 +22,19 @@ PREPROCESS_DIR="$SCRIPT_DIR/preprocessed"
 MODE="${1:-test}"
 
 # Strategy timeout per run (seconds). Override: TIMEOUT=1800 ./run_complete.sh --full
-TIMEOUT="${TIMEOUT:-3600}"
+TIMEOUT="${TIMEOUT:-86400}"
 
 # ---- 参数集 ----
 if [ "$MODE" = "--full" ]; then
-    P_COMMON="--random 10000 --hill-climb 10000"
-    P_N32="--random 10000 --hill-climb 10000 --n32-random 500"
-    P_D1A_OPT2="--random 5000 --hill-climb 5000 --max-m 12"
-    P_D2="--random 10000 --hill-climb 10000 --max-m 6"
+    # 共享/单输出搜索（跑一次）→ 最大力度
+    P_COMMON="--random 100000 --hill-climb 100000"
+    # n=32 实例（32 输出中仅 2-3 非线性，稀疏评估较慢）
+    P_N32="--random 50000 --hill-climb 50000 --n32-random 2000"
+    # n≤16 多输出（每输出独立搜索，k× 时间）
+    P_D1A_OPT2="--random 50000 --hill-climb 50000 --max-m 12"
+    # m≤6 枚举极快
+    P_D2="--random 100000 --hill-climb 100000 --max-m 6"
+    # 补码搜索只做 Phase 1b，不需要随机/爬山
     P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
 elif [ "$MODE" = "--list" ]; then
     echo "=== Instance × Strategy Matrix ==="
