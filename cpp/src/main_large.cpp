@@ -347,8 +347,8 @@ static Candidate search_single_output_large(
         if (a.valid != b.valid) return a.valid;
         return a.T < b.T;
     });
-    int K = std::min(16, n);
-    if (walsh_k > 0 && walsh_k < K) K = walsh_k;
+    int K = std::min(walsh_k, n);
+    if (K < 1) K = 1;
     // ============================================================
     // Phase 2: Systematic C(K, m) enumeration for m = 2..6
     //
@@ -636,7 +636,7 @@ int main(int argc, char** argv) {
         std::cerr << "  --max-m N        max z variables per output (default 20)\n";
         std::cerr << "  --random N       Phase 6 random fallback count (default 100)\n";
         std::cerr << "  --hill-climb N   Phase 5 hill climb iterations (default 10, only m≤8)\n";
-        std::cerr << "  --walsh-k N      top K inputs for Phase 2 C(K,m) enum (default 40, capped 16)\n";
+        std::cerr << "  --walsh-k N      top K inputs for Phase 2 C(K,m) enum (default 20)\n";
         std::cerr << "  --save-results PREFIX  save transform + T files\n";
         std::cerr << "  --anf-out PREFIX  save ANF polynomials to single file\n";
         std::cerr << "  --verify-out PREFIX  save verification results\n";
@@ -668,7 +668,7 @@ int main(int argc, char** argv) {
     int max_m = 20;
     int n_random = 300;       // Phase 6 fallback (also supplements C(K,m) for larger m)
     int n_hill_climb = 10;    // Phase 5, only applied when m ≤ 8
-    int walsh_k = 40;         // capped at 16 internally for K (top inputs)
+    int walsh_k = 20;         // top-K inputs for Phase 2 C(K,m) enum (default 20, pre-16 was hardcoded 16)
     std::string save_prefix;
     std::string anf_prefix;
     std::string verify_prefix;
