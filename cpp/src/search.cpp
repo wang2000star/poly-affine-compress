@@ -508,9 +508,7 @@ static MbCandidate evaluate_pool_rowset(
         moebius_packed(raw.data(), m);
     }
     cand.total_T = total_T;
-    cand.union_T = 0;
-    for (int64_t w = 0; w < n_words_g; w++)
-        cand.union_T += __builtin_popcountll(union_anf[w]);
+    cand.union_T = count_T(union_anf.data(), m);
     return cand;
 }
 
@@ -743,9 +741,7 @@ static MbCandidate evaluate_with_pair_filter(
         moebius_packed(raw.data(), m);
     }
     cand.total_T = total_T;
-    cand.union_T = 0;
-    for (int64_t w = 0; w < n_words_g; w++)
-        cand.union_T += __builtin_popcountll(union_anf[w]);
+    cand.union_T = count_T(union_anf.data(), m);
     return cand;
 }
 

@@ -423,133 +423,107 @@ int main(int argc, char** argv) {
         std::cout << "    m=" << cand.m << " T=" << cand.total_T << "\n";
     }
 
-    // Phase 3: Build merged transform and compute union T
-    std::cout << "\nPhase 3: Merging transforms (total m=" << result.m << ")\n";
-    result.M_rows.resize(result.m, 0);
-    result.b = 0;
-    int offset = 0;
+    // Phase 3: Build merged transform, deduplicate rows, remap ANF
+    std::cout << "\nPhase 3: Merging and deduplicating transforms\n";
+
+    // Step 1: Build sig_to_idx mapping from all per-output (M_row, b_bit)
+    std::map<std::pair<uint32_t, int>, int> sig_to_idx;
+    std::vector<std::vector<int>> out_var_map(k);
+    int original_m = result.m;
+
     for (int oi = 0; oi < k; oi++) {
         int mi = per_output[oi].m;
+        out_var_map[oi].resize(mi);
         for (int r = 0; r < mi; r++) {
-            result.M_rows[offset + r] = per_output[oi].M_rows[r];
+            uint32_t M_row = per_output[oi].M_rows[r];
+            int b_bit = (per_output[oi].b >> r) & 1;
+            auto key = std::make_pair(M_row, b_bit);
+            auto it = sig_to_idx.find(key);
+            if (it == sig_to_idx.end())
+                it = sig_to_idx.insert({key, (int)sig_to_idx.size()}).first;
+            out_var_map[oi][r] = it->second;
         }
-        uint64_t bi = per_output[oi].b;
-        for (int r = 0; r < mi; r++) {
-            if ((bi >> r) & 1)
-                result.b |= (1ULL << (offset + r));
+    }
+    int shared_m = (int)sig_to_idx.size();
+
+    // Step 2: Build deduplicated M and b
+    result.M_rows.resize(shared_m);
+    result.b = 0;
+    for (auto& [key, idx] : sig_to_idx) {
+        result.M_rows[idx] = key.first;
+        if (key.second)
+            result.b |= (1ULL << idx);
+    }
+    result.m = shared_m;
+
+    // Step 3: For each output, evaluate and remap ANF into shared z-space
+    // Store ALL remapped terms for .poly, but only count deg≥2 for sum_T/union_T
+    std::vector<std::vector<std::vector<int>>> out_all_terms(k);
+    std::set<std::vector<int>> shared_terms;    // unique deg≥2 across all outputs
+    std::vector<int> out_deg2_count(k, 0);      // per-output deg≥2 counts
+    int max_deg = 0;
+
+    for (int oi = 0; oi < k; oi++) {
+        const auto& cand = per_output[oi];
+        if (cand.m == 0) continue;
+
+        TruthTable tt_oi;
+        tt_oi.n = n;
+        tt_oi.n_outputs = 1;
+        tt_oi.n_words = tt.n_words;
+        tt_oi.tt = {tt.tt[oi]};
+
+        auto ev = evaluate_Mb(tt_oi, cand.M_rows.data(), cand.b,
+                              cand.m, params.n_threads, true);
+        if (ev.g_tt_raw.empty()) continue;
+
+        std::vector<uint64_t> anf(ev.g_tt_raw[0]);
+        moebius_packed(anf.data(), cand.m);
+
+        int64_t nw = (cand.m < 6) ? 1 : (int64_t(1) << (cand.m - 6));
+        for (int64_t w = 0; w < nw; w++) {
+            uint64_t word = anf[w];
+            while (word) {
+                int bit_idx = __builtin_ctzll(word);
+                word &= word - 1;
+                int mono_mask = (int)((w << 6) | bit_idx);
+
+                std::vector<int> svars;
+                int rem = mono_mask;
+                while (rem) {
+                    int j = __builtin_ctzll(rem);
+                    rem &= rem - 1;
+                    if (j < (int)out_var_map[oi].size())
+                        svars.push_back(out_var_map[oi][j]);
+                }
+                std::sort(svars.begin(), svars.end());
+                int deg = (int)svars.size();
+                if (deg > max_deg) max_deg = deg;
+
+                // Store ALL terms for .poly
+                out_all_terms[oi].push_back(svars);
+
+                // Only deg≥2 counts for sum_T / union_T
+                if (deg >= 2) {
+                    out_deg2_count[oi]++;
+                    shared_terms.insert(std::move(svars));
+                }
+            }
         }
-        offset += mi;
     }
 
+    // sum_T = sum of per-output unique deg≥2 terms
+    // union_T = unique deg≥2 terms across all outputs
     result.sum_T = 0;
     for (int oi = 0; oi < k; oi++)
-        result.sum_T += per_output[oi].total_T;
+        result.sum_T += out_deg2_count[oi];
+    result.union_T = (int64_t)shared_terms.size();
 
-    if (result.m <= 20) {
-        // Small m: full merged evaluation
-        TruthTable tt_combined = tt;
-        auto merged = evaluate_Mb(tt_combined, result.M_rows.data(), result.b,
-                                   result.m, params.n_threads, true);
-        result.g_tt_raw = merged.g_tt_raw;
-
-        int64_t n_words_g = (result.m < 6) ? 1 : (int64_t(1) << (result.m - 6));
-        std::vector<uint64_t> union_data(n_words_g, 0);
-        for (int oi = 0; oi < k; oi++) {
-            std::vector<uint64_t> anf(result.g_tt_raw[oi]);
-            moebius_packed(anf.data(), result.m);
-            for (int64_t w = 0; w < n_words_g; w++)
-                union_data[w] |= anf[w];
-        }
-        result.union_T = 0;
-        for (int64_t w = 0; w < n_words_g; w++)
-            result.union_T += __builtin_popcountll(union_data[w]);
-    } else {
-        // Large m: per-output z-variables are disjoint → union_T = sum_T
-        result.union_T = result.sum_T;
-    }
-
+    std::cout << "  Dedup: " << original_m << " → " << shared_m << " z variables\n";
     std::cout << "  Sum T = " << result.sum_T << "\n";
     std::cout << "  Union T = " << result.union_T << "\n";
 
-    // Phase 3c: Shared z-space union_T via per-output row deduplication
-    // If two outputs use the same (M_row, b_bit), map to same shared z variable
-    {
-        // Step 1: Build mapping from (M_row, b_bit) → shared variable index
-        std::map<std::pair<uint32_t, int>, int> sig_to_idx;
-        std::vector<std::vector<int>> out_var_map(k);
-
-        for (int oi = 0; oi < k; oi++) {
-            int mi = per_output[oi].m;
-            out_var_map[oi].resize(mi);
-            for (int r = 0; r < mi; r++) {
-                uint32_t M_row = per_output[oi].M_rows[r];
-                int b_bit = (per_output[oi].b >> r) & 1;
-                auto key = std::make_pair(M_row, b_bit);
-                auto it = sig_to_idx.find(key);
-                if (it == sig_to_idx.end())
-                    it = sig_to_idx.insert({key, (int)sig_to_idx.size()}).first;
-                out_var_map[oi][r] = it->second;
-            }
-        }
-
-        int shared_m = (int)sig_to_idx.size();
-        // Phase 3c: Shared z-space union_T
-        // Compute ANF in shared z-space and count unique remapped monomials.
-        // Union_T counts all terms (including degree-1) to match existing
-        // union_T convention (see Phase 3 small-m union_T computation).
-        {
-            std::set<std::vector<int>> shared_terms;
-
-            for (int oi = 0; oi < k; oi++) {
-                const auto& cand = per_output[oi];
-                if (cand.m == 0) continue;
-
-                TruthTable tt_oi;
-                tt_oi.n = n;
-                tt_oi.n_outputs = 1;
-                tt_oi.n_words = tt.n_words;
-                tt_oi.tt = {tt.tt[oi]};
-
-                auto ev = evaluate_Mb(tt_oi, cand.M_rows.data(), cand.b,
-                                      cand.m, params.n_threads, true);
-                if (ev.g_tt_raw.empty()) continue;
-
-                std::vector<uint64_t> anf(ev.g_tt_raw[0]);
-                moebius_packed(anf.data(), cand.m);
-
-                int64_t nw = (cand.m < 6) ? 1 : (int64_t(1) << (cand.m - 6));
-                for (int64_t w = 0; w < nw; w++) {
-                    uint64_t word = anf[w];
-                    while (word) {
-                        int bit_idx = __builtin_ctzll(word);
-                        word &= word - 1;
-                        int mono_mask = (int)((w << 6) | bit_idx);
-
-                        std::vector<int> svars;
-                        int rem = mono_mask;
-                        while (rem) {
-                            int j = __builtin_ctzll(rem);
-                            rem &= rem - 1;
-                            if (j < (int)out_var_map[oi].size())
-                                svars.push_back(out_var_map[oi][j]);
-                        }
-                        std::sort(svars.begin(), svars.end());
-                        shared_terms.insert(std::move(svars));
-                    }
-                }
-            }
-
-            int64_t shared_union_T = (int64_t)shared_terms.size();
-            if (shared_union_T < result.union_T) {
-                int64_t old_ut = result.union_T;
-                result.union_T = shared_union_T;
-                std::cout << "  Shared-z union T = " << shared_union_T
-                          << " (was " << old_ut << ")\n";
-            }
-        }
-    }
-
-    // Save results
+    // ---- Save results ----
     if (!save_prefix.empty()) {
         std::string inst_name = std::filesystem::path(path).stem().string();
         std::string dir = save_prefix;
@@ -563,122 +537,56 @@ int main(int argc, char** argv) {
         std::string tag = std::string("_") + DIRECTION_TAG + "_" + std::string(STRATEGY_TAG);
         std::string prefix = dir + "/" + inst_name + tag;
 
-        // ---- .affine: s × (n+1) matrix [M | b] ----
+        // ---- .affine: s × (n+1) matrix [M | b] (deduplicated) ----
         {
-            int s = result.m;
             std::ofstream f(prefix + ".affine");
             if (f) {
-                f << s << "\n" << s << " " << (n + 1) << "\n";
-                int bit = 0;
-                for (int oi = 0; oi < k; oi++) {
-                    for (int r = 0; r < per_output[oi].m; r++) {
-                        for (int c = 0; c < n; c++) {
-                            if (c > 0) f << " ";
-                            f << ((per_output[oi].M_rows[r] >> c) & 1);
-                        }
-                        f << " " << ((per_output[oi].b >> r) & 1) << "\n";
-                        bit++;
+                f << shared_m << "\n" << shared_m << " " << (n + 1) << "\n";
+                for (int r = 0; r < shared_m; r++) {
+                    for (int c = 0; c < n; c++) {
+                        if (c > 0) f << " ";
+                        f << ((result.M_rows[r] >> c) & 1);
                     }
+                    f << " " << ((result.b >> r) & 1) << "\n";
                 }
-                std::cout << "  Saved: " << prefix << ".affine (s=" << s << ")\n";
+                std::cout << "  Saved: " << prefix << ".affine (s=" << shared_m << ")\n";
             }
         }
 
-        // ---- .poly: per-output ANF in shared z-space ----
-        int max_deg = 0;
-        std::vector<std::vector<uint64_t>> per_output_anf(k);
-        if (!result.g_tt_raw.empty()) {
-            save_opt_expr(result.g_tt_raw, circ, output_indices, result.m, prefix + ".poly");
-            // Compute max_deg from merged g_tt_raw
-            int64_t n_words = int64_t(1) << (result.m < 6 ? 0 : result.m - 6);
-            for (int oi = 0; oi < k; oi++) {
-                std::vector<uint64_t> anf(result.g_tt_raw[oi]);
-                if (result.m > 0) moebius_packed(anf.data(), result.m);
-                for (int64_t w = 0; w < n_words; w++) {
-                    uint64_t word = anf[w];
-                    while (word) {
-                        int bit = __builtin_ctzll(word);
-                        word &= word - 1;
-                        int deg = __builtin_popcountll((w << 6) | bit);
-                        if (deg > max_deg) max_deg = deg;
-                    }
-                }
-            }
-        } else {
-            // Large m: re-evaluate best per-output candidates with save_g_tt=true
-            int s = result.m;
+        // ---- .poly: per-output ANF in shared z-space (ALL terms including deg 0/1) ----
+        {
             std::vector<int> term_counts(k, 0);
-            for (int oi = 0; oi < k; oi++) {
-                if (per_output[oi].m > 0 && per_output[oi].m <= 20) {
-                    TruthTable tt_oi;
-                    tt_oi.n = tt.n;
-                    tt_oi.n_outputs = 1;
-                    tt_oi.n_words = tt.n_words;
-                    tt_oi.tt = {tt.tt[oi]};
-                    auto er = evaluate_Mb(tt_oi,
-                        per_output[oi].M_rows.data(),
-                        per_output[oi].b,
-                        per_output[oi].m,
-                        params.n_threads, true);
-                    if (!er.g_tt_raw.empty()) {
-                        auto& g_tt = er.g_tt_raw[0];
-                        moebius_packed(g_tt.data(), per_output[oi].m);
-                        per_output_anf[oi] = g_tt;
-                        int64_t n_z = int64_t(1) << per_output[oi].m;
-                        for (int64_t zi = 0; zi < n_z; zi++) {
-                            if ((g_tt[zi >> 6] >> (zi & 63)) & 1)
-                                term_counts[oi]++;
-                        }
-                    }
-                }
-            }
+            for (int oi = 0; oi < k; oi++)
+                term_counts[oi] = (int)out_all_terms[oi].size();
+
             std::ofstream f(prefix + ".poly");
             if (f) {
-                f << s << "\n" << k << "\n";
+                f << shared_m << "\n" << k << "\n";
                 for (int oi = 0; oi < k; oi++) {
                     if (oi > 0) f << " ";
                     f << term_counts[oi];
                 }
                 f << "\n";
-                int off = 0;
                 for (int oi = 0; oi < k; oi++) {
-                    if (!per_output_anf[oi].empty()) {
-                        int64_t n_z = int64_t(1) << per_output[oi].m;
-                        for (int64_t zi = 0; zi < n_z; zi++) {
-                            if ((per_output_anf[oi][zi >> 6] >> (zi & 63)) & 1) {
-                                f << "[";
-                                for (int b = 0; b < s; b++) {
-                                    if (b > 0) f << " , ";
-                                    int bit = 0;
-                                    if (b >= off && b < off + per_output[oi].m) bit = (zi >> (b - off)) & 1;
-                                    f << bit;
-                                }
-                                f << " , 1]\n";
-                            }
+                    for (const auto& svars : out_all_terms[oi]) {
+                        f << "[";
+                        int svi = 0;
+                        for (int b = 0; b < shared_m; b++) {
+                            if (b > 0) f << " , ";
+                            int bit = (svi < (int)svars.size() && svars[svi] == b) ? 1 : 0;
+                            if (bit) svi++;
+                            f << bit;
                         }
-                    }
-                    off += per_output[oi].m;
-                }
-                // Compute max_deg from per-output ANF data
-                for (int oi = 0; oi < k; oi++) {
-                    auto& anf = per_output_anf[oi];
-                    if (anf.empty()) continue;
-                    int m_oi = per_output[oi].m;
-                    int64_t n_z_oi = int64_t(1) << m_oi;
-                    for (int64_t zi = 0; zi < n_z_oi; zi++) {
-                        if ((anf[zi >> 6] >> (zi & 63)) & 1) {
-                            int deg = __builtin_popcountll(zi);
-                            if (deg > max_deg) max_deg = deg;
-                        }
+                        f << " , 1]\n";
                     }
                 }
-                std::cout << "  Saved poly: " << prefix << ".poly (m=" << s << ", " << k << " outputs)\n";
+                std::cout << "  Saved: " << prefix << ".poly (m=" << shared_m
+                          << ", " << k << " outputs)\n";
             }
         }
 
         // ---- _stats.txt: 5-line numeric ----
         {
-            // max_deg already computed above during poly writing
             std::ofstream f(prefix + "_stats.txt");
             if (f) {
                 f << n << "\n" << k << "\n" << result.sum_T << "\n"

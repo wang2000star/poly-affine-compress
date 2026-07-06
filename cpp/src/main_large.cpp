@@ -859,6 +859,8 @@ int main(int argc, char** argv) {
         union_T = 0;
         for (size_t w = 0; w < union_data.size(); w++)
             union_T += __builtin_popcountll(union_data[w]);
+        // Use count_T to exclude constant and degree-1 terms
+        union_T = count_T(union_data.data(), max_m_all);
         std::cout << "  Union T = " << union_T;
         if (n_affine > 0) std::cout << " (" << n_affine << " affine outputs not counted)";
         std::cout << "\n";
