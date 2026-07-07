@@ -44,8 +44,8 @@ if [ "$MODE" = "--full" ]; then
     OPT2_P[int2float]="--random 50000 --hill-climb 50000 --max-m 12"
     OPT2_P[cavlc]="--random 50000 --hill-climb 50000 --max-m 12"
     OPT2_P[hd07]="--random 100000 --hill-climb 100000 --max-m 12"
-    OPT2_P[ctrl]="--random 100000 --hill-climb 100000 --max-m 12"
-    OPT2_P[dec]="--random 50000 --hill-climb 50000 --max-m 12"
+    OPT2_P[ctrl]="--random 100000 --hill-climb 500 --max-m 12"
+    OPT2_P[dec]="--random 50000 --hill-climb 200 --max-m 12"
 
     declare -A D3_P  # d3_opt2
     D3_P[hd03]="--random 15000 --hill-climb 15000"
@@ -53,8 +53,8 @@ if [ "$MODE" = "--full" ]; then
     D3_P[int2float]="--random 50000 --hill-climb 50000"
     D3_P[cavlc]="--random 50000 --hill-climb 50000"
     D3_P[hd07]="--random 100000 --hill-climb 100000"
-    D3_P[ctrl]="--random 100000 --hill-climb 100000"
-    D3_P[dec]="--random 50000 --hill-climb 50000"
+    D3_P[ctrl]="--random 100000 --hill-climb 500"
+    D3_P[dec]="--random 50000 --hill-climb 200"
 
     declare -A N32_P  # n=32 per-output
     for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
