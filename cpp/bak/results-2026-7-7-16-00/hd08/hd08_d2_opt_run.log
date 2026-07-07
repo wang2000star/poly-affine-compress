@@ -1,0 +1,20 @@
+--- Circuit ---
+  Inputs: 8, Outputs: 1, Gates: 37
+  Max-m: 6, Pool-rows: 30, Hill-climb: 100000
+
+Phase 1: Per-output sparse-g enumeration
+  Output 0/1 (om_0)...
+    Scoring 24 pool rows...
+    m=8 T=128 [4.3702e-05 s]
+
+=== Results ===
+  Sum T = 128
+  om_0: T=128 m=8
+  Sum T = 120
+  Union T = 120
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d2_opt.affine (s=8, n=8)
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d2_opt.poly (m=8, 1 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d2_opt_stats.txt (sum_T=120, union_T=120)
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d2_opt_verify.txt
+
+Total time: 0.00118405 s

@@ -1,0 +1,20 @@
+--- Circuit ---
+  Inputs: 8, Outputs: 1, Strategy: opt2 (per-output transforms)
+
+Phase 1: Computing truth table...
+  Truth table: 2^8 = 256 inputs, 4 batches, 1 outputs
+
+Phase 2: Per-output search
+  Output 0/1 (om_0)...
+    d1c: support=255 t=8 raw_T=128 best_T=8 best_b=255
+    m=8 T=8
+
+Phase 3: Merging and deduplicating transforms
+  Dedup: 8 → 8 z variables
+  Sum T = 8
+  Union T = 8
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d1c_opt.affine (s=8)
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d1c_opt.poly (m=8, 1 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d1c_opt_stats.txt (sum_T=8, union_T=8)
+
+Total time: skipped

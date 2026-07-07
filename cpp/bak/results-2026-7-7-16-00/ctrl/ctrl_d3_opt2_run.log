@@ -1,0 +1,94 @@
+--- Circuit ---
+  Inputs: 7, Outputs: 26, Strategy: opt2 (per-output transforms)
+
+Phase 1: Computing truth table...
+  Truth table: 2^7 = 128 inputs, 2 batches, 26 outputs
+
+Phase 2: Per-output search
+  Output 0/26 (oseloregdst0)...
+    d1c: support=31 t=5 raw_T=9 best_T=7 best_b=31
+    m=7 T=4
+  Output 1/26 (oseloregdst1)...
+    d1c: support=31 t=5 raw_T=10 best_T=7 best_b=5
+    m=7 T=3
+  Output 2/26 (oselopB0)...
+    d1c: support=31 t=5 raw_T=12 best_T=4 best_b=5
+    m=6 T=2
+  Output 3/26 (oselopB1)...
+    d1c: support=31 t=5 raw_T=10 best_T=3 best_b=6
+    m=7 T=3
+  Output 4/26 (oaluop0)...
+    d1c: support=127 t=7 raw_T=12 best_T=8 best_b=68
+    m=7 T=6
+  Output 5/26 (oaluop1)...
+    d1c: support=94 t=5 raw_T=6 best_T=5 best_b=4
+    m=7 T=3
+  Output 6/26 (oaluop2)...
+    d1c: support=31 t=5 raw_T=7 best_T=5 best_b=0
+    m=6 T=3
+  Output 7/26 (oaluopext0)...
+    d1c: support=31 t=5 raw_T=9 best_T=8 best_b=1
+    m=7 T=6
+  Output 8/26 (oaluopext1)...
+    d1c: support=31 t=5 raw_T=9 best_T=4 best_b=9
+    m=7 T=3
+  Output 9/26 (oaluopext2)...
+    d1c: support=31 t=5 raw_T=10 best_T=7 best_b=13
+    m=7 T=3
+  Output 10/26 (oaluopext3)...
+    d1c: support=31 t=5 raw_T=10 best_T=6 best_b=4
+    m=6 T=4
+  Output 11/26 (ohalt)...
+    d1c: support=31 t=5 raw_T=32 best_T=1 best_b=31
+    m=7 T=1
+  Output 12/26 (oregwrite)...
+    d1c: support=31 t=5 raw_T=15 best_T=6 best_b=10
+    m=7 T=3
+  Output 13/26 (oselpcopA)...
+    d1c: support=29 t=4 raw_T=4 best_T=1 best_b=24
+    m=7 T=1
+  Output 14/26 (oselpcopB)...
+    d1c: support=29 t=4 raw_T=8 best_T=1 best_b=25
+    m=7 T=1
+  Output 15/26 (obeqz)...
+    d1c: support=31 t=5 raw_T=8 best_T=1 best_b=19
+    m=7 T=1
+  Output 16/26 (obnez)...
+    d1c: support=31 t=5 raw_T=4 best_T=1 best_b=18
+    m=7 T=1
+  Output 17/26 (obgez)...
+    d1c: support=31 t=5 raw_T=2 best_T=1 best_b=16
+    m=7 T=1
+  Output 18/26 (obltz)...
+    d1c: support=31 t=5 raw_T=4 best_T=1 best_b=17
+    m=7 T=1
+  Output 19/26 (ojump)...
+    d1c: support=28 t=3 raw_T=4 best_T=1 best_b=24
+    m=7 T=1
+  Output 20/26 (oCin)...
+    d1c: support=63 t=6 raw_T=8 best_T=6 best_b=36
+    m=7 T=4
+  Output 21/26 (oinvA)...
+    d1c: support=127 t=7 raw_T=12 best_T=4 best_b=70
+    m=7 T=3
+  Output 22/26 (oinvB)...
+    d1c: support=127 t=7 raw_T=6 best_T=5 best_b=4
+    m=7 T=4
+  Output 23/26 (osign)...
+    m=4 T=0
+  Output 24/26 (omemwrite)...
+    d1c: support=31 t=5 raw_T=12 best_T=2 best_b=13
+    m=7 T=1
+  Output 25/26 (oselwb)...
+    d1c: support=31 t=5 raw_T=8 best_T=1 best_b=14
+    m=7 T=1
+
+Phase 3: Merging and deduplicating transforms
+  Dedup: 176 → 38 z variables
+  Sum T = 64
+  Union T = 64
+  Saved: /home/wangfz/bool/cpp/results/ctrl/ctrl_d3_opt2.affine (s=38)
+  Saved: /home/wangfz/bool/cpp/results/ctrl/ctrl_d3_opt2.poly (m=38, 26 outputs)
+  Saved: /home/wangfz/bool/cpp/results/ctrl/ctrl_d3_opt2_stats.txt (sum_T=64, union_T=64)
+
+Total time: skipped

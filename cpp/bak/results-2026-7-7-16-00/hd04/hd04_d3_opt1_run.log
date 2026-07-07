@@ -1,0 +1,109 @@
+--- Circuit ---
+  Inputs: 16, Outputs to optimize: 8
+
+Phase 1: Computing truth table...
+  Truth table: 2^16 = 65536 inputs, 1024 batches, 8 output(s), 104 thread(s)
+
+Phase 2: Raw ANF baseline...
+  Sum T = 662
+  Max deg = 9
+    m_7: T=1, m=2
+    m_6: T=3, m=3
+    m_5: T=7, m=4
+    m_4: T=15, m=5
+    m_3: T=31, m=6
+    m_2: T=223, m=9
+    m_1: T=127, m=8
+    m_0: T=255, m=9
+
+Phase 2c: d1c product-based simplification...
+    [d1c] output 5 (t=14): T_nl 223 → 160 (b=0x2060)
+      → T_union=722
+    Searched 8 output(s), 1 improved
+    d1c time: 9.8455 s
+
+Phase 2b: Computing Aut(F) basis...
+  dim(Aut(F)) = 5
+  basis vectors: 2 4 8 16 32
+  Aut(F) time: 0.0122993 s
+  Dependency union: 16/16 bits (0 don't-care)
+
+Phase 3: Computing Walsh correlations...
+  Output m_7 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128)
+  Output m_6 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128)
+  Output m_5 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128)
+  Output m_4 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128)
+  Output m_3 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128)
+  Output m_2 top-5 bits: 8(192) 9(192) 10(192) 11(192) 12(192)
+  Output m_1 top-5 bits: 8(128) 9(128) 10(128) 11(128) 12(128)
+  Output m_0 top-5 bits: 8(129) 9(129) 10(129) 11(129) 12(129)
+  Walsh time: 0.0273447 s
+
+Phase 4: Searching for M,b...
+  4a-pr: Progressive M construction (max m=24)...
+    progressive result: m=16 T_union=564
+    progressive time: 0.005456 s
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (100000 candidates)
+  Search time: 209.155 s
+  4e: Hill climbing from top 100000 candidates (+ identity)
+    hill climb #0: T=564 -> T=78
+    hill climb #1: T=722 -> T=78
+    hill climb from identity: T=564 -> T=78
+    Hill climb time: 31.8037 s
+
+========================================
+  Results (100103 candidates evaluated)
+  Raw ANF Sum T = 662
+========================================
+  1. m=16 T=67 (union=78, compression 8.48718×) M=[10000000..; 01000000..; 00100000..; 00010000..; 00001000..; 00000100..; 00000010..; 00000001..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..]
+    Per-output T: m_7=1 m_6=2 m_5=3 m_4=5 m_3=7 m_2=26 m_1=11 m_0=12
+  2. m=16 T=83 (union=78, compression 8.48718×) M=[10000000..; 01000000..; 00100000..; 00010000..; 00001000..; 00000110..; 00000010..; 00000001..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000100..; 00000100..]
+    Per-output T: m_7=1 m_6=2 m_5=3 m_4=5 m_3=7 m_2=30 m_1=11 m_0=24
+  3. m=16 T=67 (union=78, compression 8.48718×) M=[10000000..; 01000000..; 00100000..; 00010000..; 00001000..; 00000100..; 00000010..; 00000001..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..]
+    Per-output T: m_7=1 m_6=2 m_5=3 m_4=5 m_3=7 m_2=26 m_1=11 m_0=12
+  4. m=16 T=662 (union=564, compression 1.17376×) M=[10000000..; 01000000..; 00100000..; 00010000..; 00001000..; 00000100..; 00000010..; 00000001..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..]
+    Per-output T: m_7=1 m_6=3 m_5=7 m_4=15 m_3=31 m_2=223 m_1=127 m_0=255
+  5. m=16 T=806 (union=722, compression 0.916898×) M=[10000000..; 01000000..; 00100000..; 00010000..; 00001000..; 00000100..; 00000010..; 00000001..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..; 00000000..]
+  6. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  7. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  8. m=5 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..; 00000000..; 00000000..; 00000000..; 00000000..]
+  9. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  10. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  11. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  12. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  13. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  14. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  15. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  16. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  17. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  18. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  19. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00000000..]
+  20. m=1 T=9223372036854775807 (union=9223372036854775807, compression 7.17742e-17×) M=[00100000..]
+
+Best candidate: m=16, T_sum=67, T_union=78
+// Transform z = Mx + b (GF(2)):
+// m=16, n=16
+// z_0 = i_9
+// z_1 = i_8 + i_16
+// z_2 = i_7 + i_15
+// z_3 = i_6 + i_14
+// z_4 = i_5 + i_13
+// z_5 = i_4 + i_12
+// z_6 = i_3 + i_11
+// z_7 = i_2 + i_10
+// z_8 = i_17
+// z_9 = i_16
+// z_10 = i_16 + i_15
+// z_11 = i_16 + i_14
+// z_12 = i_16 + i_13
+// z_13 = i_12
+// z_14 = i_12 + i_11
+// z_15 = i_11 + i_10
+  Evaluating best candidate for output...
+  Saved affine: /home/wangfz/bool/cpp/results/hd04/hd04_d3_opt1.affine (s=16, n=16)
+  Saved poly: /home/wangfz/bool/cpp/results/hd04/hd04_d3_opt1.poly (m=16, 8 outputs, 88 terms)
+  Saved stats: /home/wangfz/bool/cpp/results/hd04/hd04_d3_opt1_stats.txt (n=16, k=8, sum_T=67, union_T=78)
+
+Total time: 250.849 s

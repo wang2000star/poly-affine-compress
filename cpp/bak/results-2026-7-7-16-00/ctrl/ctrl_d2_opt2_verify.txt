@@ -1,0 +1,31 @@
+# Verification: f(x) = g(Mx+b)
+# n=7
+
+oseloregdst0: PASS T=9 m=7
+oseloregdst1: PASS T=10 m=7
+oselopB0: PASS T=12 m=7
+oselopB1: PASS T=10 m=7
+oaluop0: PASS T=12 m=7
+oaluop1: PASS T=6 m=7
+oaluop2: PASS T=7 m=7
+oaluopext0: PASS T=9 m=7
+oaluopext1: PASS T=9 m=7
+oaluopext2: PASS T=10 m=7
+oaluopext3: PASS T=10 m=7
+ohalt: PASS T=32 m=7
+oregwrite: PASS T=15 m=7
+oselpcopA: PASS T=4 m=7
+oselpcopB: PASS T=8 m=7
+obeqz: PASS T=8 m=7
+obnez: PASS T=4 m=7
+obgez: PASS T=2 m=7
+obltz: PASS T=4 m=7
+ojump: PASS T=4 m=7
+oCin: PASS T=8 m=7
+oinvA: PASS T=12 m=7
+oinvB: PASS T=6 m=7
+osign: PASS  AFFINE
+omemwrite: PASS T=12 m=7
+oselwb: PASS T=8 m=7
+
+All: PASS

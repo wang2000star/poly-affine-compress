@@ -1,0 +1,46 @@
+--- Circuit ---
+  Inputs: 8, Outputs to optimize: 8
+
+Phase 1: Computing truth table...
+  Truth table: 2^8 = 256 inputs, 4 batches, 8 output(s), 104 thread(s)
+
+Phase 2: Raw ANF baseline...
+  Sum T = 95
+  Max deg = 2
+    y_0: T=13, m=2
+    y_1: T=14, m=2
+    y_2: T=11, m=2
+    y_3: T=14, m=2
+    y_4: T=16, m=2
+    y_5: T=8, m=2
+    y_6: T=9, m=2
+    y_7: T=10, m=2
+
+Phase 2c: d1c product-based simplification...
+    Searched 8 output(s), 0 improved
+    d1c time: 0.000614126 s
+
+Phase 2b: Computing Aut(F) basis...
+  dim(Aut(F)) = 0
+  (no non-trivial invariance)
+  Aut(F) time: 4.295e-05 s
+  Dependency union: 8/8 bits (0 don't-care)
+
+Phase 3: Computing Walsh correlations...
+  Output y_0 top-5 bits: 6(32) 7(32) 0(0) 1(0) 2(0)
+  Output y_1 top-5 bits: 6(32) 7(32) 1(8) 0(0) 2(0)
+  Output y_2 top-5 bits: 6(36) 7(36) 0(4) 1(4) 2(4)
+  Output y_3 top-5 bits: 6(36) 7(36) 0(4) 1(4) 2(4)
+  Output y_4 top-5 bits: 6(36) 7(36) 0(4) 1(4) 2(4)
+  Output y_5 top-5 bits: 6(32) 7(32) 0(8) 1(8) 2(0)
+  Output y_6 top-5 bits: 6(32) 7(32) 1(8) 0(0) 2(0)
+  Output y_7 top-5 bits: 6(32) 7(32) 1(8) 0(0) 2(0)
+  Walsh time: 0.00138537 s
+
+Phase 4: Searching for M,b...
+  4a-pr: Progressive M construction (max m=16)...
+    progressive result: m=8 T_union=37
+    progressive time: 0.00549275 s
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (100000 candidates)

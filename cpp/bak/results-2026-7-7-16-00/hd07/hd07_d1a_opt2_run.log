@@ -1,0 +1,48 @@
+--- Circuit ---
+  Inputs: 8, Outputs: 8, Gates: 32
+  Warning: n=8 ≤ 20. Use optimize_anf_opt1/opt2 instead (truth table approach is faster for small n).
+  Max-m: 12, Random: 100000, Hill-climb: 100000
+
+Phase 1: Per-output search (z-space evaluation)
+  Output 0/8 (om_7)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=8 T=6 (3482.89 s)
+  Output 1/8 (om_6)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=7 T=6 (2727.68 s)
+  Output 2/8 (om_5)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=6 T=4 (1930.85 s)
+  Output 3/8 (om_4)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=5 T=4 (1427.77 s)
+  Output 4/8 (om_3)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=4 T=2 (1050.34 s)
+  Output 5/8 (om_2)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=3 T=1 (698.171 s)
+  Output 6/8 (om_1)...
+    m≤12, search=100000 random + 100000 hill-climb
+    AFFINE: y = 0 (8.691e-06 s)
+  Output 7/8 (om_0)...
+    m≤12, search=100000 random + 100000 hill-climb
+    AFFINE: y = 0 (7.492e-06 s)
+
+=== Results ===
+  om_7: T=6 m=8
+  om_6: T=6 m=7
+  om_5: T=4 m=6
+  om_4: T=4 m=5
+  om_3: T=2 m=4
+  om_2: T=1 m=3
+  om_1: AFFINE (mask=0x0, b=0)
+  om_0: AFFINE (mask=0x0, b=0)
+  Sum T = 23
+  Union T = 23 (2 affine outputs not counted)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d1a_opt2.affine (s=33)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d1a_opt2.poly (m=33, 8 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d1a_opt2_stats.txt (n=8, k=8, sum_T=23, union_T=23)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d1a_opt2_verify.txt
+
+Total time: 11317.7 s

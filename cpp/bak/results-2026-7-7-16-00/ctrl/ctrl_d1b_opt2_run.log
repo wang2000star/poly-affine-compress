@@ -1,0 +1,87 @@
+GateBuilder: ctrl
+  threshold=2147483647 out_dir=/home/wangfz/bool/cpp/results/ctrl
+  Circuit: 7 inputs, 26 outputs, 181 gates
+  Build complete
+  Output oseloregdst0: m=7 T=9 T_nl=9
+    m_used=5 T=9
+  Output oseloregdst1: m=7 T=10 T_nl=10
+    m_used=5 T=10
+  Output oselopB0: m=7 T=12 T_nl=12
+    m_used=5 T=12
+  Output oselopB1: m=7 T=10 T_nl=8
+    m_used=5 T=10
+  Output oaluop0: m=7 T=12 T_nl=12
+    m_used=7 T=12
+  Output oaluop1: m=7 T=6 T_nl=6
+    m_used=7 T=6
+  Output oaluop2: m=7 T=7 T_nl=5
+    m_used=5 T=7
+  Output oaluopext0: m=7 T=9 T_nl=9
+    m_used=5 T=9
+  Output oaluopext1: m=7 T=9 T_nl=9
+    m_used=5 T=9
+  Output oaluopext2: m=7 T=10 T_nl=10
+    m_used=5 T=10
+  Output oaluopext3: m=7 T=10 T_nl=8
+    m_used=5 T=10
+  Output ohalt: m=7 T=32 T_nl=26
+    m_used=5 T=32
+  Output oregwrite: m=7 T=15 T_nl=14
+    m_used=5 T=15
+  Output oselpcopA: m=7 T=4 T_nl=4
+    m_used=5 T=4
+  Output oselpcopB: m=7 T=8 T_nl=7
+    m_used=5 T=8
+  Output obeqz: m=7 T=8 T_nl=8
+    m_used=5 T=8
+  Output obnez: m=7 T=4 T_nl=4
+    m_used=5 T=4
+  Output obgez: m=7 T=2 T_nl=2
+    m_used=5 T=2
+  Output obltz: m=7 T=4 T_nl=4
+    m_used=5 T=4
+  Output ojump: m=7 T=4 T_nl=3
+    m_used=5 T=4
+  Output oCin: m=7 T=8 T_nl=8
+    m_used=6 T=8
+  Output oinvA: m=7 T=12 T_nl=12
+    m_used=7 T=12
+  Output oinvB: m=7 T=6 T_nl=6
+    m_used=7 T=6
+  Output osign: m=0 T=1 T_nl=0
+    m_used=0 T=1
+  Output omemwrite: m=7 T=12 T_nl=11
+    m_used=5 T=12
+  Output oselwb: m=7 T=8 T_nl=8
+    m_used=5 T=8
+  Per-output compression complete
+    oseloregdst0: m=7 T=9
+    oseloregdst1: m=7 T=8
+    oselopB0: m=7 T=4
+    oselopB1: m=7 T=4
+    oaluop0: m=7 T=8
+    oaluop1: m=7 T=5
+    oaluop2: m=7 T=7
+    oaluopext0: m=7 T=8
+    oaluopext1: m=7 T=4
+    oaluopext2: m=7 T=7
+    oaluopext3: m=7 T=7
+    ohalt: m=7 T=1
+    oregwrite: m=7 T=9
+    oselpcopA: m=7 T=1
+    oselpcopB: m=7 T=1
+    obeqz: m=7 T=1
+    obnez: m=7 T=1
+    obgez: m=7 T=1
+    obltz: m=7 T=1
+    ojump: m=7 T=1
+    oCin: m=7 T=6
+    oinvA: m=7 T=4
+    oinvB: m=7 T=5
+    osign: m=0 T=1
+    omemwrite: m=7 T=2
+    oselwb: m=7 T=1
+  Saved: /home/wangfz/bool/cpp/results/ctrl/ctrl_d1b_opt2.affine (s=175, n=7)
+  Saved: /home/wangfz/bool/cpp/results/ctrl/ctrl_d1b_opt2.poly (m=175, 26 outputs)
+  Saved: /home/wangfz/bool/cpp/results/ctrl/ctrl_d1b_opt2_stats.txt (sum_T=98, union_T=98)
+  Done. Files written to /home/wangfz/bool/cpp/results/ctrl/ctrl_d1b_opt2.*

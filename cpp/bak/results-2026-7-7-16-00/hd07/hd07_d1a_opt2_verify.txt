@@ -1,0 +1,13 @@
+# Verification: f(x) = g(Mx+b)
+# n=8, s=33, t=8
+
+om_7: PASS T=6 m=8
+om_6: PASS T=6 m=7
+om_5: PASS T=4 m=6
+om_4: PASS T=4 m=5
+om_3: PASS T=2 m=4
+om_2: PASS T=1 m=3
+om_1: PASS (affine)
+om_0: PASS (affine)
+
+All outputs PASS

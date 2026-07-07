@@ -1,0 +1,6 @@
+# Verification: f(x) = g(Mx+b)
+# n=8
+
+om_0: PASS T=128 m=8
+
+All: PASS

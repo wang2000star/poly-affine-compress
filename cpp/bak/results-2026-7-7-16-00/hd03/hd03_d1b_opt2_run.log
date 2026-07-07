@@ -1,0 +1,33 @@
+GateBuilder: hd03
+  threshold=2147483647 out_dir=/home/wangfz/bool/cpp/results/hd03
+  Circuit: 16 inputs, 8 outputs, 64 gates
+  Build complete
+  Output om_7: m=16 T=257 T_nl=255
+    m_used=16 T=257
+  Output om_6: m=16 T=129 T_nl=127
+    m_used=16 T=129
+  Output om_5: m=16 T=65 T_nl=63
+    m_used=16 T=65
+  Output om_4: m=16 T=33 T_nl=31
+    m_used=16 T=33
+  Output om_3: m=16 T=17 T_nl=15
+    m_used=16 T=17
+  Output om_2: m=16 T=9 T_nl=7
+    m_used=16 T=9
+  Output om_1: m=16 T=5 T_nl=3
+    m_used=16 T=5
+  Output om_0: m=16 T=3 T_nl=1
+    m_used=16 T=3
+  Per-output compression complete
+    om_7: m=16 T=257
+    om_6: m=16 T=129
+    om_5: m=16 T=65
+    om_4: m=16 T=33
+    om_3: m=16 T=17
+    om_2: m=16 T=9
+    om_1: m=16 T=5
+    om_0: m=16 T=3
+  Saved: /home/wangfz/bool/cpp/results/hd03/hd03_d1b_opt2.affine (s=128, n=16)
+  Saved: /home/wangfz/bool/cpp/results/hd03/hd03_d1b_opt2.poly (m=128, 8 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd03/hd03_d1b_opt2_stats.txt (sum_T=502, union_T=502)
+  Done. Files written to /home/wangfz/bool/cpp/results/hd03/hd03_d1b_opt2.*

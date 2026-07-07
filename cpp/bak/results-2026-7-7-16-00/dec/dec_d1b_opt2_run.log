@@ -1,0 +1,778 @@
+GateBuilder: dec
+  threshold=2147483647 out_dir=/home/wangfz/bool/cpp/results/dec
+  Circuit: 8 inputs, 256 outputs, 312 gates
+    processed 200/312 stmts, next_m=8
+  Build complete
+  Output osel10: m=8 T=128 T_nl=127
+    m_used=8 T=128
+  Output osel11: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel12: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel13: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel14: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel15: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel16: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel17: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel18: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel19: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel110: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel111: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel112: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel113: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel114: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel115: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel116: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel117: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel118: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel119: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel120: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel121: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel122: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel123: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel124: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel125: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel126: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel127: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel128: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel129: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel130: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel131: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel132: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel133: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel134: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel135: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel136: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel137: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel138: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel139: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel140: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel141: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel142: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel143: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel144: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel145: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel146: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel147: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel148: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel149: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel150: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel151: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel152: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel153: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel154: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel155: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel156: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel157: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel158: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel159: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel160: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel161: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel162: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel163: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Output osel164: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel165: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel166: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel167: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel168: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel169: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel170: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel171: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel172: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel173: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel174: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel175: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel176: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel177: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel178: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel179: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel180: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel181: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel182: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel183: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel184: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel185: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel186: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel187: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel188: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel189: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel190: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel191: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel192: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel193: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel194: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel195: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Output osel196: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel197: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel198: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel199: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1100: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel1101: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1102: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1103: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1104: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel1105: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1106: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1107: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1108: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1109: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1110: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1111: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Output osel1112: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel1113: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1114: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1115: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1116: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1117: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1118: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1119: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Output osel1120: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel1121: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1122: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1123: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Output osel1124: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel1125: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Output osel1126: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Output osel1127: m=8 T=1 T_nl=1
+    m_used=8 T=1
+  Output osel20: m=8 T=256 T_nl=247
+    m_used=8 T=256
+  Output osel21: m=8 T=128 T_nl=127
+    m_used=8 T=128
+  Output osel22: m=8 T=128 T_nl=127
+    m_used=8 T=128
+  Output osel23: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel24: m=8 T=128 T_nl=127
+    m_used=8 T=128
+  Output osel25: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel26: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel27: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel28: m=8 T=128 T_nl=127
+    m_used=8 T=128
+  Output osel29: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel210: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel211: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel212: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel213: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel214: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel215: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel216: m=8 T=128 T_nl=127
+    m_used=8 T=128
+  Output osel217: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel218: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel219: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel220: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel221: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel222: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel223: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel224: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel225: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel226: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel227: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel228: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel229: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel230: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel231: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel232: m=8 T=128 T_nl=127
+    m_used=8 T=128
+  Output osel233: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel234: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel235: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel236: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel237: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel238: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel239: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel240: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel241: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel242: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel243: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel244: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel245: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel246: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel247: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel248: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel249: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel250: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel251: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel252: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel253: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel254: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel255: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel256: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel257: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel258: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel259: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel260: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel261: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel262: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel263: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel264: m=8 T=128 T_nl=127
+    m_used=8 T=128
+  Output osel265: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel266: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel267: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel268: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel269: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel270: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel271: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel272: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel273: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel274: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel275: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel276: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel277: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel278: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel279: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel280: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel281: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel282: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel283: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel284: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel285: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel286: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel287: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel288: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel289: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel290: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel291: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel292: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel293: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel294: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel295: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel296: m=8 T=64 T_nl=64
+    m_used=8 T=64
+  Output osel297: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel298: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel299: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2100: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel2101: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2102: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2103: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2104: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel2105: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2106: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2107: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2108: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2109: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2110: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2111: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel2112: m=8 T=32 T_nl=32
+    m_used=8 T=32
+  Output osel2113: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2114: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2115: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2116: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2117: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2118: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2119: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel2120: m=8 T=16 T_nl=16
+    m_used=8 T=16
+  Output osel2121: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2122: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2123: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel2124: m=8 T=8 T_nl=8
+    m_used=8 T=8
+  Output osel2125: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel2126: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output osel2127: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Per-output compression complete
+    osel10: m=8 T=1
+    osel11: m=8 T=1
+    osel12: m=8 T=1
+    osel13: m=8 T=1
+    osel14: m=8 T=1
+    osel15: m=8 T=1
+    osel16: m=8 T=1
+    osel17: m=8 T=1
+    osel18: m=8 T=1
+    osel19: m=8 T=1
+    osel110: m=8 T=1
+    osel111: m=8 T=1
+    osel112: m=8 T=1
+    osel113: m=8 T=1
+    osel114: m=8 T=1
+    osel115: m=8 T=1
+    osel116: m=8 T=1
+    osel117: m=8 T=1
+    osel118: m=8 T=1
+    osel119: m=8 T=1
+    osel120: m=8 T=1
+    osel121: m=8 T=1
+    osel122: m=8 T=1
+    osel123: m=8 T=1
+    osel124: m=8 T=1
+    osel125: m=8 T=1
+    osel126: m=8 T=1
+    osel127: m=8 T=1
+    osel128: m=8 T=1
+    osel129: m=8 T=1
+    osel130: m=8 T=1
+    osel131: m=8 T=1
+    osel132: m=8 T=1
+    osel133: m=8 T=1
+    osel134: m=8 T=1
+    osel135: m=8 T=1
+    osel136: m=8 T=1
+    osel137: m=8 T=1
+    osel138: m=8 T=1
+    osel139: m=8 T=1
+    osel140: m=8 T=1
+    osel141: m=8 T=1
+    osel142: m=8 T=1
+    osel143: m=8 T=1
+    osel144: m=8 T=1
+    osel145: m=8 T=1
+    osel146: m=8 T=1
+    osel147: m=8 T=1
+    osel148: m=8 T=1
+    osel149: m=8 T=1
+    osel150: m=8 T=1
+    osel151: m=8 T=1
+    osel152: m=8 T=1
+    osel153: m=8 T=1
+    osel154: m=8 T=1
+    osel155: m=8 T=1
+    osel156: m=8 T=1
+    osel157: m=8 T=1
+    osel158: m=8 T=1
+    osel159: m=8 T=1
+    osel160: m=8 T=1
+    osel161: m=8 T=1
+    osel162: m=8 T=1
+    osel163: m=8 T=1
+    osel164: m=8 T=1
+    osel165: m=8 T=1
+    osel166: m=8 T=1
+    osel167: m=8 T=1
+    osel168: m=8 T=1
+    osel169: m=8 T=1
+    osel170: m=8 T=1
+    osel171: m=8 T=1
+    osel172: m=8 T=1
+    osel173: m=8 T=1
+    osel174: m=8 T=1
+    osel175: m=8 T=1
+    osel176: m=8 T=1
+    osel177: m=8 T=1
+    osel178: m=8 T=1
+    osel179: m=8 T=1
+    osel180: m=8 T=1
+    osel181: m=8 T=1
+    osel182: m=8 T=1
+    osel183: m=8 T=1
+    osel184: m=8 T=1
+    osel185: m=8 T=1
+    osel186: m=8 T=1
+    osel187: m=8 T=1
+    osel188: m=8 T=1
+    osel189: m=8 T=1
+    osel190: m=8 T=1
+    osel191: m=8 T=1
+    osel192: m=8 T=1
+    osel193: m=8 T=1
+    osel194: m=8 T=1
+    osel195: m=8 T=1
+    osel196: m=8 T=1
+    osel197: m=8 T=1
+    osel198: m=8 T=1
+    osel199: m=8 T=1
+    osel1100: m=8 T=1
+    osel1101: m=8 T=1
+    osel1102: m=8 T=1
+    osel1103: m=8 T=1
+    osel1104: m=8 T=1
+    osel1105: m=8 T=1
+    osel1106: m=8 T=1
+    osel1107: m=8 T=1
+    osel1108: m=8 T=1
+    osel1109: m=8 T=1
+    osel1110: m=8 T=1
+    osel1111: m=8 T=1
+    osel1112: m=8 T=1
+    osel1113: m=8 T=1
+    osel1114: m=8 T=1
+    osel1115: m=8 T=1
+    osel1116: m=8 T=1
+    osel1117: m=8 T=1
+    osel1118: m=8 T=1
+    osel1119: m=8 T=1
+    osel1120: m=8 T=1
+    osel1121: m=8 T=1
+    osel1122: m=8 T=1
+    osel1123: m=8 T=1
+    osel1124: m=8 T=1
+    osel1125: m=8 T=1
+    osel1126: m=8 T=1
+    osel1127: m=8 T=1
+    osel20: m=8 T=1
+    osel21: m=8 T=1
+    osel22: m=8 T=1
+    osel23: m=8 T=1
+    osel24: m=8 T=1
+    osel25: m=8 T=1
+    osel26: m=8 T=1
+    osel27: m=8 T=1
+    osel28: m=8 T=1
+    osel29: m=8 T=1
+    osel210: m=8 T=1
+    osel211: m=8 T=1
+    osel212: m=8 T=1
+    osel213: m=8 T=1
+    osel214: m=8 T=1
+    osel215: m=8 T=1
+    osel216: m=8 T=1
+    osel217: m=8 T=1
+    osel218: m=8 T=1
+    osel219: m=8 T=1
+    osel220: m=8 T=1
+    osel221: m=8 T=1
+    osel222: m=8 T=1
+    osel223: m=8 T=1
+    osel224: m=8 T=1
+    osel225: m=8 T=1
+    osel226: m=8 T=1
+    osel227: m=8 T=1
+    osel228: m=8 T=1
+    osel229: m=8 T=1
+    osel230: m=8 T=1
+    osel231: m=8 T=1
+    osel232: m=8 T=1
+    osel233: m=8 T=1
+    osel234: m=8 T=1
+    osel235: m=8 T=1
+    osel236: m=8 T=1
+    osel237: m=8 T=1
+    osel238: m=8 T=1
+    osel239: m=8 T=1
+    osel240: m=8 T=1
+    osel241: m=8 T=1
+    osel242: m=8 T=1
+    osel243: m=8 T=1
+    osel244: m=8 T=1
+    osel245: m=8 T=1
+    osel246: m=8 T=1
+    osel247: m=8 T=1
+    osel248: m=8 T=1
+    osel249: m=8 T=1
+    osel250: m=8 T=1
+    osel251: m=8 T=1
+    osel252: m=8 T=1
+    osel253: m=8 T=1
+    osel254: m=8 T=1
+    osel255: m=8 T=1
+    osel256: m=8 T=1
+    osel257: m=8 T=1
+    osel258: m=8 T=1
+    osel259: m=8 T=1
+    osel260: m=8 T=1
+    osel261: m=8 T=1
+    osel262: m=8 T=1
+    osel263: m=8 T=1
+    osel264: m=8 T=1
+    osel265: m=8 T=1
+    osel266: m=8 T=1
+    osel267: m=8 T=1
+    osel268: m=8 T=1
+    osel269: m=8 T=1
+    osel270: m=8 T=1
+    osel271: m=8 T=1
+    osel272: m=8 T=1
+    osel273: m=8 T=1
+    osel274: m=8 T=1
+    osel275: m=8 T=1
+    osel276: m=8 T=1
+    osel277: m=8 T=1
+    osel278: m=8 T=1
+    osel279: m=8 T=1
+    osel280: m=8 T=1
+    osel281: m=8 T=1
+    osel282: m=8 T=1
+    osel283: m=8 T=1
+    osel284: m=8 T=1
+    osel285: m=8 T=1
+    osel286: m=8 T=1
+    osel287: m=8 T=1
+    osel288: m=8 T=1
+    osel289: m=8 T=1
+    osel290: m=8 T=1
+    osel291: m=8 T=1
+    osel292: m=8 T=1
+    osel293: m=8 T=1
+    osel294: m=8 T=1
+    osel295: m=8 T=1
+    osel296: m=8 T=1
+    osel297: m=8 T=1
+    osel298: m=8 T=1
+    osel299: m=8 T=1
+    osel2100: m=8 T=1
+    osel2101: m=8 T=1
+    osel2102: m=8 T=1
+    osel2103: m=8 T=1
+    osel2104: m=8 T=1
+    osel2105: m=8 T=1
+    osel2106: m=8 T=1
+    osel2107: m=8 T=1
+    osel2108: m=8 T=1
+    osel2109: m=8 T=1
+    osel2110: m=8 T=1
+    osel2111: m=8 T=1
+    osel2112: m=8 T=1
+    osel2113: m=8 T=1
+    osel2114: m=8 T=1
+    osel2115: m=8 T=1
+    osel2116: m=8 T=1
+    osel2117: m=8 T=1
+    osel2118: m=8 T=1
+    osel2119: m=8 T=1
+    osel2120: m=8 T=1
+    osel2121: m=8 T=1
+    osel2122: m=8 T=1
+    osel2123: m=8 T=1
+    osel2124: m=8 T=1
+    osel2125: m=8 T=1
+    osel2126: m=8 T=1
+    osel2127: m=8 T=1
+  Saved: /home/wangfz/bool/cpp/results/dec/dec_d1b_opt2.affine (s=2048, n=8)
+  Saved: /home/wangfz/bool/cpp/results/dec/dec_d1b_opt2.poly (m=2048, 256 outputs)
+  Saved: /home/wangfz/bool/cpp/results/dec/dec_d1b_opt2_stats.txt (sum_T=256, union_T=256)
+  Done. Files written to /home/wangfz/bool/cpp/results/dec/dec_d1b_opt2.*

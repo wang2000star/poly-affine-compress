@@ -21,7 +21,7 @@ TIMEOUT="${TIMEOUT:-86400}"
 P_COMMON="--random 100000 --hill-climb 100000"
 P_D2="--random 100000 --hill-climb 100000 --max-m 6"
 P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
-P_OPT2="--random 100000 --hill-climb 100000 --max-m 12"
+P_OPT2="--random 100000 --hill-climb 2000 --max-m 12"
 
 # ---- 配色 ----
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'

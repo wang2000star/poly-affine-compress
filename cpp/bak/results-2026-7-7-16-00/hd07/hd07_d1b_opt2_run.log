@@ -1,0 +1,33 @@
+GateBuilder: hd07
+  threshold=2147483647 out_dir=/home/wangfz/bool/cpp/results/hd07
+  Circuit: 8 inputs, 8 outputs, 32 gates
+  Build complete
+  Output om_7: m=8 T=84 T_nl=84
+    m_used=8 T=84
+  Output om_6: m=8 T=42 T_nl=42
+    m_used=8 T=42
+  Output om_5: m=8 T=20 T_nl=20
+    m_used=8 T=20
+  Output om_4: m=8 T=10 T_nl=10
+    m_used=8 T=10
+  Output om_3: m=8 T=4 T_nl=4
+    m_used=8 T=4
+  Output om_2: m=8 T=2 T_nl=2
+    m_used=8 T=2
+  Output om_1: m=0 T=0 T_nl=0
+    m_used=0 T=0
+  Output om_0: m=0 T=0 T_nl=0
+    m_used=0 T=0
+  Per-output compression complete
+    om_7: m=8 T=17
+    om_6: m=8 T=13
+    om_5: m=8 T=8
+    om_4: m=8 T=7
+    om_3: m=8 T=3
+    om_2: m=8 T=1
+    om_1: m=0 T=0
+    om_0: m=0 T=0
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d1b_opt2.affine (s=48, n=8)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d1b_opt2.poly (m=48, 8 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d1b_opt2_stats.txt (sum_T=45, union_T=45)
+  Done. Files written to /home/wangfz/bool/cpp/results/hd07/hd07_d1b_opt2.*

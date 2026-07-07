@@ -1,0 +1,41 @@
+--- Circuit ---
+  Inputs: 16, Outputs: 8, Strategy: opt2 (per-output transforms)
+
+Phase 1: Computing truth table...
+  Truth table: 2^16 = 65536 inputs, 1024 batches, 8 outputs
+
+Phase 2: Per-output search
+  Output 0/8 (m_7)...
+    d1c: support=771 t=4 raw_T=3 best_T=1 best_b=0
+    m=16 T=1
+  Output 1/8 (m_6)...
+    d1c: support=1799 t=6 raw_T=5 best_T=3 best_b=0
+    m=16 T=3
+  Output 2/8 (m_5)...
+    d1c: support=3855 t=8 raw_T=9 best_T=7 best_b=0
+    m=16 T=7
+  Output 3/8 (m_4)...
+    d1c: support=7967 t=10 raw_T=17 best_T=15 best_b=0
+    m=16 T=15
+  Output 4/8 (m_3)...
+    d1c: support=16191 t=12 raw_T=33 best_T=31 best_b=0
+    m=16 T=31
+  Output 5/8 (m_2)...
+    d1c: support=32639 t=14 raw_T=225 best_T=160 best_b=8288
+    m=16 T=160
+  Output 6/8 (m_1)...
+    d1c: support=65535 t=16 raw_T=129 best_T=127 best_b=0
+    m=16 T=127
+  Output 7/8 (m_0)...
+    d1c: support=65535 t=16 raw_T=257 best_T=255 best_b=0
+    m=16 T=255
+
+Phase 3: Merging and deduplicating transforms
+  Dedup: 128 → 19 z variables
+  Sum T = 599
+  Union T = 584
+  Saved: /home/wangfz/bool/cpp/results/hd04/hd04_d1c_opt2.affine (s=19)
+  Saved: /home/wangfz/bool/cpp/results/hd04/hd04_d1c_opt2.poly (m=19, 8 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd04/hd04_d1c_opt2_stats.txt (sum_T=599, union_T=584)
+
+Total time: skipped

@@ -1,0 +1,46 @@
+--- Circuit ---
+  Inputs: 8, Outputs: 8, Gates: 32
+  Max-m: 6, Pool-rows: 30, Hill-climb: 100000
+
+Phase 1: Per-output sparse-g enumeration
+  Output 0/8 (om_7)...
+    Scoring 24 pool rows...
+    m=8 T=84 [0.000107127 s]
+  Output 1/8 (om_6)...
+    Scoring 24 pool rows...
+    m=8 T=42 [8.9709e-05 s]
+  Output 2/8 (om_5)...
+    Scoring 24 pool rows...
+    m=8 T=20 [0.000108634 s]
+  Output 3/8 (om_4)...
+    Scoring 24 pool rows...
+    m=8 T=10 [0.000118696 s]
+  Output 4/8 (om_3)...
+    Scoring 24 pool rows...
+    m=8 T=4 [0.000137657 s]
+  Output 5/8 (om_2)...
+    Scoring 24 pool rows...
+    m=8 T=2 [0.000186388 s]
+  Output 6/8 (om_1)...
+    AFFINE: y = 0 [3.6254e-05 s]
+  Output 7/8 (om_0)...
+    AFFINE: y = 0 [3.6946e-05 s]
+
+=== Results ===
+  Sum T = 162
+  om_7: T=84 m=8
+  om_6: T=42 m=8
+  om_5: T=20 m=8
+  om_4: T=10 m=8
+  om_3: T=4 m=8
+  om_2: T=2 m=8
+  om_1: AFFINE (mask=0x0, b=0)
+  om_0: AFFINE (mask=0x0, b=0)
+  Sum T = 162
+  Union T = 162
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d2_opt2.affine (s=48, n=8)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d2_opt2.poly (m=48, 8 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d2_opt2_stats.txt (sum_T=162, union_T=162)
+  Saved: /home/wangfz/bool/cpp/results/hd07/hd07_d2_opt2_verify.txt
+
+Total time: 0.00714784 s

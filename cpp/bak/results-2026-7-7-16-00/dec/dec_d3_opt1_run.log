@@ -1,0 +1,806 @@
+--- Circuit ---
+  Inputs: 8, Outputs to optimize: 256
+
+Phase 1: Computing truth table...
+  Truth table: 2^8 = 256 inputs, 4 batches, 256 output(s), 104 thread(s)
+
+Phase 2: Raw ANF baseline...
+  Sum T = 6544
+  Max deg = 8
+    osel10: T=127, m=8
+    osel11: T=64, m=8
+    osel12: T=64, m=8
+    osel13: T=32, m=8
+    osel14: T=64, m=8
+    osel15: T=32, m=8
+    osel16: T=32, m=8
+    osel17: T=16, m=8
+    osel18: T=64, m=8
+    osel19: T=32, m=8
+    osel110: T=32, m=8
+    osel111: T=16, m=8
+    osel112: T=32, m=8
+    osel113: T=16, m=8
+    osel114: T=16, m=8
+    osel115: T=8, m=8
+    osel116: T=64, m=8
+    osel117: T=32, m=8
+    osel118: T=32, m=8
+    osel119: T=16, m=8
+    osel120: T=32, m=8
+    osel121: T=16, m=8
+    osel122: T=16, m=8
+    osel123: T=8, m=8
+    osel124: T=32, m=8
+    osel125: T=16, m=8
+    osel126: T=16, m=8
+    osel127: T=8, m=8
+    osel128: T=16, m=8
+    osel129: T=8, m=8
+    osel130: T=8, m=8
+    osel131: T=4, m=8
+    osel132: T=64, m=8
+    osel133: T=32, m=8
+    osel134: T=32, m=8
+    osel135: T=16, m=8
+    osel136: T=32, m=8
+    osel137: T=16, m=8
+    osel138: T=16, m=8
+    osel139: T=8, m=8
+    osel140: T=32, m=8
+    osel141: T=16, m=8
+    osel142: T=16, m=8
+    osel143: T=8, m=8
+    osel144: T=16, m=8
+    osel145: T=8, m=8
+    osel146: T=8, m=8
+    osel147: T=4, m=8
+    osel148: T=32, m=8
+    osel149: T=16, m=8
+    osel150: T=16, m=8
+    osel151: T=8, m=8
+    osel152: T=16, m=8
+    osel153: T=8, m=8
+    osel154: T=8, m=8
+    osel155: T=4, m=8
+    osel156: T=16, m=8
+    osel157: T=8, m=8
+    osel158: T=8, m=8
+    osel159: T=4, m=8
+    osel160: T=8, m=8
+    osel161: T=4, m=8
+    osel162: T=4, m=8
+    osel163: T=2, m=8
+    osel164: T=64, m=8
+    osel165: T=32, m=8
+    osel166: T=32, m=8
+    osel167: T=16, m=8
+    osel168: T=32, m=8
+    osel169: T=16, m=8
+    osel170: T=16, m=8
+    osel171: T=8, m=8
+    osel172: T=32, m=8
+    osel173: T=16, m=8
+    osel174: T=16, m=8
+    osel175: T=8, m=8
+    osel176: T=16, m=8
+    osel177: T=8, m=8
+    osel178: T=8, m=8
+    osel179: T=4, m=8
+    osel180: T=32, m=8
+    osel181: T=16, m=8
+    osel182: T=16, m=8
+    osel183: T=8, m=8
+    osel184: T=16, m=8
+    osel185: T=8, m=8
+    osel186: T=8, m=8
+    osel187: T=4, m=8
+    osel188: T=16, m=8
+    osel189: T=8, m=8
+    osel190: T=8, m=8
+    osel191: T=4, m=8
+    osel192: T=8, m=8
+    osel193: T=4, m=8
+    osel194: T=4, m=8
+    osel195: T=2, m=8
+    osel196: T=32, m=8
+    osel197: T=16, m=8
+    osel198: T=16, m=8
+    osel199: T=8, m=8
+    osel1100: T=16, m=8
+    osel1101: T=8, m=8
+    osel1102: T=8, m=8
+    osel1103: T=4, m=8
+    osel1104: T=16, m=8
+    osel1105: T=8, m=8
+    osel1106: T=8, m=8
+    osel1107: T=4, m=8
+    osel1108: T=8, m=8
+    osel1109: T=4, m=8
+    osel1110: T=4, m=8
+    osel1111: T=2, m=8
+    osel1112: T=16, m=8
+    osel1113: T=8, m=8
+    osel1114: T=8, m=8
+    osel1115: T=4, m=8
+    osel1116: T=8, m=8
+    osel1117: T=4, m=8
+    osel1118: T=4, m=8
+    osel1119: T=2, m=8
+    osel1120: T=8, m=8
+    osel1121: T=4, m=8
+    osel1122: T=4, m=8
+    osel1123: T=2, m=8
+    osel1124: T=4, m=8
+    osel1125: T=2, m=8
+    osel1126: T=2, m=8
+    osel1127: T=1, m=8
+    osel20: T=247, m=8
+    osel21: T=127, m=8
+    osel22: T=127, m=8
+    osel23: T=64, m=8
+    osel24: T=127, m=8
+    osel25: T=64, m=8
+    osel26: T=64, m=8
+    osel27: T=32, m=8
+    osel28: T=127, m=8
+    osel29: T=64, m=8
+    osel210: T=64, m=8
+    osel211: T=32, m=8
+    osel212: T=64, m=8
+    osel213: T=32, m=8
+    osel214: T=32, m=8
+    osel215: T=16, m=8
+    osel216: T=127, m=8
+    osel217: T=64, m=8
+    osel218: T=64, m=8
+    osel219: T=32, m=8
+    osel220: T=64, m=8
+    osel221: T=32, m=8
+    osel222: T=32, m=8
+    osel223: T=16, m=8
+    osel224: T=64, m=8
+    osel225: T=32, m=8
+    osel226: T=32, m=8
+    osel227: T=16, m=8
+    osel228: T=32, m=8
+    osel229: T=16, m=8
+    osel230: T=16, m=8
+    osel231: T=8, m=8
+    osel232: T=127, m=8
+    osel233: T=64, m=8
+    osel234: T=64, m=8
+    osel235: T=32, m=8
+    osel236: T=64, m=8
+    osel237: T=32, m=8
+    osel238: T=32, m=8
+    osel239: T=16, m=8
+    osel240: T=64, m=8
+    osel241: T=32, m=8
+    osel242: T=32, m=8
+    osel243: T=16, m=8
+    osel244: T=32, m=8
+    osel245: T=16, m=8
+    osel246: T=16, m=8
+    osel247: T=8, m=8
+    osel248: T=64, m=8
+    osel249: T=32, m=8
+    osel250: T=32, m=8
+    osel251: T=16, m=8
+    osel252: T=32, m=8
+    osel253: T=16, m=8
+    osel254: T=16, m=8
+    osel255: T=8, m=8
+    osel256: T=32, m=8
+    osel257: T=16, m=8
+    osel258: T=16, m=8
+    osel259: T=8, m=8
+    osel260: T=16, m=8
+    osel261: T=8, m=8
+    osel262: T=8, m=8
+    osel263: T=4, m=8
+    osel264: T=127, m=8
+    osel265: T=64, m=8
+    osel266: T=64, m=8
+    osel267: T=32, m=8
+    osel268: T=64, m=8
+    osel269: T=32, m=8
+    osel270: T=32, m=8
+    osel271: T=16, m=8
+    osel272: T=64, m=8
+    osel273: T=32, m=8
+    osel274: T=32, m=8
+    osel275: T=16, m=8
+    osel276: T=32, m=8
+    osel277: T=16, m=8
+    osel278: T=16, m=8
+    osel279: T=8, m=8
+    osel280: T=64, m=8
+    osel281: T=32, m=8
+    osel282: T=32, m=8
+    osel283: T=16, m=8
+    osel284: T=32, m=8
+    osel285: T=16, m=8
+    osel286: T=16, m=8
+    osel287: T=8, m=8
+    osel288: T=32, m=8
+    osel289: T=16, m=8
+    osel290: T=16, m=8
+    osel291: T=8, m=8
+    osel292: T=16, m=8
+    osel293: T=8, m=8
+    osel294: T=8, m=8
+    osel295: T=4, m=8
+    osel296: T=64, m=8
+    osel297: T=32, m=8
+    osel298: T=32, m=8
+    osel299: T=16, m=8
+    osel2100: T=32, m=8
+    osel2101: T=16, m=8
+    osel2102: T=16, m=8
+    osel2103: T=8, m=8
+    osel2104: T=32, m=8
+    osel2105: T=16, m=8
+    osel2106: T=16, m=8
+    osel2107: T=8, m=8
+    osel2108: T=16, m=8
+    osel2109: T=8, m=8
+    osel2110: T=8, m=8
+    osel2111: T=4, m=8
+    osel2112: T=32, m=8
+    osel2113: T=16, m=8
+    osel2114: T=16, m=8
+    osel2115: T=8, m=8
+    osel2116: T=16, m=8
+    osel2117: T=8, m=8
+    osel2118: T=8, m=8
+    osel2119: T=4, m=8
+    osel2120: T=16, m=8
+    osel2121: T=8, m=8
+    osel2122: T=8, m=8
+    osel2123: T=4, m=8
+    osel2124: T=8, m=8
+    osel2125: T=4, m=8
+    osel2126: T=4, m=8
+    osel2127: T=2, m=8
+
+Phase 2c: d1c product-based simplification...
+    [d1c] output 0 (t=8): T_nl 127 → 1 (b=0x7f)
+      → T_union=256
+    [d1c] output 1 (t=8): T_nl 64 → 1 (b=0x7e)
+      → T_union=256
+    [d1c] output 2 (t=8): T_nl 64 → 1 (b=0x7d)
+      → T_union=256
+    [d1c] output 3 (t=8): T_nl 32 → 1 (b=0x7c)
+      → T_union=256
+    [d1c] output 4 (t=8): T_nl 64 → 1 (b=0x7b)
+      → T_union=256
+    [d1c] output 5 (t=8): T_nl 32 → 1 (b=0x7a)
+      → T_union=256
+    [d1c] output 6 (t=8): T_nl 32 → 1 (b=0x79)
+      → T_union=256
+    [d1c] output 7 (t=8): T_nl 16 → 1 (b=0x78)
+      → T_union=256
+    [d1c] output 8 (t=8): T_nl 64 → 1 (b=0x77)
+      → T_union=256
+    [d1c] output 9 (t=8): T_nl 32 → 1 (b=0x76)
+      → T_union=256
+    [d1c] output 10 (t=8): T_nl 32 → 1 (b=0x75)
+      → T_union=256
+    [d1c] output 11 (t=8): T_nl 16 → 1 (b=0x74)
+      → T_union=256
+    [d1c] output 12 (t=8): T_nl 32 → 1 (b=0x73)
+      → T_union=256
+    [d1c] output 13 (t=8): T_nl 16 → 1 (b=0x72)
+      → T_union=256
+    [d1c] output 14 (t=8): T_nl 16 → 1 (b=0x71)
+      → T_union=256
+    [d1c] output 15 (t=8): T_nl 8 → 1 (b=0x70)
+      → T_union=256
+    [d1c] output 16 (t=8): T_nl 64 → 1 (b=0x6f)
+      → T_union=256
+    [d1c] output 17 (t=8): T_nl 32 → 1 (b=0x6e)
+      → T_union=256
+    [d1c] output 18 (t=8): T_nl 32 → 1 (b=0x6d)
+      → T_union=256
+    [d1c] output 19 (t=8): T_nl 16 → 1 (b=0x6c)
+      → T_union=256
+    [d1c] output 20 (t=8): T_nl 32 → 1 (b=0x6b)
+      → T_union=256
+    [d1c] output 21 (t=8): T_nl 16 → 1 (b=0x6a)
+      → T_union=256
+    [d1c] output 22 (t=8): T_nl 16 → 1 (b=0x69)
+      → T_union=256
+    [d1c] output 23 (t=8): T_nl 8 → 1 (b=0x68)
+      → T_union=256
+    [d1c] output 24 (t=8): T_nl 32 → 1 (b=0x67)
+      → T_union=256
+    [d1c] output 25 (t=8): T_nl 16 → 1 (b=0x66)
+      → T_union=256
+    [d1c] output 26 (t=8): T_nl 16 → 1 (b=0x65)
+      → T_union=256
+    [d1c] output 27 (t=8): T_nl 8 → 1 (b=0x64)
+      → T_union=256
+    [d1c] output 28 (t=8): T_nl 16 → 1 (b=0x63)
+      → T_union=256
+    [d1c] output 29 (t=8): T_nl 8 → 1 (b=0x62)
+      → T_union=256
+    [d1c] output 30 (t=8): T_nl 8 → 1 (b=0x61)
+      → T_union=256
+    [d1c] output 31 (t=8): T_nl 4 → 1 (b=0x60)
+      → T_union=256
+    [d1c] output 32 (t=8): T_nl 64 → 1 (b=0x5f)
+      → T_union=256
+    [d1c] output 33 (t=8): T_nl 32 → 1 (b=0x5e)
+      → T_union=256
+    [d1c] output 34 (t=8): T_nl 32 → 1 (b=0x5d)
+      → T_union=256
+    [d1c] output 35 (t=8): T_nl 16 → 1 (b=0x5c)
+      → T_union=256
+    [d1c] output 36 (t=8): T_nl 32 → 1 (b=0x5b)
+      → T_union=256
+    [d1c] output 37 (t=8): T_nl 16 → 1 (b=0x5a)
+      → T_union=256
+    [d1c] output 38 (t=8): T_nl 16 → 1 (b=0x59)
+      → T_union=256
+    [d1c] output 39 (t=8): T_nl 8 → 1 (b=0x58)
+      → T_union=256
+    [d1c] output 40 (t=8): T_nl 32 → 1 (b=0x57)
+      → T_union=256
+    [d1c] output 41 (t=8): T_nl 16 → 1 (b=0x56)
+      → T_union=256
+    [d1c] output 42 (t=8): T_nl 16 → 1 (b=0x55)
+      → T_union=256
+    [d1c] output 43 (t=8): T_nl 8 → 1 (b=0x54)
+      → T_union=256
+    [d1c] output 44 (t=8): T_nl 16 → 1 (b=0x53)
+      → T_union=256
+    [d1c] output 45 (t=8): T_nl 8 → 1 (b=0x52)
+      → T_union=256
+    [d1c] output 46 (t=8): T_nl 8 → 1 (b=0x51)
+      → T_union=256
+    [d1c] output 47 (t=8): T_nl 4 → 1 (b=0x50)
+      → T_union=256
+    [d1c] output 48 (t=8): T_nl 32 → 1 (b=0x4f)
+      → T_union=256
+    [d1c] output 49 (t=8): T_nl 16 → 1 (b=0x4e)
+      → T_union=256
+    [d1c] output 50 (t=8): T_nl 16 → 1 (b=0x4d)
+      → T_union=256
+    [d1c] output 51 (t=8): T_nl 8 → 1 (b=0x4c)
+      → T_union=256
+    [d1c] output 52 (t=8): T_nl 16 → 1 (b=0x4b)
+      → T_union=256
+    [d1c] output 53 (t=8): T_nl 8 → 1 (b=0x4a)
+      → T_union=256
+    [d1c] output 54 (t=8): T_nl 8 → 1 (b=0x49)
+      → T_union=256
+    [d1c] output 55 (t=8): T_nl 4 → 1 (b=0x48)
+      → T_union=256
+    [d1c] output 56 (t=8): T_nl 16 → 1 (b=0x47)
+      → T_union=256
+    [d1c] output 57 (t=8): T_nl 8 → 1 (b=0x46)
+      → T_union=256
+    [d1c] output 58 (t=8): T_nl 8 → 1 (b=0x45)
+      → T_union=256
+    [d1c] output 59 (t=8): T_nl 4 → 1 (b=0x44)
+      → T_union=256
+    [d1c] output 60 (t=8): T_nl 8 → 1 (b=0x43)
+      → T_union=256
+    [d1c] output 61 (t=8): T_nl 4 → 1 (b=0x42)
+      → T_union=256
+    [d1c] output 62 (t=8): T_nl 4 → 1 (b=0x41)
+      → T_union=256
+    [d1c] output 63 (t=8): T_nl 2 → 1 (b=0x40)
+      → T_union=256
+    [d1c] output 64 (t=8): T_nl 64 → 1 (b=0x3f)
+      → T_union=256
+    [d1c] output 65 (t=8): T_nl 32 → 1 (b=0x3e)
+      → T_union=256
+    [d1c] output 66 (t=8): T_nl 32 → 1 (b=0x3d)
+      → T_union=256
+    [d1c] output 67 (t=8): T_nl 16 → 1 (b=0x3c)
+      → T_union=256
+    [d1c] output 68 (t=8): T_nl 32 → 1 (b=0x3b)
+      → T_union=256
+    [d1c] output 69 (t=8): T_nl 16 → 1 (b=0x3a)
+      → T_union=256
+    [d1c] output 70 (t=8): T_nl 16 → 1 (b=0x39)
+      → T_union=256
+    [d1c] output 71 (t=8): T_nl 8 → 1 (b=0x38)
+      → T_union=256
+    [d1c] output 72 (t=8): T_nl 32 → 1 (b=0x37)
+      → T_union=256
+    [d1c] output 73 (t=8): T_nl 16 → 1 (b=0x36)
+      → T_union=256
+    [d1c] output 74 (t=8): T_nl 16 → 1 (b=0x35)
+      → T_union=256
+    [d1c] output 75 (t=8): T_nl 8 → 1 (b=0x34)
+      → T_union=256
+    [d1c] output 76 (t=8): T_nl 16 → 1 (b=0x33)
+      → T_union=256
+    [d1c] output 77 (t=8): T_nl 8 → 1 (b=0x32)
+      → T_union=256
+    [d1c] output 78 (t=8): T_nl 8 → 1 (b=0x31)
+      → T_union=256
+    [d1c] output 79 (t=8): T_nl 4 → 1 (b=0x30)
+      → T_union=256
+    [d1c] output 80 (t=8): T_nl 32 → 1 (b=0x2f)
+      → T_union=256
+    [d1c] output 81 (t=8): T_nl 16 → 1 (b=0x2e)
+      → T_union=256
+    [d1c] output 82 (t=8): T_nl 16 → 1 (b=0x2d)
+      → T_union=256
+    [d1c] output 83 (t=8): T_nl 8 → 1 (b=0x2c)
+      → T_union=256
+    [d1c] output 84 (t=8): T_nl 16 → 1 (b=0x2b)
+      → T_union=256
+    [d1c] output 85 (t=8): T_nl 8 → 1 (b=0x2a)
+      → T_union=256
+    [d1c] output 86 (t=8): T_nl 8 → 1 (b=0x29)
+      → T_union=256
+    [d1c] output 87 (t=8): T_nl 4 → 1 (b=0x28)
+      → T_union=256
+    [d1c] output 88 (t=8): T_nl 16 → 1 (b=0x27)
+      → T_union=256
+    [d1c] output 89 (t=8): T_nl 8 → 1 (b=0x26)
+      → T_union=256
+    [d1c] output 90 (t=8): T_nl 8 → 1 (b=0x25)
+      → T_union=256
+    [d1c] output 91 (t=8): T_nl 4 → 1 (b=0x24)
+      → T_union=256
+    [d1c] output 92 (t=8): T_nl 8 → 1 (b=0x23)
+      → T_union=256
+    [d1c] output 93 (t=8): T_nl 4 → 1 (b=0x22)
+      → T_union=256
+    [d1c] output 94 (t=8): T_nl 4 → 1 (b=0x21)
+      → T_union=256
+    [d1c] output 95 (t=8): T_nl 2 → 1 (b=0x20)
+      → T_union=256
+    [d1c] output 96 (t=8): T_nl 32 → 1 (b=0x1f)
+      → T_union=256
+    [d1c] output 97 (t=8): T_nl 16 → 1 (b=0x1e)
+      → T_union=256
+    [d1c] output 98 (t=8): T_nl 16 → 1 (b=0x1d)
+      → T_union=256
+    [d1c] output 99 (t=8): T_nl 8 → 1 (b=0x1c)
+      → T_union=256
+    [d1c] output 100 (t=8): T_nl 16 → 1 (b=0x1b)
+      → T_union=256
+    [d1c] output 101 (t=8): T_nl 8 → 1 (b=0x1a)
+      → T_union=256
+    [d1c] output 102 (t=8): T_nl 8 → 1 (b=0x19)
+      → T_union=256
+    [d1c] output 103 (t=8): T_nl 4 → 1 (b=0x18)
+      → T_union=256
+    [d1c] output 104 (t=8): T_nl 16 → 1 (b=0x17)
+      → T_union=256
+    [d1c] output 105 (t=8): T_nl 8 → 1 (b=0x16)
+      → T_union=256
+    [d1c] output 106 (t=8): T_nl 8 → 1 (b=0x15)
+      → T_union=256
+    [d1c] output 107 (t=8): T_nl 4 → 1 (b=0x14)
+      → T_union=256
+    [d1c] output 108 (t=8): T_nl 8 → 1 (b=0x13)
+      → T_union=256
+    [d1c] output 109 (t=8): T_nl 4 → 1 (b=0x12)
+      → T_union=256
+    [d1c] output 110 (t=8): T_nl 4 → 1 (b=0x11)
+      → T_union=256
+    [d1c] output 111 (t=8): T_nl 2 → 1 (b=0x10)
+      → T_union=256
+    [d1c] output 112 (t=8): T_nl 16 → 1 (b=0xf)
+      → T_union=256
+    [d1c] output 113 (t=8): T_nl 8 → 1 (b=0xe)
+      → T_union=256
+    [d1c] output 114 (t=8): T_nl 8 → 1 (b=0xd)
+      → T_union=256
+    [d1c] output 115 (t=8): T_nl 4 → 1 (b=0xc)
+      → T_union=256
+    [d1c] output 116 (t=8): T_nl 8 → 1 (b=0xb)
+      → T_union=256
+    [d1c] output 117 (t=8): T_nl 4 → 1 (b=0xa)
+      → T_union=256
+    [d1c] output 118 (t=8): T_nl 4 → 1 (b=0x9)
+      → T_union=256
+    [d1c] output 119 (t=8): T_nl 2 → 1 (b=0x8)
+      → T_union=256
+    [d1c] output 120 (t=8): T_nl 8 → 1 (b=0x7)
+      → T_union=256
+    [d1c] output 121 (t=8): T_nl 4 → 1 (b=0x6)
+      → T_union=256
+    [d1c] output 122 (t=8): T_nl 4 → 1 (b=0x5)
+      → T_union=256
+    [d1c] output 123 (t=8): T_nl 2 → 1 (b=0x4)
+      → T_union=256
+    [d1c] output 124 (t=8): T_nl 4 → 1 (b=0x3)
+      → T_union=256
+    [d1c] output 125 (t=8): T_nl 2 → 1 (b=0x2)
+      → T_union=256
+    [d1c] output 126 (t=8): T_nl 2 → 1 (b=0x1)
+      → T_union=256
+    [d1c] output 128 (t=8): T_nl 247 → 1 (b=0xff)
+      → T_union=256
+    [d1c] output 129 (t=8): T_nl 127 → 1 (b=0xfe)
+      → T_union=256
+    [d1c] output 130 (t=8): T_nl 127 → 1 (b=0xfd)
+      → T_union=256
+    [d1c] output 131 (t=8): T_nl 64 → 1 (b=0xfc)
+      → T_union=256
+    [d1c] output 132 (t=8): T_nl 127 → 1 (b=0xfb)
+      → T_union=256
+    [d1c] output 133 (t=8): T_nl 64 → 1 (b=0xfa)
+      → T_union=256
+    [d1c] output 134 (t=8): T_nl 64 → 1 (b=0xf9)
+      → T_union=256
+    [d1c] output 135 (t=8): T_nl 32 → 1 (b=0xf8)
+      → T_union=256
+    [d1c] output 136 (t=8): T_nl 127 → 1 (b=0xf7)
+      → T_union=256
+    [d1c] output 137 (t=8): T_nl 64 → 1 (b=0xf6)
+      → T_union=256
+    [d1c] output 138 (t=8): T_nl 64 → 1 (b=0xf5)
+      → T_union=256
+    [d1c] output 139 (t=8): T_nl 32 → 1 (b=0xf4)
+      → T_union=256
+    [d1c] output 140 (t=8): T_nl 64 → 1 (b=0xf3)
+      → T_union=256
+    [d1c] output 141 (t=8): T_nl 32 → 1 (b=0xf2)
+      → T_union=256
+    [d1c] output 142 (t=8): T_nl 32 → 1 (b=0xf1)
+      → T_union=256
+    [d1c] output 143 (t=8): T_nl 16 → 1 (b=0xf0)
+      → T_union=256
+    [d1c] output 144 (t=8): T_nl 127 → 1 (b=0xef)
+      → T_union=256
+    [d1c] output 145 (t=8): T_nl 64 → 1 (b=0xee)
+      → T_union=256
+    [d1c] output 146 (t=8): T_nl 64 → 1 (b=0xed)
+      → T_union=256
+    [d1c] output 147 (t=8): T_nl 32 → 1 (b=0xec)
+      → T_union=256
+    [d1c] output 148 (t=8): T_nl 64 → 1 (b=0xeb)
+      → T_union=256
+    [d1c] output 149 (t=8): T_nl 32 → 1 (b=0xea)
+      → T_union=256
+    [d1c] output 150 (t=8): T_nl 32 → 1 (b=0xe9)
+      → T_union=256
+    [d1c] output 151 (t=8): T_nl 16 → 1 (b=0xe8)
+      → T_union=256
+    [d1c] output 152 (t=8): T_nl 64 → 1 (b=0xe7)
+      → T_union=256
+    [d1c] output 153 (t=8): T_nl 32 → 1 (b=0xe6)
+      → T_union=256
+    [d1c] output 154 (t=8): T_nl 32 → 1 (b=0xe5)
+      → T_union=256
+    [d1c] output 155 (t=8): T_nl 16 → 1 (b=0xe4)
+      → T_union=256
+    [d1c] output 156 (t=8): T_nl 32 → 1 (b=0xe3)
+      → T_union=256
+    [d1c] output 157 (t=8): T_nl 16 → 1 (b=0xe2)
+      → T_union=256
+    [d1c] output 158 (t=8): T_nl 16 → 1 (b=0xe1)
+      → T_union=256
+    [d1c] output 159 (t=8): T_nl 8 → 1 (b=0xe0)
+      → T_union=256
+    [d1c] output 160 (t=8): T_nl 127 → 1 (b=0xdf)
+      → T_union=256
+    [d1c] output 161 (t=8): T_nl 64 → 1 (b=0xde)
+      → T_union=256
+    [d1c] output 162 (t=8): T_nl 64 → 1 (b=0xdd)
+      → T_union=256
+    [d1c] output 163 (t=8): T_nl 32 → 1 (b=0xdc)
+      → T_union=256
+    [d1c] output 164 (t=8): T_nl 64 → 1 (b=0xdb)
+      → T_union=256
+    [d1c] output 165 (t=8): T_nl 32 → 1 (b=0xda)
+      → T_union=256
+    [d1c] output 166 (t=8): T_nl 32 → 1 (b=0xd9)
+      → T_union=256
+    [d1c] output 167 (t=8): T_nl 16 → 1 (b=0xd8)
+      → T_union=256
+    [d1c] output 168 (t=8): T_nl 64 → 1 (b=0xd7)
+      → T_union=256
+    [d1c] output 169 (t=8): T_nl 32 → 1 (b=0xd6)
+      → T_union=256
+    [d1c] output 170 (t=8): T_nl 32 → 1 (b=0xd5)
+      → T_union=256
+    [d1c] output 171 (t=8): T_nl 16 → 1 (b=0xd4)
+      → T_union=256
+    [d1c] output 172 (t=8): T_nl 32 → 1 (b=0xd3)
+      → T_union=256
+    [d1c] output 173 (t=8): T_nl 16 → 1 (b=0xd2)
+      → T_union=256
+    [d1c] output 174 (t=8): T_nl 16 → 1 (b=0xd1)
+      → T_union=256
+    [d1c] output 175 (t=8): T_nl 8 → 1 (b=0xd0)
+      → T_union=256
+    [d1c] output 176 (t=8): T_nl 64 → 1 (b=0xcf)
+      → T_union=256
+    [d1c] output 177 (t=8): T_nl 32 → 1 (b=0xce)
+      → T_union=256
+    [d1c] output 178 (t=8): T_nl 32 → 1 (b=0xcd)
+      → T_union=256
+    [d1c] output 179 (t=8): T_nl 16 → 1 (b=0xcc)
+      → T_union=256
+    [d1c] output 180 (t=8): T_nl 32 → 1 (b=0xcb)
+      → T_union=256
+    [d1c] output 181 (t=8): T_nl 16 → 1 (b=0xca)
+      → T_union=256
+    [d1c] output 182 (t=8): T_nl 16 → 1 (b=0xc9)
+      → T_union=256
+    [d1c] output 183 (t=8): T_nl 8 → 1 (b=0xc8)
+      → T_union=256
+    [d1c] output 184 (t=8): T_nl 32 → 1 (b=0xc7)
+      → T_union=256
+    [d1c] output 185 (t=8): T_nl 16 → 1 (b=0xc6)
+      → T_union=256
+    [d1c] output 186 (t=8): T_nl 16 → 1 (b=0xc5)
+      → T_union=256
+    [d1c] output 187 (t=8): T_nl 8 → 1 (b=0xc4)
+      → T_union=256
+    [d1c] output 188 (t=8): T_nl 16 → 1 (b=0xc3)
+      → T_union=256
+    [d1c] output 189 (t=8): T_nl 8 → 1 (b=0xc2)
+      → T_union=256
+    [d1c] output 190 (t=8): T_nl 8 → 1 (b=0xc1)
+      → T_union=256
+    [d1c] output 191 (t=8): T_nl 4 → 1 (b=0xc0)
+      → T_union=256
+    [d1c] output 192 (t=8): T_nl 127 → 1 (b=0xbf)
+      → T_union=256
+    [d1c] output 193 (t=8): T_nl 64 → 1 (b=0xbe)
+      → T_union=256
+    [d1c] output 194 (t=8): T_nl 64 → 1 (b=0xbd)
+      → T_union=256
+    [d1c] output 195 (t=8): T_nl 32 → 1 (b=0xbc)
+      → T_union=256
+    [d1c] output 196 (t=8): T_nl 64 → 1 (b=0xbb)
+      → T_union=256
+    [d1c] output 197 (t=8): T_nl 32 → 1 (b=0xba)
+      → T_union=256
+    [d1c] output 198 (t=8): T_nl 32 → 1 (b=0xb9)
+      → T_union=256
+    [d1c] output 199 (t=8): T_nl 16 → 1 (b=0xb8)
+      → T_union=256
+    [d1c] output 200 (t=8): T_nl 64 → 1 (b=0xb7)
+      → T_union=256
+    [d1c] output 201 (t=8): T_nl 32 → 1 (b=0xb6)
+      → T_union=256
+    [d1c] output 202 (t=8): T_nl 32 → 1 (b=0xb5)
+      → T_union=256
+    [d1c] output 203 (t=8): T_nl 16 → 1 (b=0xb4)
+      → T_union=256
+    [d1c] output 204 (t=8): T_nl 32 → 1 (b=0xb3)
+      → T_union=256
+    [d1c] output 205 (t=8): T_nl 16 → 1 (b=0xb2)
+      → T_union=256
+    [d1c] output 206 (t=8): T_nl 16 → 1 (b=0xb1)
+      → T_union=256
+    [d1c] output 207 (t=8): T_nl 8 → 1 (b=0xb0)
+      → T_union=256
+    [d1c] output 208 (t=8): T_nl 64 → 1 (b=0xaf)
+      → T_union=256
+    [d1c] output 209 (t=8): T_nl 32 → 1 (b=0xae)
+      → T_union=256
+    [d1c] output 210 (t=8): T_nl 32 → 1 (b=0xad)
+      → T_union=256
+    [d1c] output 211 (t=8): T_nl 16 → 1 (b=0xac)
+      → T_union=256
+    [d1c] output 212 (t=8): T_nl 32 → 1 (b=0xab)
+      → T_union=256
+    [d1c] output 213 (t=8): T_nl 16 → 1 (b=0xaa)
+      → T_union=256
+    [d1c] output 214 (t=8): T_nl 16 → 1 (b=0xa9)
+      → T_union=256
+    [d1c] output 215 (t=8): T_nl 8 → 1 (b=0xa8)
+      → T_union=256
+    [d1c] output 216 (t=8): T_nl 32 → 1 (b=0xa7)
+      → T_union=256
+    [d1c] output 217 (t=8): T_nl 16 → 1 (b=0xa6)
+      → T_union=256
+    [d1c] output 218 (t=8): T_nl 16 → 1 (b=0xa5)
+      → T_union=256
+    [d1c] output 219 (t=8): T_nl 8 → 1 (b=0xa4)
+      → T_union=256
+    [d1c] output 220 (t=8): T_nl 16 → 1 (b=0xa3)
+      → T_union=256
+    [d1c] output 221 (t=8): T_nl 8 → 1 (b=0xa2)
+      → T_union=256
+    [d1c] output 222 (t=8): T_nl 8 → 1 (b=0xa1)
+      → T_union=256
+    [d1c] output 223 (t=8): T_nl 4 → 1 (b=0xa0)
+      → T_union=256
+    [d1c] output 224 (t=8): T_nl 64 → 1 (b=0x9f)
+      → T_union=256
+    [d1c] output 225 (t=8): T_nl 32 → 1 (b=0x9e)
+      → T_union=256
+    [d1c] output 226 (t=8): T_nl 32 → 1 (b=0x9d)
+      → T_union=256
+    [d1c] output 227 (t=8): T_nl 16 → 1 (b=0x9c)
+      → T_union=256
+    [d1c] output 228 (t=8): T_nl 32 → 1 (b=0x9b)
+      → T_union=256
+    [d1c] output 229 (t=8): T_nl 16 → 1 (b=0x9a)
+      → T_union=256
+    [d1c] output 230 (t=8): T_nl 16 → 1 (b=0x99)
+      → T_union=256
+    [d1c] output 231 (t=8): T_nl 8 → 1 (b=0x98)
+      → T_union=256
+    [d1c] output 232 (t=8): T_nl 32 → 1 (b=0x97)
+      → T_union=256
+    [d1c] output 233 (t=8): T_nl 16 → 1 (b=0x96)
+      → T_union=256
+    [d1c] output 234 (t=8): T_nl 16 → 1 (b=0x95)
+      → T_union=256
+    [d1c] output 235 (t=8): T_nl 8 → 1 (b=0x94)
+      → T_union=256
+    [d1c] output 236 (t=8): T_nl 16 → 1 (b=0x93)
+      → T_union=256
+    [d1c] output 237 (t=8): T_nl 8 → 1 (b=0x92)
+      → T_union=256
+    [d1c] output 238 (t=8): T_nl 8 → 1 (b=0x91)
+      → T_union=256
+    [d1c] output 239 (t=8): T_nl 4 → 1 (b=0x90)
+      → T_union=256
+    [d1c] output 240 (t=8): T_nl 32 → 1 (b=0x8f)
+      → T_union=256
+    [d1c] output 241 (t=8): T_nl 16 → 1 (b=0x8e)
+      → T_union=256
+    [d1c] output 242 (t=8): T_nl 16 → 1 (b=0x8d)
+      → T_union=256
+    [d1c] output 243 (t=8): T_nl 8 → 1 (b=0x8c)
+      → T_union=256
+    [d1c] output 244 (t=8): T_nl 16 → 1 (b=0x8b)
+      → T_union=256
+    [d1c] output 245 (t=8): T_nl 8 → 1 (b=0x8a)
+      → T_union=256
+    [d1c] output 246 (t=8): T_nl 8 → 1 (b=0x89)
+      → T_union=256
+    [d1c] output 247 (t=8): T_nl 4 → 1 (b=0x88)
+      → T_union=256
+    [d1c] output 248 (t=8): T_nl 16 → 1 (b=0x87)
+      → T_union=256
+    [d1c] output 249 (t=8): T_nl 8 → 1 (b=0x86)
+      → T_union=256
+    [d1c] output 250 (t=8): T_nl 8 → 1 (b=0x85)
+      → T_union=256
+    [d1c] output 251 (t=8): T_nl 4 → 1 (b=0x84)
+      → T_union=256
+    [d1c] output 252 (t=8): T_nl 8 → 1 (b=0x83)
+      → T_union=256
+    [d1c] output 253 (t=8): T_nl 4 → 1 (b=0x82)
+      → T_union=256
+    [d1c] output 254 (t=8): T_nl 4 → 1 (b=0x81)
+      → T_union=256
+    [d1c] output 255 (t=8): T_nl 2 → 1 (b=0x80)
+      → T_union=256
+    Searched 256 output(s), 255 improved
+    d1c time: 43.3505 s
+
+Phase 2b: Computing Aut(F) basis...
+  dim(Aut(F)) = 6
+  basis vectors: 1 2 4 8 16 32
+  Aut(F) time: 0.00105476 s
+  Dependency union: 8/8 bits (0 don't-care)
+
+Phase 3: Computing Walsh correlations...
+  Output osel10 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output osel11 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output osel12 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output osel13 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output osel14 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output osel15 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output osel16 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output osel17 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Walsh time: 0.023025 s
+
+Phase 4: Searching for M,b...
+  4a-pr: Progressive M construction (max m=16)...
+    progressive result: m=8 T_union=256
+    progressive time: 0.169768 s
+  4a: Single-row Walsh (20000 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (10000 candidates)
+  Search time: 180.433 s
+  4e: Hill climbing from top 10000 candidates (+ identity)

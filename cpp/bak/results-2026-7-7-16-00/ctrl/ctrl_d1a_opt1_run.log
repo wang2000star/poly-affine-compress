@@ -1,0 +1,2980 @@
+--- Circuit ---
+  Inputs: 7, Outputs to optimize: 26
+
+Phase 1: Computing truth table...
+  Truth table: 2^7 = 128 inputs, 2 batches, 26 output(s), 104 thread(s)
+
+Phase 2: Raw ANF baseline...
+  Sum T = 215
+  Max deg = 7
+    oseloregdst0: T=9, m=5
+    oseloregdst1: T=10, m=5
+    oselopB0: T=12, m=4
+    oselopB1: T=8, m=5
+    oaluop0: T=12, m=7
+    oaluop1: T=6, m=5
+    oaluop2: T=5, m=5
+    oaluopext0: T=9, m=5
+    oaluopext1: T=9, m=5
+    oaluopext2: T=10, m=5
+    oaluopext3: T=8, m=5
+    ohalt: T=26, m=5
+    oregwrite: T=14, m=5
+    oselpcopA: T=4, m=4
+    oselpcopB: T=7, m=4
+    obeqz: T=8, m=5
+    obnez: T=4, m=5
+    obgez: T=2, m=5
+    obltz: T=4, m=5
+    ojump: T=3, m=3
+    oCin: T=8, m=6
+    oinvA: T=12, m=7
+    oinvB: T=6, m=7
+    osign: T=0, m=0
+    omemwrite: T=11, m=4
+    oselwb: T=8, m=5
+
+Phase 2c: d1c product-based simplification...
+    [d1c] output 0 (t=5): T_nl 9 → 7 (b=0x1f)
+      → T_union=72
+    [d1c] output 1 (t=5): T_nl 10 → 7 (b=0x5)
+      → T_union=35
+    [d1c] output 2 (t=5): T_nl 12 → 4 (b=0x5)
+      → T_union=35
+    [d1c] output 3 (t=5): T_nl 8 → 3 (b=0x6)
+      → T_union=38
+    [d1c] output 4 (t=7): T_nl 12 → 8 (b=0x44)
+      → T_union=34
+    [d1c] output 5 (t=5): T_nl 6 → 5 (b=0x4)
+      → T_union=34
+    [d1c] output 7 (t=5): T_nl 9 → 8 (b=0x1)
+      → T_union=41
+    [d1c] output 8 (t=5): T_nl 9 → 4 (b=0x9)
+      → T_union=52
+    [d1c] output 9 (t=5): T_nl 10 → 7 (b=0xd)
+      → T_union=42
+    [d1c] output 10 (t=5): T_nl 8 → 6 (b=0x4)
+      → T_union=34
+    [d1c] output 11 (t=5): T_nl 26 → 1 (b=0x1f)
+      → T_union=72
+    [d1c] output 12 (t=5): T_nl 14 → 6 (b=0xa)
+      → T_union=64
+    [d1c] output 13 (t=4): T_nl 4 → 1 (b=0x18)
+      → T_union=64
+    [d1c] output 14 (t=4): T_nl 7 → 1 (b=0x19)
+      → T_union=72
+    [d1c] output 15 (t=5): T_nl 8 → 1 (b=0x13)
+      → T_union=72
+    [d1c] output 16 (t=5): T_nl 4 → 1 (b=0x12)
+      → T_union=64
+    [d1c] output 17 (t=5): T_nl 2 → 1 (b=0x10)
+      → T_union=48
+    [d1c] output 18 (t=5): T_nl 4 → 1 (b=0x11)
+      → T_union=52
+    [d1c] output 19 (t=3): T_nl 3 → 1 (b=0x18)
+      → T_union=64
+    [d1c] output 20 (t=6): T_nl 8 → 6 (b=0x24)
+      → T_union=35
+    [d1c] output 21 (t=7): T_nl 12 → 4 (b=0x46)
+      → T_union=38
+    [d1c] output 22 (t=7): T_nl 6 → 5 (b=0x4)
+      → T_union=34
+    [d1c] output 24 (t=5): T_nl 11 → 2 (b=0xd)
+      → T_union=42
+    [d1c] output 25 (t=5): T_nl 8 → 1 (b=0xe)
+      → T_union=48
+    Searched 26 output(s), 24 improved
+    d1c time: 0.384531 s
+
+Phase 2b: Computing Aut(F) basis...
+  dim(Aut(F)) = 3
+  basis vectors: 1 2 32
+  Aut(F) time: 7.767e-05 s
+  Dependency union: 7/7 bits (0 don't-care)
+
+Phase 3: Computing Walsh correlations...
+  Output oseloregdst0 top-5 bits: 6(18) 3(10) 4(10) 1(6) 2(6)
+  Output oseloregdst1 top-5 bits: 6(10) 1(6) 3(6) 0(2) 2(2)
+  Output oselopB0 top-5 bits: 2(8) 6(8) 0(4) 1(4) 3(4)
+  Output oselopB1 top-5 bits: 6(22) 4(14) 3(10) 1(6) 2(6)
+  Output oaluop0 top-5 bits: 6(8) 0(6) 1(4) 4(4) 5(2)
+  Output oaluop1 top-5 bits: 1(12) 6(12) 2(4) 3(4) 4(4)
+  Output oaluop2 top-5 bits: 6(26) 2(10) 3(10) 4(10) 0(2)
+  Output oaluopext0 top-5 bits: 6(10) 2(6) 0(2) 1(2) 3(2)
+  Walsh time: 0.00138236 s
+
+Phase 4: Searching for M,b...
+  4a-pr: Progressive M construction (max m=15)...
+    progressive result: m=7 T_union=40
+    progressive time: 0.0159337 s
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (100000 candidates)
+  Search time: 166.953 s
+  4e: Hill climbing from top 100000 candidates (+ identity)
+    hill climb #4: T=35 -> T=34
+    hill climb #5: T=35 -> T=34
+    hill climb #7: T=35 -> T=34
+    hill climb #8: T=38 -> T=34
+    hill climb #9: T=38 -> T=34
+    hill climb #10: T=39 -> T=36
+    hill climb #11: T=40 -> T=36
+    hill climb #12: T=40 -> T=36
+    hill climb #13: T=41 -> T=36
+    hill climb #14: T=42 -> T=36
+    hill climb #15: T=42 -> T=36
+    hill climb #16: T=47 -> T=43
+    hill climb #17: T=48 -> T=36
+    hill climb #18: T=48 -> T=43
+    hill climb #19: T=48 -> T=37
+    hill climb #20: T=48 -> T=35
+    hill climb #21: T=52 -> T=36
+    hill climb #22: T=52 -> T=36
+    hill climb #23: T=56 -> T=36
+    hill climb #24: T=56 -> T=36
+    hill climb #25: T=56 -> T=50
+    hill climb #26: T=58 -> T=49
+    hill climb #27: T=60 -> T=35
+    hill climb #28: T=60 -> T=43
+    hill climb #29: T=60 -> T=50
+    hill climb #30: T=60 -> T=35
+    hill climb #31: T=60 -> T=36
+    hill climb #32: T=61 -> T=39
+    hill climb #33: T=62 -> T=43
+    hill climb #34: T=62 -> T=35
+    hill climb #35: T=62 -> T=43
+    hill climb #36: T=62 -> T=39
+    hill climb #37: T=63 -> T=36
+    hill climb #39: T=63 -> T=34
+    hill climb #40: T=64 -> T=36
+    hill climb #41: T=64 -> T=36
+    hill climb #42: T=64 -> T=39
+    hill climb #43: T=64 -> T=36
+    hill climb #44: T=64 -> T=43
+    hill climb #45: T=64 -> T=36
+    hill climb #46: T=65 -> T=49
+    hill climb #47: T=65 -> T=62
+    hill climb #48: T=65 -> T=43
+    hill climb #49: T=66 -> T=36
+    hill climb #50: T=66 -> T=40
+    hill climb #51: T=66 -> T=39
+    hill climb #52: T=66 -> T=39
+    hill climb #53: T=67 -> T=36
+    hill climb #54: T=67 -> T=39
+    hill climb #55: T=67 -> T=49
+    hill climb #56: T=67 -> T=65
+    hill climb #57: T=68 -> T=36
+    hill climb #58: T=68 -> T=36
+    hill climb #59: T=68 -> T=36
+    hill climb #60: T=68 -> T=36
+    hill climb #61: T=68 -> T=36
+    hill climb #62: T=68 -> T=39
+    hill climb #63: T=68 -> T=64
+    hill climb #64: T=68 -> T=65
+    hill climb #65: T=68 -> T=43
+    hill climb #66: T=68 -> T=36
+    hill climb #67: T=69 -> T=36
+    hill climb #68: T=69 -> T=54
+    hill climb #69: T=69 -> T=44
+    hill climb #70: T=69 -> T=64
+    hill climb #71: T=70 -> T=65
+    hill climb #72: T=70 -> T=36
+    hill climb #73: T=70 -> T=42
+    hill climb #74: T=70 -> T=36
+    hill climb #75: T=70 -> T=35
+    hill climb #76: T=70 -> T=63
+    hill climb #77: T=70 -> T=40
+    hill climb #78: T=70 -> T=65
+    hill climb #79: T=70 -> T=39
+    hill climb #80: T=71 -> T=43
+    hill climb #81: T=71 -> T=63
+    hill climb #82: T=71 -> T=63
+    hill climb #83: T=71 -> T=70
+    hill climb #84: T=72 -> T=36
+    hill climb #85: T=72 -> T=35
+    hill climb #86: T=72 -> T=36
+    hill climb #87: T=72 -> T=36
+    hill climb #88: T=72 -> T=60
+    hill climb #89: T=72 -> T=63
+    hill climb #90: T=72 -> T=35
+    hill climb #91: T=72 -> T=54
+    hill climb #92: T=73 -> T=66
+    hill climb #93: T=73 -> T=66
+    hill climb #94: T=73 -> T=36
+    hill climb #95: T=73 -> T=71
+    hill climb #97: T=73 -> T=36
+    hill climb #98: T=73 -> T=67
+    hill climb #99: T=73 -> T=43
+    hill climb #101: T=74 -> T=36
+    hill climb #102: T=74 -> T=35
+    hill climb #103: T=74 -> T=55
+    hill climb #104: T=74 -> T=36
+    hill climb #105: T=74 -> T=65
+    hill climb #106: T=74 -> T=55
+    hill climb #107: T=74 -> T=43
+    hill climb #108: T=74 -> T=68
+    hill climb #109: T=74 -> T=68
+    hill climb #110: T=74 -> T=67
+    hill climb #111: T=74 -> T=66
+    hill climb #112: T=74 -> T=57
+    hill climb #113: T=75 -> T=66
+    hill climb #114: T=75 -> T=36
+    hill climb #115: T=75 -> T=54
+    hill climb #116: T=75 -> T=54
+    hill climb #117: T=75 -> T=54
+    hill climb #118: T=76 -> T=43
+    hill climb #119: T=76 -> T=43
+    hill climb #120: T=76 -> T=36
+    hill climb #121: T=76 -> T=36
+    hill climb #122: T=76 -> T=43
+    hill climb #123: T=76 -> T=72
+    hill climb #124: T=76 -> T=54
+    hill climb #125: T=76 -> T=43
+    hill climb #126: T=76 -> T=49
+    hill climb #127: T=76 -> T=36
+    hill climb #128: T=76 -> T=56
+    hill climb #129: T=77 -> T=35
+    hill climb #130: T=77 -> T=67
+    hill climb #131: T=77 -> T=76
+    hill climb #132: T=77 -> T=61
+    hill climb #133: T=77 -> T=76
+    hill climb #134: T=77 -> T=66
+    hill climb #135: T=77 -> T=58
+    hill climb #136: T=78 -> T=43
+    hill climb #137: T=78 -> T=44
+    hill climb #138: T=78 -> T=36
+    hill climb #139: T=78 -> T=73
+    hill climb #140: T=78 -> T=76
+    hill climb #142: T=78 -> T=35
+    hill climb #143: T=78 -> T=76
+    hill climb #144: T=78 -> T=36
+    hill climb #145: T=78 -> T=35
+    hill climb #146: T=78 -> T=67
+    hill climb #147: T=79 -> T=36
+    hill climb #148: T=79 -> T=71
+    hill climb #150: T=79 -> T=54
+    hill climb #151: T=79 -> T=43
+    hill climb #152: T=79 -> T=64
+    hill climb #153: T=79 -> T=36
+    hill climb #154: T=79 -> T=75
+    hill climb #155: T=79 -> T=36
+    hill climb #156: T=80 -> T=36
+    hill climb #157: T=80 -> T=36
+    hill climb #158: T=80 -> T=43
+    hill climb #159: T=80 -> T=36
+    hill climb #160: T=80 -> T=40
+    hill climb #161: T=80 -> T=58
+    hill climb #162: T=80 -> T=38
+    hill climb #163: T=80 -> T=40
+    hill climb #164: T=80 -> T=55
+    hill climb #165: T=80 -> T=36
+    hill climb #166: T=80 -> T=76
+    hill climb #167: T=80 -> T=36
+    hill climb #168: T=80 -> T=44
+    hill climb #169: T=80 -> T=36
+    hill climb #170: T=80 -> T=36
+    hill climb #171: T=80 -> T=39
+    hill climb #172: T=80 -> T=66
+    hill climb #173: T=80 -> T=40
+    hill climb #174: T=80 -> T=54
+    hill climb #175: T=80 -> T=43
+    hill climb #176: T=80 -> T=37
+    hill climb #177: T=80 -> T=66
+    hill climb #178: T=80 -> T=55
+    hill climb #179: T=80 -> T=75
+    hill climb #180: T=80 -> T=70
+    hill climb #181: T=80 -> T=36
+    hill climb #182: T=80 -> T=39
+    hill climb #183: T=80 -> T=36
+    hill climb #184: T=80 -> T=35
+    hill climb #185: T=80 -> T=68
+    hill climb #186: T=80 -> T=43
+    hill climb #187: T=81 -> T=49
+    hill climb #188: T=81 -> T=39
+    hill climb #189: T=81 -> T=77
+    hill climb #190: T=81 -> T=73
+    hill climb #191: T=81 -> T=36
+    hill climb #192: T=81 -> T=35
+    hill climb #193: T=81 -> T=36
+    hill climb #194: T=81 -> T=65
+    hill climb #195: T=81 -> T=43
+    hill climb #196: T=82 -> T=36
+    hill climb #197: T=82 -> T=38
+    hill climb #198: T=82 -> T=39
+    hill climb #199: T=82 -> T=66
+    hill climb #200: T=82 -> T=67
+    hill climb #201: T=82 -> T=73
+    hill climb #202: T=82 -> T=35
+    hill climb #203: T=82 -> T=34
+    hill climb #204: T=82 -> T=43
+    hill climb #205: T=82 -> T=40
+    hill climb #206: T=82 -> T=39
+    hill climb #207: T=82 -> T=73
+    hill climb #208: T=82 -> T=76
+    hill climb #209: T=82 -> T=35
+    hill climb #210: T=82 -> T=71
+    hill climb #211: T=83 -> T=39
+    hill climb #212: T=83 -> T=77
+    hill climb #213: T=83 -> T=36
+    hill climb #214: T=83 -> T=35
+    hill climb #215: T=83 -> T=66
+    hill climb #216: T=83 -> T=39
+    hill climb #217: T=83 -> T=60
+    hill climb #218: T=83 -> T=81
+    hill climb #219: T=83 -> T=75
+    hill climb #220: T=83 -> T=42
+    hill climb #221: T=83 -> T=36
+    hill climb #222: T=84 -> T=74
+    hill climb #223: T=84 -> T=36
+    hill climb #224: T=84 -> T=39
+    hill climb #225: T=84 -> T=36
+    hill climb #226: T=84 -> T=72
+    hill climb #228: T=84 -> T=43
+    hill climb #229: T=84 -> T=82
+    hill climb #230: T=84 -> T=72
+    hill climb #231: T=84 -> T=42
+    hill climb #232: T=84 -> T=34
+    hill climb #233: T=84 -> T=37
+    hill climb #234: T=84 -> T=35
+    hill climb #235: T=84 -> T=34
+    hill climb #236: T=84 -> T=37
+    hill climb #237: T=84 -> T=64
+    hill climb #238: T=84 -> T=43
+    hill climb #239: T=84 -> T=67
+    hill climb #240: T=85 -> T=67
+    hill climb #241: T=85 -> T=70
+    hill climb #242: T=85 -> T=43
+    hill climb #243: T=85 -> T=68
+    hill climb #244: T=85 -> T=39
+    hill climb #245: T=85 -> T=83
+    hill climb #246: T=85 -> T=78
+    hill climb #247: T=85 -> T=44
+    hill climb #248: T=85 -> T=43
+    hill climb #249: T=85 -> T=35
+    hill climb #250: T=86 -> T=43
+    hill climb #251: T=86 -> T=36
+    hill climb #252: T=86 -> T=43
+    hill climb #253: T=86 -> T=39
+    hill climb #254: T=86 -> T=36
+    hill climb #255: T=86 -> T=36
+    hill climb #256: T=86 -> T=43
+    hill climb #257: T=86 -> T=70
+    hill climb #258: T=86 -> T=64
+    hill climb #260: T=86 -> T=68
+    hill climb #261: T=86 -> T=82
+    hill climb #262: T=86 -> T=64
+    hill climb #263: T=86 -> T=58
+    hill climb #264: T=86 -> T=38
+    hill climb #265: T=86 -> T=71
+    hill climb #266: T=87 -> T=35
+    hill climb #267: T=87 -> T=35
+    hill climb #268: T=87 -> T=75
+    hill climb #269: T=87 -> T=36
+    hill climb #270: T=87 -> T=39
+    hill climb #271: T=87 -> T=78
+    hill climb #272: T=88 -> T=43
+    hill climb #273: T=88 -> T=44
+    hill climb #274: T=88 -> T=37
+    hill climb #275: T=88 -> T=40
+    hill climb #276: T=88 -> T=36
+    hill climb #277: T=88 -> T=35
+    hill climb #278: T=88 -> T=70
+    hill climb #279: T=88 -> T=36
+    hill climb #280: T=88 -> T=35
+    hill climb #281: T=88 -> T=43
+    hill climb #282: T=88 -> T=65
+    hill climb #283: T=88 -> T=43
+    hill climb #284: T=88 -> T=36
+    hill climb #285: T=88 -> T=61
+    hill climb #286: T=88 -> T=42
+    hill climb #287: T=88 -> T=36
+    hill climb #288: T=88 -> T=39
+    hill climb #289: T=88 -> T=40
+    hill climb #290: T=88 -> T=35
+    hill climb #292: T=88 -> T=43
+    hill climb #293: T=88 -> T=36
+    hill climb #294: T=88 -> T=38
+    hill climb #295: T=88 -> T=36
+    hill climb #296: T=89 -> T=36
+    hill climb #297: T=89 -> T=34
+    hill climb #298: T=89 -> T=39
+    hill climb #299: T=89 -> T=36
+    hill climb #300: T=89 -> T=83
+    hill climb #301: T=89 -> T=43
+    hill climb #302: T=89 -> T=66
+    hill climb #303: T=89 -> T=88
+    hill climb #304: T=89 -> T=57
+    hill climb #305: T=89 -> T=84
+    hill climb #306: T=89 -> T=54
+    hill climb #307: T=89 -> T=44
+    hill climb #308: T=90 -> T=43
+    hill climb #309: T=90 -> T=71
+    hill climb #310: T=90 -> T=64
+    hill climb #311: T=90 -> T=59
+    hill climb #312: T=90 -> T=39
+    hill climb #313: T=90 -> T=57
+    hill climb #314: T=90 -> T=59
+    hill climb #315: T=90 -> T=74
+    hill climb #316: T=90 -> T=36
+    hill climb #317: T=90 -> T=39
+    hill climb #318: T=90 -> T=59
+    hill climb #319: T=90 -> T=36
+    hill climb #320: T=90 -> T=35
+    hill climb #321: T=90 -> T=39
+    hill climb #322: T=90 -> T=54
+    hill climb #323: T=90 -> T=36
+    hill climb #324: T=90 -> T=34
+    hill climb #325: T=91 -> T=72
+    hill climb #326: T=91 -> T=36
+    hill climb #327: T=91 -> T=39
+    hill climb #328: T=91 -> T=35
+    hill climb #329: T=91 -> T=37
+    hill climb #330: T=91 -> T=67
+    hill climb #331: T=91 -> T=80
+    hill climb #332: T=91 -> T=35
+    hill climb #333: T=91 -> T=76
+    hill climb #334: T=91 -> T=36
+    hill climb #335: T=91 -> T=69
+    hill climb #336: T=91 -> T=42
+    hill climb #337: T=91 -> T=66
+    hill climb #338: T=92 -> T=74
+    hill climb #339: T=92 -> T=36
+    hill climb #340: T=92 -> T=34
+    hill climb #341: T=92 -> T=64
+    hill climb #342: T=92 -> T=34
+    hill climb #343: T=92 -> T=36
+    hill climb #344: T=92 -> T=36
+    hill climb #345: T=92 -> T=68
+    hill climb #346: T=92 -> T=36
+    hill climb #347: T=92 -> T=49
+    hill climb #348: T=92 -> T=62
+    hill climb #349: T=92 -> T=55
+    hill climb #350: T=92 -> T=87
+    hill climb #351: T=92 -> T=37
+    hill climb #352: T=92 -> T=36
+    hill climb #353: T=92 -> T=35
+    hill climb #354: T=92 -> T=43
+    hill climb #355: T=92 -> T=62
+    hill climb #356: T=92 -> T=83
+    hill climb #357: T=92 -> T=44
+    hill climb #358: T=92 -> T=87
+    hill climb #359: T=92 -> T=43
+    hill climb #360: T=92 -> T=70
+    hill climb #361: T=92 -> T=36
+    hill climb #362: T=92 -> T=36
+    hill climb #363: T=92 -> T=63
+    hill climb #364: T=92 -> T=39
+    hill climb #365: T=92 -> T=39
+    hill climb #366: T=92 -> T=75
+    hill climb #367: T=92 -> T=67
+    hill climb #368: T=92 -> T=43
+    hill climb #369: T=92 -> T=76
+    hill climb #370: T=92 -> T=62
+    hill climb #371: T=92 -> T=65
+    hill climb #372: T=92 -> T=69
+    hill climb #373: T=92 -> T=36
+    hill climb #374: T=92 -> T=65
+    hill climb #375: T=92 -> T=36
+    hill climb #376: T=92 -> T=36
+    hill climb #377: T=92 -> T=43
+    hill climb #378: T=92 -> T=43
+    hill climb #379: T=92 -> T=36
+    hill climb #380: T=92 -> T=44
+    hill climb #381: T=93 -> T=35
+    hill climb #382: T=93 -> T=39
+    hill climb #383: T=93 -> T=43
+    hill climb #384: T=93 -> T=75
+    hill climb #385: T=93 -> T=72
+    hill climb #386: T=93 -> T=39
+    hill climb #387: T=93 -> T=70
+    hill climb #388: T=93 -> T=68
+    hill climb #389: T=93 -> T=72
+    hill climb #390: T=93 -> T=70
+    hill climb #391: T=93 -> T=86
+    hill climb #392: T=93 -> T=35
+    hill climb #393: T=93 -> T=70
+    hill climb #394: T=94 -> T=39
+    hill climb #395: T=94 -> T=65
+    hill climb #396: T=94 -> T=39
+    hill climb #397: T=94 -> T=44
+    hill climb #398: T=94 -> T=36
+    hill climb #399: T=94 -> T=35
+    hill climb #400: T=94 -> T=66
+    hill climb #401: T=94 -> T=35
+    hill climb #402: T=94 -> T=36
+    hill climb #403: T=94 -> T=39
+    hill climb #404: T=94 -> T=58
+    hill climb #405: T=94 -> T=36
+    hill climb #406: T=94 -> T=36
+    hill climb #407: T=94 -> T=44
+    hill climb #408: T=94 -> T=66
+    hill climb #409: T=94 -> T=36
+    hill climb #410: T=94 -> T=36
+    hill climb #411: T=94 -> T=57
+    hill climb #412: T=94 -> T=61
+    hill climb #413: T=94 -> T=36
+    hill climb #414: T=94 -> T=39
+    hill climb #415: T=94 -> T=49
+    hill climb #416: T=95 -> T=68
+    hill climb #417: T=95 -> T=39
+    hill climb #418: T=95 -> T=43
+    hill climb #419: T=95 -> T=64
+    hill climb #420: T=95 -> T=34
+    hill climb #421: T=95 -> T=36
+    hill climb #422: T=95 -> T=36
+    hill climb #423: T=95 -> T=39
+    hill climb #424: T=95 -> T=36
+    hill climb #425: T=95 -> T=36
+    hill climb #426: T=95 -> T=39
+    hill climb #427: T=95 -> T=66
+    hill climb #428: T=95 -> T=36
+    hill climb #429: T=96 -> T=72
+    hill climb #430: T=96 -> T=54
+    hill climb #431: T=96 -> T=40
+    hill climb #432: T=96 -> T=39
+    hill climb #433: T=96 -> T=35
+    hill climb #434: T=96 -> T=39
+    hill climb #435: T=96 -> T=36
+    hill climb #436: T=96 -> T=36
+    hill climb #437: T=96 -> T=43
+    hill climb #438: T=96 -> T=59
+    hill climb #439: T=96 -> T=38
+    hill climb #440: T=96 -> T=36
+    hill climb #441: T=96 -> T=66
+    hill climb #442: T=96 -> T=73
+    hill climb #443: T=96 -> T=59
+    hill climb #444: T=96 -> T=53
+    hill climb #445: T=96 -> T=37
+    hill climb #446: T=96 -> T=39
+    hill climb #447: T=96 -> T=43
+    hill climb #448: T=96 -> T=39
+    hill climb #449: T=96 -> T=71
+    hill climb #450: T=96 -> T=68
+    hill climb #451: T=96 -> T=43
+    hill climb #452: T=96 -> T=43
+    hill climb #453: T=96 -> T=43
+    hill climb #454: T=96 -> T=36
+    hill climb #455: T=96 -> T=59
+    hill climb #456: T=96 -> T=36
+    hill climb #457: T=96 -> T=66
+    hill climb #458: T=96 -> T=36
+    hill climb #459: T=96 -> T=35
+    hill climb #460: T=97 -> T=64
+    hill climb #461: T=97 -> T=43
+    hill climb #462: T=97 -> T=74
+    hill climb #463: T=97 -> T=83
+    hill climb #464: T=97 -> T=43
+    hill climb #465: T=97 -> T=36
+    hill climb #466: T=97 -> T=43
+    hill climb #467: T=97 -> T=70
+    hill climb #468: T=97 -> T=36
+    hill climb #469: T=97 -> T=75
+    hill climb #470: T=97 -> T=36
+    hill climb #471: T=97 -> T=43
+    hill climb #472: T=97 -> T=36
+    hill climb #473: T=97 -> T=70
+    hill climb #474: T=97 -> T=72
+    hill climb #475: T=97 -> T=39
+    hill climb #476: T=97 -> T=36
+    hill climb #477: T=97 -> T=39
+    hill climb #478: T=97 -> T=36
+    hill climb #479: T=97 -> T=67
+    hill climb #480: T=97 -> T=54
+    hill climb #481: T=97 -> T=36
+    hill climb #482: T=98 -> T=43
+    hill climb #483: T=98 -> T=72
+    hill climb #484: T=98 -> T=39
+    hill climb #485: T=98 -> T=55
+    hill climb #486: T=98 -> T=67
+    hill climb #487: T=98 -> T=50
+    hill climb #488: T=98 -> T=70
+    hill climb #489: T=98 -> T=65
+    hill climb #490: T=98 -> T=49
+    hill climb #491: T=98 -> T=54
+    hill climb #492: T=98 -> T=36
+    hill climb #493: T=98 -> T=43
+    hill climb #494: T=98 -> T=78
+    hill climb #495: T=98 -> T=67
+    hill climb #496: T=98 -> T=76
+    hill climb #497: T=98 -> T=73
+    hill climb #498: T=98 -> T=36
+    hill climb #499: T=98 -> T=55
+    hill climb #500: T=98 -> T=43
+    hill climb #501: T=98 -> T=75
+    hill climb #502: T=98 -> T=36
+    hill climb #503: T=98 -> T=39
+    hill climb #504: T=98 -> T=61
+    hill climb #505: T=98 -> T=36
+    hill climb #506: T=98 -> T=72
+    hill climb #507: T=98 -> T=36
+    hill climb #508: T=98 -> T=73
+    hill climb #509: T=98 -> T=66
+    hill climb #510: T=98 -> T=55
+    hill climb #511: T=98 -> T=44
+    hill climb #512: T=98 -> T=36
+    hill climb #513: T=98 -> T=55
+    hill climb #514: T=98 -> T=36
+    hill climb #515: T=99 -> T=54
+    hill climb #516: T=99 -> T=83
+    hill climb #517: T=99 -> T=36
+    hill climb #518: T=99 -> T=65
+    hill climb #519: T=99 -> T=36
+    hill climb #520: T=99 -> T=78
+    hill climb #521: T=99 -> T=36
+    hill climb #522: T=99 -> T=36
+    hill climb #523: T=99 -> T=39
+    hill climb #524: T=99 -> T=36
+    hill climb #525: T=99 -> T=36
+    hill climb #526: T=99 -> T=35
+    hill climb #527: T=99 -> T=39
+    hill climb #528: T=99 -> T=44
+    hill climb #529: T=99 -> T=39
+    hill climb #530: T=99 -> T=43
+    hill climb #531: T=100 -> T=52
+    hill climb #532: T=100 -> T=39
+    hill climb #533: T=100 -> T=43
+    hill climb #534: T=100 -> T=34
+    hill climb #535: T=100 -> T=36
+    hill climb #536: T=100 -> T=40
+    hill climb #537: T=100 -> T=58
+    hill climb #538: T=100 -> T=36
+    hill climb #539: T=100 -> T=36
+    hill climb #540: T=100 -> T=35
+    hill climb #541: T=100 -> T=74
+    hill climb #542: T=100 -> T=75
+    hill climb #543: T=100 -> T=36
+    hill climb #544: T=100 -> T=77
+    hill climb #545: T=100 -> T=39
+    hill climb #546: T=100 -> T=36
+    hill climb #547: T=100 -> T=42
+    hill climb #548: T=100 -> T=38
+    hill climb #549: T=100 -> T=36
+    hill climb #550: T=100 -> T=73
+    hill climb #551: T=100 -> T=59
+    hill climb #552: T=100 -> T=67
+    hill climb #553: T=100 -> T=37
+    hill climb #554: T=100 -> T=39
+    hill climb #555: T=100 -> T=58
+    hill climb #556: T=100 -> T=43
+    hill climb #557: T=100 -> T=36
+    hill climb #558: T=100 -> T=35
+    hill climb #559: T=100 -> T=36
+    hill climb #560: T=100 -> T=39
+    hill climb #561: T=100 -> T=66
+    hill climb #562: T=100 -> T=70
+    hill climb #563: T=100 -> T=39
+    hill climb #564: T=100 -> T=65
+    hill climb #565: T=100 -> T=67
+    hill climb #566: T=100 -> T=39
+    hill climb #567: T=100 -> T=43
+    hill climb #568: T=100 -> T=43
+    hill climb #569: T=100 -> T=64
+    hill climb #570: T=100 -> T=39
+    hill climb #571: T=100 -> T=59
+    hill climb #572: T=100 -> T=36
+    hill climb #573: T=100 -> T=78
+    hill climb #574: T=100 -> T=76
+    hill climb #575: T=100 -> T=44
+    hill climb #576: T=100 -> T=39
+    hill climb #577: T=100 -> T=88
+    hill climb #578: T=100 -> T=63
+    hill climb #579: T=100 -> T=36
+    hill climb #580: T=100 -> T=36
+    hill climb #581: T=100 -> T=65
+    hill climb #582: T=100 -> T=43
+    hill climb #583: T=100 -> T=84
+    hill climb #584: T=100 -> T=39
+    hill climb #585: T=100 -> T=60
+    hill climb #586: T=100 -> T=79
+    hill climb #587: T=100 -> T=73
+    hill climb #588: T=101 -> T=66
+    hill climb #589: T=101 -> T=36
+    hill climb #590: T=101 -> T=36
+    hill climb #591: T=101 -> T=39
+    hill climb #592: T=101 -> T=66
+    hill climb #593: T=101 -> T=43
+    hill climb #594: T=101 -> T=67
+    hill climb #595: T=101 -> T=36
+    hill climb #596: T=101 -> T=73
+    hill climb #597: T=101 -> T=35
+    hill climb #598: T=101 -> T=74
+    hill climb #599: T=101 -> T=61
+    hill climb #600: T=101 -> T=39
+    hill climb #601: T=101 -> T=68
+    hill climb #602: T=101 -> T=35
+    hill climb #603: T=101 -> T=77
+    hill climb #604: T=101 -> T=44
+    hill climb #605: T=101 -> T=75
+    hill climb #606: T=101 -> T=74
+    hill climb #607: T=101 -> T=35
+    hill climb #608: T=101 -> T=39
+    hill climb #609: T=101 -> T=61
+    hill climb #610: T=101 -> T=66
+    hill climb #611: T=101 -> T=49
+    hill climb #612: T=101 -> T=65
+    hill climb #613: T=101 -> T=36
+    hill climb #614: T=101 -> T=36
+    hill climb #615: T=101 -> T=36
+    hill climb #616: T=101 -> T=66
+    hill climb #617: T=101 -> T=66
+    hill climb #618: T=101 -> T=76
+    hill climb #619: T=101 -> T=70
+    hill climb #620: T=101 -> T=37
+    hill climb #621: T=101 -> T=59
+    hill climb #622: T=101 -> T=39
+    hill climb #623: T=101 -> T=54
+    hill climb #624: T=102 -> T=36
+    hill climb #625: T=102 -> T=62
+    hill climb #626: T=102 -> T=36
+    hill climb #627: T=102 -> T=36
+    hill climb #628: T=102 -> T=59
+    hill climb #629: T=102 -> T=43
+    hill climb #630: T=102 -> T=43
+    hill climb #631: T=102 -> T=76
+    hill climb #632: T=102 -> T=66
+    hill climb #633: T=102 -> T=66
+    hill climb #634: T=102 -> T=35
+    hill climb #635: T=102 -> T=35
+    hill climb #636: T=102 -> T=36
+    hill climb #637: T=102 -> T=66
+    hill climb #638: T=102 -> T=65
+    hill climb #639: T=102 -> T=35
+    hill climb #640: T=102 -> T=100
+    hill climb #641: T=102 -> T=68
+    hill climb #642: T=102 -> T=64
+    hill climb #643: T=102 -> T=54
+    hill climb #644: T=102 -> T=73
+    hill climb #645: T=102 -> T=36
+    hill climb #646: T=102 -> T=35
+    hill climb #647: T=102 -> T=75
+    hill climb #648: T=102 -> T=39
+    hill climb #649: T=102 -> T=67
+    hill climb #650: T=102 -> T=36
+    hill climb #651: T=102 -> T=61
+    hill climb #652: T=102 -> T=39
+    hill climb #653: T=102 -> T=68
+    hill climb #654: T=102 -> T=70
+    hill climb #655: T=102 -> T=36
+    hill climb #656: T=102 -> T=39
+    hill climb #657: T=102 -> T=36
+    hill climb #658: T=102 -> T=73
+    hill climb #659: T=102 -> T=43
+    hill climb #660: T=102 -> T=39
+    hill climb #661: T=102 -> T=82
+    hill climb #662: T=102 -> T=58
+    hill climb #663: T=102 -> T=67
+    hill climb #664: T=102 -> T=67
+    hill climb #665: T=102 -> T=65
+    hill climb #666: T=102 -> T=36
+    hill climb #667: T=102 -> T=68
+    hill climb #668: T=102 -> T=63
+    hill climb #669: T=102 -> T=58
+    hill climb #670: T=102 -> T=43
+    hill climb #671: T=102 -> T=67
+    hill climb #672: T=102 -> T=35
+    hill climb #673: T=102 -> T=58
+    hill climb #674: T=102 -> T=35
+    hill climb #675: T=102 -> T=39
+    hill climb #676: T=102 -> T=68
+    hill climb #677: T=102 -> T=36
+    hill climb #678: T=102 -> T=72
+    hill climb #679: T=102 -> T=43
+    hill climb #680: T=102 -> T=36
+    hill climb #681: T=102 -> T=62
+    hill climb #682: T=102 -> T=58
+    hill climb #683: T=102 -> T=67
+    hill climb #684: T=102 -> T=35
+    hill climb #685: T=103 -> T=63
+    hill climb #686: T=103 -> T=36
+    hill climb #687: T=103 -> T=44
+    hill climb #688: T=103 -> T=39
+    hill climb #689: T=103 -> T=55
+    hill climb #690: T=103 -> T=77
+    hill climb #691: T=103 -> T=71
+    hill climb #692: T=103 -> T=66
+    hill climb #693: T=103 -> T=72
+    hill climb #694: T=103 -> T=70
+    hill climb #695: T=103 -> T=74
+    hill climb #696: T=103 -> T=35
+    hill climb #697: T=103 -> T=36
+    hill climb #698: T=103 -> T=66
+    hill climb #699: T=103 -> T=74
+    hill climb #700: T=103 -> T=65
+    hill climb #701: T=103 -> T=75
+    hill climb #702: T=103 -> T=36
+    hill climb #703: T=103 -> T=35
+    hill climb #704: T=103 -> T=43
+    hill climb #705: T=103 -> T=68
+    hill climb #706: T=103 -> T=76
+    hill climb #707: T=103 -> T=43
+    hill climb #708: T=103 -> T=71
+    hill climb #709: T=103 -> T=83
+    hill climb #710: T=103 -> T=68
+    hill climb #711: T=103 -> T=55
+    hill climb #712: T=103 -> T=39
+    hill climb #713: T=103 -> T=77
+    hill climb #714: T=103 -> T=87
+    hill climb #715: T=104 -> T=35
+    hill climb #716: T=104 -> T=65
+    hill climb #717: T=104 -> T=36
+    hill climb #718: T=104 -> T=76
+    hill climb #719: T=104 -> T=65
+    hill climb #720: T=104 -> T=67
+    hill climb #721: T=104 -> T=83
+    hill climb #722: T=104 -> T=39
+    hill climb #723: T=104 -> T=36
+    hill climb #724: T=104 -> T=39
+    hill climb #725: T=104 -> T=44
+    hill climb #726: T=104 -> T=66
+    hill climb #727: T=104 -> T=36
+    hill climb #728: T=104 -> T=76
+    hill climb #729: T=104 -> T=34
+    hill climb #730: T=104 -> T=39
+    hill climb #731: T=104 -> T=72
+    hill climb #732: T=104 -> T=39
+    hill climb #733: T=104 -> T=77
+    hill climb #734: T=104 -> T=49
+    hill climb #735: T=104 -> T=43
+    hill climb #736: T=104 -> T=39
+    hill climb #737: T=104 -> T=43
+    hill climb #738: T=104 -> T=36
+    hill climb #739: T=104 -> T=49
+    hill climb #740: T=104 -> T=67
+    hill climb #741: T=104 -> T=43
+    hill climb #742: T=104 -> T=67
+    hill climb #743: T=104 -> T=53
+    hill climb #744: T=104 -> T=36
+    hill climb #745: T=104 -> T=73
+    hill climb #746: T=104 -> T=69
+    hill climb #747: T=104 -> T=83
+    hill climb #748: T=104 -> T=43
+    hill climb #749: T=104 -> T=66
+    hill climb #750: T=104 -> T=35
+    hill climb #751: T=104 -> T=36
+    hill climb #752: T=104 -> T=43
+    hill climb #753: T=104 -> T=39
+    hill climb #754: T=104 -> T=44
+    hill climb #755: T=104 -> T=68
+    hill climb #756: T=104 -> T=43
+    hill climb #757: T=104 -> T=73
+    hill climb #758: T=104 -> T=74
+    hill climb #759: T=104 -> T=70
+    hill climb #760: T=104 -> T=55
+    hill climb #761: T=104 -> T=65
+    hill climb #762: T=104 -> T=36
+    hill climb #763: T=104 -> T=58
+    hill climb #764: T=104 -> T=62
+    hill climb #765: T=104 -> T=43
+    hill climb #766: T=104 -> T=40
+    hill climb #767: T=104 -> T=43
+    hill climb #768: T=104 -> T=39
+    hill climb #769: T=105 -> T=85
+    hill climb #770: T=105 -> T=69
+    hill climb #771: T=105 -> T=43
+    hill climb #772: T=105 -> T=88
+    hill climb #773: T=105 -> T=43
+    hill climb #774: T=105 -> T=58
+    hill climb #775: T=105 -> T=43
+    hill climb #776: T=105 -> T=43
+    hill climb #777: T=105 -> T=39
+    hill climb #778: T=105 -> T=39
+    hill climb #779: T=105 -> T=34
+    hill climb #780: T=105 -> T=40
+    hill climb #781: T=105 -> T=39
+    hill climb #782: T=105 -> T=43
+    hill climb #783: T=105 -> T=43
+    hill climb #784: T=105 -> T=77
+    hill climb #785: T=105 -> T=36
+    hill climb #786: T=105 -> T=66
+    hill climb #787: T=105 -> T=76
+    hill climb #788: T=105 -> T=59
+    hill climb #789: T=105 -> T=77
+    hill climb #790: T=106 -> T=59
+    hill climb #791: T=106 -> T=36
+    hill climb #792: T=106 -> T=65
+    hill climb #793: T=106 -> T=77
+    hill climb #794: T=106 -> T=66
+    hill climb #795: T=106 -> T=69
+    hill climb #796: T=106 -> T=70
+    hill climb #797: T=106 -> T=59
+    hill climb #798: T=106 -> T=56
+    hill climb #799: T=106 -> T=43
+    hill climb #800: T=106 -> T=78
+    hill climb #801: T=106 -> T=67
+    hill climb #802: T=106 -> T=70
+    hill climb #803: T=106 -> T=44
+    hill climb #804: T=106 -> T=36
+    hill climb #805: T=106 -> T=76
+    hill climb #806: T=106 -> T=39
+    hill climb #807: T=106 -> T=74
+    hill climb #808: T=106 -> T=62
+    hill climb #809: T=106 -> T=35
+    hill climb #810: T=106 -> T=52
+    hill climb #811: T=106 -> T=36
+    hill climb #812: T=106 -> T=39
+    hill climb #813: T=106 -> T=43
+    hill climb #814: T=106 -> T=49
+    hill climb #815: T=106 -> T=43
+    hill climb #816: T=106 -> T=67
+    hill climb #817: T=106 -> T=69
+    hill climb #818: T=106 -> T=68
+    hill climb #819: T=106 -> T=100
+    hill climb #820: T=106 -> T=44
+    hill climb #821: T=106 -> T=36
+    hill climb #822: T=106 -> T=68
+    hill climb #823: T=106 -> T=66
+    hill climb #824: T=106 -> T=71
+    hill climb #825: T=106 -> T=78
+    hill climb #826: T=106 -> T=78
+    hill climb #827: T=106 -> T=39
+    hill climb #828: T=106 -> T=83
+    hill climb #829: T=106 -> T=76
+    hill climb #830: T=106 -> T=67
+    hill climb #831: T=106 -> T=63
+    hill climb #832: T=106 -> T=36
+    hill climb #833: T=106 -> T=60
+    hill climb #834: T=106 -> T=36
+    hill climb #835: T=106 -> T=66
+    hill climb #836: T=107 -> T=36
+    hill climb #837: T=107 -> T=36
+    hill climb #838: T=107 -> T=78
+    hill climb #839: T=107 -> T=43
+    hill climb #840: T=107 -> T=34
+    hill climb #841: T=107 -> T=85
+    hill climb #842: T=107 -> T=83
+    hill climb #843: T=107 -> T=65
+    hill climb #844: T=107 -> T=76
+    hill climb #845: T=107 -> T=82
+    hill climb #846: T=107 -> T=66
+    hill climb #847: T=107 -> T=43
+    hill climb #848: T=107 -> T=67
+    hill climb #849: T=107 -> T=35
+    hill climb #850: T=107 -> T=72
+    hill climb #851: T=107 -> T=39
+    hill climb #852: T=107 -> T=39
+    hill climb #853: T=107 -> T=36
+    hill climb #854: T=107 -> T=67
+    hill climb #855: T=107 -> T=35
+    hill climb #856: T=107 -> T=43
+    hill climb #857: T=107 -> T=36
+    hill climb #858: T=107 -> T=82
+    hill climb #859: T=107 -> T=84
+    hill climb #860: T=107 -> T=78
+    hill climb #861: T=107 -> T=39
+    hill climb #862: T=107 -> T=72
+    hill climb #863: T=107 -> T=39
+    hill climb #864: T=107 -> T=82
+    hill climb #865: T=107 -> T=40
+    hill climb #866: T=107 -> T=67
+    hill climb #867: T=107 -> T=36
+    hill climb #868: T=107 -> T=39
+    hill climb #869: T=107 -> T=76
+    hill climb #870: T=107 -> T=34
+    hill climb #871: T=107 -> T=39
+    hill climb #872: T=107 -> T=66
+    hill climb #873: T=107 -> T=85
+    hill climb #874: T=107 -> T=59
+    hill climb #875: T=107 -> T=36
+    hill climb #876: T=108 -> T=76
+    hill climb #877: T=108 -> T=67
+    hill climb #878: T=108 -> T=36
+    hill climb #879: T=108 -> T=36
+    hill climb #880: T=108 -> T=76
+    hill climb #881: T=108 -> T=37
+    hill climb #882: T=108 -> T=64
+    hill climb #883: T=108 -> T=36
+    hill climb #884: T=108 -> T=37
+    hill climb #885: T=108 -> T=67
+    hill climb #886: T=108 -> T=49
+    hill climb #887: T=108 -> T=37
+    hill climb #888: T=108 -> T=43
+    hill climb #889: T=108 -> T=76
+    hill climb #890: T=108 -> T=67
+    hill climb #891: T=108 -> T=37
+    hill climb #892: T=108 -> T=43
+    hill climb #893: T=108 -> T=39
+    hill climb #894: T=108 -> T=69
+    hill climb #895: T=108 -> T=36
+    hill climb #896: T=108 -> T=76
+    hill climb #897: T=108 -> T=70
+    hill climb #898: T=108 -> T=65
+    hill climb #899: T=108 -> T=69
+    hill climb #900: T=108 -> T=76
+    hill climb #901: T=108 -> T=67
+    hill climb #902: T=108 -> T=36
+    hill climb #903: T=108 -> T=70
+    hill climb #904: T=108 -> T=105
+    hill climb #905: T=108 -> T=78
+    hill climb #906: T=108 -> T=36
+    hill climb #907: T=108 -> T=43
+    hill climb #908: T=108 -> T=36
+    hill climb #909: T=108 -> T=66
+    hill climb #910: T=108 -> T=74
+    hill climb #911: T=108 -> T=82
+    hill climb #912: T=108 -> T=50
+    hill climb #913: T=108 -> T=67
+    hill climb #914: T=108 -> T=73
+    hill climb #915: T=108 -> T=39
+    hill climb #916: T=108 -> T=70
+    hill climb #917: T=108 -> T=65
+    hill climb #918: T=108 -> T=55
+    hill climb #919: T=108 -> T=36
+    hill climb #920: T=108 -> T=36
+    hill climb #921: T=108 -> T=64
+    hill climb #922: T=108 -> T=44
+    hill climb #923: T=108 -> T=65
+    hill climb #924: T=108 -> T=88
+    hill climb #925: T=108 -> T=39
+    hill climb #926: T=108 -> T=36
+    hill climb #927: T=108 -> T=73
+    hill climb #928: T=108 -> T=73
+    hill climb #929: T=108 -> T=68
+    hill climb #930: T=108 -> T=72
+    hill climb #931: T=108 -> T=40
+    hill climb #932: T=108 -> T=36
+    hill climb #933: T=108 -> T=39
+    hill climb #934: T=108 -> T=72
+    hill climb #935: T=108 -> T=39
+    hill climb #936: T=108 -> T=43
+    hill climb #937: T=108 -> T=65
+    hill climb #938: T=109 -> T=81
+    hill climb #939: T=109 -> T=36
+    hill climb #940: T=109 -> T=66
+    hill climb #941: T=109 -> T=62
+    hill climb #942: T=109 -> T=36
+    hill climb #943: T=109 -> T=59
+    hill climb #944: T=109 -> T=82
+    hill climb #945: T=109 -> T=76
+    hill climb #946: T=109 -> T=77
+    hill climb #947: T=109 -> T=67
+    hill climb #948: T=109 -> T=71
+    hill climb #949: T=109 -> T=40
+    hill climb #950: T=109 -> T=68
+    hill climb #951: T=109 -> T=36
+    hill climb #952: T=109 -> T=69
+    hill climb #953: T=109 -> T=66
+    hill climb #954: T=109 -> T=72
+    hill climb #955: T=109 -> T=61
+    hill climb #956: T=109 -> T=56
+    hill climb #957: T=109 -> T=63
+    hill climb #958: T=109 -> T=54
+    hill climb #959: T=109 -> T=67
+    hill climb #960: T=109 -> T=73
+    hill climb #961: T=109 -> T=43
+    hill climb #962: T=109 -> T=87
+    hill climb #963: T=109 -> T=43
+    hill climb #964: T=109 -> T=75
+    hill climb #965: T=109 -> T=36
+    hill climb #966: T=109 -> T=64
+    hill climb #967: T=109 -> T=39
+    hill climb #968: T=109 -> T=39
+    hill climb #969: T=109 -> T=69
+    hill climb #970: T=109 -> T=66
+    hill climb #971: T=109 -> T=70
+    hill climb #972: T=109 -> T=67
+    hill climb #973: T=109 -> T=35
+    hill climb #974: T=109 -> T=39
+    hill climb #975: T=110 -> T=82
+    hill climb #976: T=110 -> T=43
+    hill climb #977: T=110 -> T=36
+    hill climb #978: T=110 -> T=84
+    hill climb #979: T=110 -> T=36
+    hill climb #980: T=110 -> T=85
+    hill climb #981: T=110 -> T=35
+    hill climb #982: T=110 -> T=36
+    hill climb #983: T=110 -> T=72
+    hill climb #984: T=110 -> T=74
+    hill climb #985: T=110 -> T=77
+    hill climb #986: T=110 -> T=43
+    hill climb #987: T=110 -> T=38
+    hill climb #988: T=110 -> T=39
+    hill climb #989: T=110 -> T=55
+    hill climb #990: T=110 -> T=56
+    hill climb #991: T=110 -> T=68
+    hill climb #992: T=110 -> T=66
+    hill climb #993: T=110 -> T=39
+    hill climb #994: T=110 -> T=76
+    hill climb #995: T=110 -> T=78
+    hill climb #996: T=110 -> T=36
+    hill climb #997: T=110 -> T=36
+    hill climb #998: T=110 -> T=34
+    hill climb #999: T=110 -> T=77
+    hill climb #1000: T=110 -> T=72
+    hill climb #1001: T=110 -> T=72
+    hill climb #1002: T=110 -> T=43
+    hill climb #1003: T=110 -> T=43
+    hill climb #1004: T=110 -> T=35
+    hill climb #1005: T=110 -> T=39
+    hill climb #1006: T=110 -> T=39
+    hill climb #1007: T=110 -> T=68
+    hill climb #1008: T=110 -> T=36
+    hill climb #1009: T=110 -> T=43
+    hill climb #1010: T=110 -> T=39
+    hill climb #1011: T=110 -> T=36
+    hill climb #1012: T=110 -> T=43
+    hill climb #1013: T=110 -> T=36
+    hill climb #1014: T=110 -> T=66
+    hill climb #1015: T=110 -> T=36
+    hill climb #1016: T=110 -> T=36
+    hill climb #1017: T=110 -> T=76
+    hill climb #1018: T=110 -> T=76
+    hill climb #1019: T=110 -> T=71
+    hill climb #1020: T=110 -> T=74
+    hill climb #1021: T=110 -> T=36
+    hill climb #1022: T=110 -> T=64
+    hill climb #1023: T=110 -> T=36
+    hill climb #1024: T=110 -> T=85
+    hill climb #1025: T=110 -> T=43
+    hill climb #1026: T=110 -> T=65
+    hill climb #1027: T=110 -> T=36
+    hill climb #1028: T=110 -> T=61
+    hill climb #1029: T=110 -> T=66
+    hill climb #1030: T=110 -> T=36
+    hill climb #1031: T=110 -> T=43
+    hill climb #1032: T=110 -> T=65
+    hill climb #1033: T=110 -> T=77
+    hill climb #1034: T=110 -> T=78
+    hill climb #1035: T=110 -> T=73
+    hill climb #1036: T=110 -> T=35
+    hill climb #1037: T=110 -> T=76
+    hill climb #1038: T=110 -> T=74
+    hill climb #1039: T=110 -> T=64
+    hill climb #1040: T=110 -> T=36
+    hill climb #1041: T=110 -> T=43
+    hill climb #1042: T=110 -> T=77
+    hill climb #1043: T=110 -> T=39
+    hill climb #1044: T=110 -> T=40
+    hill climb #1045: T=110 -> T=56
+    hill climb #1046: T=110 -> T=51
+    hill climb #1047: T=110 -> T=72
+    hill climb #1048: T=110 -> T=43
+    hill climb #1049: T=110 -> T=85
+    hill climb #1050: T=110 -> T=62
+    hill climb #1051: T=110 -> T=36
+    hill climb #1052: T=110 -> T=64
+    hill climb #1053: T=110 -> T=66
+    hill climb #1054: T=110 -> T=35
+    hill climb #1055: T=110 -> T=66
+    hill climb #1056: T=110 -> T=77
+    hill climb #1057: T=111 -> T=58
+    hill climb #1058: T=111 -> T=78
+    hill climb #1059: T=111 -> T=43
+    hill climb #1060: T=111 -> T=84
+    hill climb #1061: T=111 -> T=73
+    hill climb #1062: T=111 -> T=36
+    hill climb #1063: T=111 -> T=76
+    hill climb #1064: T=111 -> T=74
+    hill climb #1065: T=111 -> T=74
+    hill climb #1066: T=111 -> T=54
+    hill climb #1067: T=111 -> T=36
+    hill climb #1068: T=111 -> T=72
+    hill climb #1069: T=111 -> T=36
+    hill climb #1070: T=111 -> T=67
+    hill climb #1071: T=111 -> T=85
+    hill climb #1072: T=111 -> T=67
+    hill climb #1073: T=111 -> T=87
+    hill climb #1074: T=111 -> T=38
+    hill climb #1075: T=111 -> T=85
+    hill climb #1076: T=111 -> T=65
+    hill climb #1077: T=111 -> T=43
+    hill climb #1078: T=111 -> T=55
+    hill climb #1079: T=111 -> T=76
+    hill climb #1080: T=111 -> T=65
+    hill climb #1081: T=111 -> T=83
+    hill climb #1082: T=111 -> T=76
+    hill climb #1083: T=111 -> T=43
+    hill climb #1084: T=111 -> T=73
+    hill climb #1085: T=111 -> T=79
+    hill climb #1086: T=111 -> T=65
+    hill climb #1087: T=111 -> T=67
+    hill climb #1088: T=111 -> T=36
+    hill climb #1089: T=111 -> T=78
+    hill climb #1090: T=111 -> T=82
+    hill climb #1091: T=111 -> T=67
+    hill climb #1092: T=111 -> T=36
+    hill climb #1093: T=111 -> T=65
+    hill climb #1094: T=111 -> T=43
+    hill climb #1095: T=111 -> T=72
+    hill climb #1096: T=111 -> T=65
+    hill climb #1097: T=111 -> T=74
+    hill climb #1098: T=112 -> T=43
+    hill climb #1099: T=112 -> T=76
+    hill climb #1100: T=112 -> T=66
+    hill climb #1101: T=112 -> T=36
+    hill climb #1102: T=112 -> T=77
+    hill climb #1103: T=112 -> T=69
+    hill climb #1104: T=112 -> T=39
+    hill climb #1105: T=112 -> T=36
+    hill climb #1106: T=112 -> T=36
+    hill climb #1107: T=112 -> T=73
+    hill climb #1108: T=112 -> T=64
+    hill climb #1109: T=112 -> T=36
+    hill climb #1110: T=112 -> T=59
+    hill climb #1111: T=112 -> T=43
+    hill climb #1112: T=112 -> T=73
+    hill climb #1113: T=112 -> T=71
+    hill climb #1114: T=112 -> T=36
+    hill climb #1115: T=112 -> T=34
+    hill climb #1116: T=112 -> T=69
+    hill climb #1117: T=112 -> T=43
+    hill climb #1118: T=112 -> T=72
+    hill climb #1119: T=112 -> T=44
+    hill climb #1120: T=112 -> T=34
+    hill climb #1121: T=112 -> T=72
+    hill climb #1122: T=112 -> T=87
+    hill climb #1123: T=112 -> T=43
+    hill climb #1124: T=112 -> T=66
+    hill climb #1125: T=112 -> T=72
+    hill climb #1126: T=112 -> T=82
+    hill climb #1127: T=112 -> T=39
+    hill climb #1128: T=112 -> T=77
+    hill climb #1129: T=112 -> T=64
+    hill climb #1130: T=112 -> T=37
+    hill climb #1131: T=112 -> T=66
+    hill climb #1132: T=112 -> T=44
+    hill climb #1133: T=112 -> T=76
+    hill climb #1134: T=112 -> T=36
+    hill climb #1135: T=112 -> T=69
+    hill climb #1136: T=112 -> T=85
+    hill climb #1137: T=112 -> T=74
+    hill climb #1138: T=112 -> T=39
+    hill climb #1139: T=112 -> T=35
+    hill climb #1140: T=112 -> T=43
+    hill climb #1141: T=112 -> T=38
+    hill climb #1142: T=112 -> T=71
+    hill climb #1143: T=112 -> T=63
+    hill climb #1144: T=112 -> T=66
+    hill climb #1145: T=112 -> T=71
+    hill climb #1146: T=112 -> T=39
+    hill climb #1147: T=112 -> T=39
+    hill climb #1148: T=112 -> T=54
+    hill climb #1149: T=112 -> T=55
+    hill climb #1150: T=112 -> T=53
+    hill climb #1151: T=112 -> T=72
+    hill climb #1152: T=112 -> T=43
+    hill climb #1153: T=112 -> T=88
+    hill climb #1154: T=112 -> T=72
+    hill climb #1155: T=112 -> T=36
+    hill climb #1156: T=112 -> T=66
+    hill climb #1157: T=112 -> T=35
+    hill climb #1158: T=112 -> T=43
+    hill climb #1159: T=112 -> T=36
+    hill climb #1160: T=112 -> T=39
+    hill climb #1161: T=112 -> T=77
+    hill climb #1162: T=112 -> T=60
+    hill climb #1163: T=112 -> T=36
+    hill climb #1164: T=112 -> T=35
+    hill climb #1165: T=112 -> T=36
+    hill climb #1166: T=112 -> T=66
+    hill climb #1167: T=112 -> T=64
+    hill climb #1168: T=112 -> T=36
+    hill climb #1169: T=112 -> T=64
+    hill climb #1170: T=112 -> T=39
+    hill climb #1171: T=112 -> T=66
+    hill climb #1172: T=112 -> T=110
+    hill climb #1173: T=112 -> T=71
+    hill climb #1174: T=112 -> T=39
+    hill climb #1175: T=112 -> T=72
+    hill climb #1176: T=112 -> T=34
+    hill climb #1177: T=112 -> T=78
+    hill climb #1178: T=112 -> T=40
+    hill climb #1179: T=112 -> T=66
+    hill climb #1180: T=112 -> T=36
+    hill climb #1181: T=112 -> T=64
+    hill climb #1182: T=112 -> T=76
+    hill climb #1183: T=112 -> T=77
+    hill climb #1184: T=112 -> T=78
+    hill climb #1185: T=112 -> T=58
+    hill climb #1186: T=112 -> T=35
+    hill climb #1187: T=112 -> T=57
+    hill climb #1188: T=112 -> T=39
+    hill climb #1189: T=112 -> T=36
+    hill climb #1190: T=112 -> T=67
+    hill climb #1191: T=112 -> T=72
+    hill climb #1192: T=112 -> T=87
+    hill climb #1193: T=112 -> T=39
+    hill climb #1194: T=112 -> T=39
+    hill climb #1195: T=112 -> T=61
+    hill climb #1196: T=112 -> T=72
+    hill climb #1197: T=112 -> T=43
+    hill climb #1198: T=112 -> T=72
+    hill climb #1199: T=112 -> T=66
+    hill climb #1200: T=112 -> T=78
+    hill climb #1201: T=112 -> T=36
+    hill climb #1202: T=112 -> T=52
+    hill climb #1203: T=112 -> T=63
+    hill climb #1204: T=112 -> T=87
+    hill climb #1205: T=112 -> T=36
+    hill climb #1206: T=113 -> T=76
+    hill climb #1207: T=113 -> T=77
+    hill climb #1208: T=113 -> T=35
+    hill climb #1209: T=113 -> T=84
+    hill climb #1210: T=113 -> T=76
+    hill climb #1211: T=113 -> T=43
+    hill climb #1212: T=113 -> T=36
+    hill climb #1213: T=113 -> T=36
+    hill climb #1214: T=113 -> T=39
+    hill climb #1215: T=113 -> T=43
+    hill climb #1216: T=113 -> T=70
+    hill climb #1217: T=113 -> T=77
+    hill climb #1218: T=113 -> T=73
+    hill climb #1219: T=113 -> T=75
+    hill climb #1220: T=113 -> T=43
+    hill climb #1221: T=113 -> T=67
+    hill climb #1222: T=113 -> T=78
+    hill climb #1223: T=113 -> T=34
+    hill climb #1224: T=113 -> T=66
+    hill climb #1225: T=113 -> T=72
+    hill climb #1226: T=113 -> T=43
+    hill climb #1227: T=113 -> T=87
+    hill climb #1228: T=113 -> T=67
+    hill climb #1229: T=113 -> T=59
+    hill climb #1230: T=113 -> T=73
+    hill climb #1231: T=113 -> T=36
+    hill climb #1232: T=113 -> T=55
+    hill climb #1233: T=113 -> T=40
+    hill climb #1234: T=113 -> T=87
+    hill climb #1235: T=113 -> T=77
+    hill climb #1236: T=113 -> T=88
+    hill climb #1237: T=113 -> T=35
+    hill climb #1238: T=113 -> T=78
+    hill climb #1239: T=113 -> T=43
+    hill climb #1240: T=113 -> T=44
+    hill climb #1241: T=113 -> T=43
+    hill climb #1242: T=113 -> T=83
+    hill climb #1243: T=113 -> T=42
+    hill climb #1244: T=113 -> T=65
+    hill climb #1245: T=113 -> T=36
+    hill climb #1246: T=113 -> T=43
+    hill climb #1247: T=113 -> T=36
+    hill climb #1248: T=113 -> T=99
+    hill climb #1249: T=113 -> T=61
+    hill climb #1250: T=113 -> T=65
+    hill climb #1251: T=113 -> T=39
+    hill climb #1252: T=113 -> T=69
+    hill climb #1253: T=113 -> T=61
+    hill climb #1254: T=113 -> T=77
+    hill climb #1255: T=113 -> T=35
+    hill climb #1256: T=113 -> T=71
+    hill climb #1257: T=113 -> T=35
+    hill climb #1258: T=113 -> T=67
+    hill climb #1259: T=113 -> T=39
+    hill climb #1260: T=113 -> T=36
+    hill climb #1261: T=113 -> T=39
+    hill climb #1262: T=113 -> T=71
+    hill climb #1263: T=113 -> T=75
+    hill climb #1264: T=113 -> T=85
+    hill climb #1265: T=113 -> T=76
+    hill climb #1266: T=113 -> T=43
+    hill climb #1267: T=113 -> T=36
+    hill climb #1268: T=113 -> T=76
+    hill climb #1269: T=113 -> T=54
+    hill climb #1270: T=113 -> T=39
+    hill climb #1271: T=114 -> T=84
+    hill climb #1272: T=114 -> T=36
+    hill climb #1273: T=114 -> T=61
+    hill climb #1274: T=114 -> T=36
+    hill climb #1275: T=114 -> T=43
+    hill climb #1276: T=114 -> T=36
+    hill climb #1277: T=114 -> T=35
+    hill climb #1278: T=114 -> T=49
+    hill climb #1279: T=114 -> T=77
+    hill climb #1280: T=114 -> T=76
+    hill climb #1281: T=114 -> T=36
+    hill climb #1282: T=114 -> T=74
+    hill climb #1283: T=114 -> T=58
+    hill climb #1284: T=114 -> T=43
+    hill climb #1285: T=114 -> T=39
+    hill climb #1286: T=114 -> T=64
+    hill climb #1287: T=114 -> T=84
+    hill climb #1288: T=114 -> T=67
+    hill climb #1289: T=114 -> T=44
+    hill climb #1290: T=114 -> T=43
+    hill climb #1291: T=114 -> T=36
+    hill climb #1292: T=114 -> T=43
+    hill climb #1293: T=114 -> T=36
+    hill climb #1294: T=114 -> T=82
+    hill climb #1295: T=114 -> T=66
+    hill climb #1296: T=114 -> T=84
+    hill climb #1297: T=114 -> T=36
+    hill climb #1298: T=114 -> T=36
+    hill climb #1299: T=114 -> T=65
+    hill climb #1300: T=114 -> T=86
+    hill climb #1301: T=114 -> T=43
+    hill climb #1302: T=114 -> T=72
+    hill climb #1303: T=114 -> T=36
+    hill climb #1304: T=114 -> T=39
+    hill climb #1305: T=114 -> T=84
+    hill climb #1306: T=114 -> T=77
+    hill climb #1307: T=114 -> T=76
+    hill climb #1308: T=114 -> T=36
+    hill climb #1309: T=114 -> T=84
+    hill climb #1310: T=114 -> T=77
+    hill climb #1311: T=114 -> T=43
+    hill climb #1312: T=114 -> T=88
+    hill climb #1313: T=114 -> T=73
+    hill climb #1314: T=114 -> T=39
+    hill climb #1315: T=114 -> T=84
+    hill climb #1316: T=114 -> T=36
+    hill climb #1317: T=114 -> T=63
+    hill climb #1318: T=114 -> T=88
+    hill climb #1319: T=114 -> T=78
+    hill climb #1320: T=114 -> T=71
+    hill climb #1321: T=114 -> T=76
+    hill climb #1322: T=114 -> T=35
+    hill climb #1323: T=114 -> T=36
+    hill climb #1324: T=114 -> T=36
+    hill climb #1325: T=114 -> T=43
+    hill climb #1326: T=114 -> T=66
+    hill climb #1327: T=114 -> T=85
+    hill climb #1328: T=114 -> T=77
+    hill climb #1329: T=114 -> T=76
+    hill climb #1330: T=114 -> T=67
+    hill climb #1331: T=114 -> T=67
+    hill climb #1332: T=114 -> T=36
+    hill climb #1333: T=114 -> T=36
+    hill climb #1334: T=114 -> T=66
+    hill climb #1335: T=114 -> T=39
+    hill climb #1336: T=114 -> T=37
+    hill climb #1337: T=114 -> T=36
+    hill climb #1338: T=114 -> T=39
+    hill climb #1339: T=114 -> T=72
+    hill climb #1340: T=114 -> T=78
+    hill climb #1341: T=114 -> T=36
+    hill climb #1342: T=114 -> T=72
+    hill climb #1343: T=114 -> T=71
+    hill climb #1344: T=114 -> T=112
+    hill climb #1345: T=115 -> T=40
+    hill climb #1346: T=115 -> T=36
+    hill climb #1347: T=115 -> T=78
+    hill climb #1348: T=115 -> T=88
+    hill climb #1349: T=115 -> T=74
+    hill climb #1350: T=115 -> T=82
+    hill climb #1351: T=115 -> T=67
+    hill climb #1352: T=115 -> T=62
+    hill climb #1353: T=115 -> T=36
+    hill climb #1354: T=115 -> T=72
+    hill climb #1355: T=115 -> T=67
+    hill climb #1356: T=115 -> T=43
+    hill climb #1357: T=115 -> T=43
+    hill climb #1358: T=115 -> T=36
+    hill climb #1359: T=115 -> T=74
+    hill climb #1360: T=115 -> T=55
+    hill climb #1361: T=115 -> T=39
+    hill climb #1362: T=115 -> T=71
+    hill climb #1363: T=115 -> T=75
+    hill climb #1364: T=115 -> T=73
+    hill climb #1365: T=115 -> T=70
+    hill climb #1366: T=115 -> T=34
+    hill climb #1367: T=115 -> T=83
+    hill climb #1368: T=115 -> T=73
+    hill climb #1369: T=115 -> T=76
+    hill climb #1370: T=115 -> T=59
+    hill climb #1371: T=115 -> T=37
+    hill climb #1372: T=115 -> T=50
+    hill climb #1373: T=115 -> T=36
+    hill climb #1374: T=115 -> T=50
+    hill climb #1375: T=115 -> T=43
+    hill climb #1376: T=115 -> T=43
+    hill climb #1377: T=115 -> T=68
+    hill climb #1378: T=115 -> T=78
+    hill climb #1379: T=115 -> T=43
+    hill climb #1380: T=115 -> T=36
+    hill climb #1381: T=115 -> T=74
+    hill climb #1382: T=115 -> T=65
+    hill climb #1383: T=115 -> T=59
+    hill climb #1384: T=115 -> T=73
+    hill climb #1385: T=115 -> T=68
+    hill climb #1386: T=115 -> T=74
+    hill climb #1387: T=115 -> T=73
+    hill climb #1388: T=115 -> T=44
+    hill climb #1389: T=115 -> T=43
+    hill climb #1390: T=115 -> T=49
+    hill climb #1391: T=115 -> T=39
+    hill climb #1392: T=115 -> T=43
+    hill climb #1393: T=116 -> T=36
+    hill climb #1394: T=116 -> T=57
+    hill climb #1395: T=116 -> T=54
+    hill climb #1396: T=116 -> T=89
+    hill climb #1397: T=116 -> T=66
+    hill climb #1398: T=116 -> T=43
+    hill climb #1399: T=116 -> T=65
+    hill climb #1400: T=116 -> T=39
+    hill climb #1401: T=116 -> T=64
+    hill climb #1402: T=116 -> T=36
+    hill climb #1403: T=116 -> T=72
+    hill climb #1404: T=116 -> T=43
+    hill climb #1405: T=116 -> T=59
+    hill climb #1406: T=116 -> T=66
+    hill climb #1407: T=116 -> T=66
+    hill climb #1408: T=116 -> T=85
+    hill climb #1409: T=116 -> T=43
+    hill climb #1410: T=116 -> T=79
+    hill climb #1411: T=116 -> T=36
+    hill climb #1412: T=116 -> T=35
+    hill climb #1413: T=116 -> T=54
+    hill climb #1414: T=116 -> T=35
+    hill climb #1415: T=116 -> T=70
+    hill climb #1416: T=116 -> T=43
+    hill climb #1417: T=116 -> T=39
+    hill climb #1418: T=116 -> T=88
+    hill climb #1419: T=116 -> T=73
+    hill climb #1420: T=116 -> T=64
+    hill climb #1421: T=116 -> T=54
+    hill climb #1422: T=116 -> T=87
+    hill climb #1423: T=116 -> T=39
+    hill climb #1424: T=116 -> T=39
+    hill climb #1425: T=116 -> T=65
+    hill climb #1426: T=116 -> T=36
+    hill climb #1427: T=116 -> T=66
+    hill climb #1428: T=116 -> T=65
+    hill climb #1429: T=116 -> T=36
+    hill climb #1430: T=116 -> T=106
+    hill climb #1431: T=116 -> T=39
+    hill climb #1432: T=116 -> T=73
+    hill climb #1433: T=116 -> T=88
+    hill climb #1434: T=116 -> T=76
+    hill climb #1435: T=116 -> T=58
+    hill climb #1436: T=116 -> T=35
+    hill climb #1437: T=116 -> T=70
+    hill climb #1438: T=116 -> T=67
+    hill climb #1439: T=116 -> T=43
+    hill climb #1440: T=116 -> T=82
+    hill climb #1441: T=116 -> T=61
+    hill climb #1442: T=116 -> T=34
+    hill climb #1443: T=116 -> T=84
+    hill climb #1444: T=116 -> T=76
+    hill climb #1445: T=116 -> T=82
+    hill climb #1446: T=116 -> T=51
+    hill climb #1447: T=116 -> T=76
+    hill climb #1448: T=116 -> T=62
+    hill climb #1449: T=116 -> T=44
+    hill climb #1450: T=116 -> T=40
+    hill climb #1451: T=116 -> T=36
+    hill climb #1452: T=116 -> T=39
+    hill climb #1453: T=116 -> T=39
+    hill climb #1454: T=116 -> T=36
+    hill climb #1455: T=116 -> T=36
+    hill climb #1456: T=116 -> T=36
+    hill climb #1457: T=116 -> T=76
+    hill climb #1458: T=116 -> T=43
+    hill climb #1459: T=116 -> T=64
+    hill climb #1460: T=116 -> T=74
+    hill climb #1461: T=116 -> T=74
+    hill climb #1462: T=116 -> T=88
+    hill climb #1463: T=116 -> T=77
+    hill climb #1464: T=116 -> T=40
+    hill climb #1465: T=116 -> T=66
+    hill climb #1466: T=116 -> T=58
+    hill climb #1467: T=116 -> T=36
+    hill climb #1468: T=116 -> T=65
+    hill climb #1469: T=116 -> T=36
+    hill climb #1470: T=116 -> T=112
+    hill climb #1471: T=116 -> T=76
+    hill climb #1472: T=116 -> T=67
+    hill climb #1473: T=116 -> T=77
+    hill climb #1474: T=116 -> T=73
+    hill climb #1475: T=116 -> T=39
+    hill climb #1476: T=116 -> T=36
+    hill climb #1477: T=116 -> T=36
+    hill climb #1478: T=116 -> T=36
+    hill climb #1479: T=116 -> T=76
+    hill climb #1480: T=116 -> T=66
+    hill climb #1481: T=116 -> T=83
+    hill climb #1482: T=116 -> T=76
+    hill climb #1483: T=116 -> T=70
+    hill climb #1484: T=116 -> T=36
+    hill climb #1485: T=116 -> T=64
+    hill climb #1486: T=116 -> T=64
+    hill climb #1487: T=116 -> T=54
+    hill climb #1488: T=116 -> T=72
+    hill climb #1489: T=116 -> T=77
+    hill climb #1490: T=116 -> T=36
+    hill climb #1491: T=116 -> T=60
+    hill climb #1492: T=116 -> T=75
+    hill climb #1493: T=116 -> T=71
+    hill climb #1494: T=116 -> T=60
+    hill climb #1495: T=116 -> T=74
+    hill climb #1496: T=116 -> T=58
+    hill climb #1497: T=116 -> T=36
+    hill climb #1498: T=116 -> T=74
+    hill climb #1499: T=116 -> T=36
+    hill climb #1500: T=117 -> T=39
+    hill climb #1501: T=117 -> T=43
+    hill climb #1502: T=117 -> T=78
+    hill climb #1503: T=117 -> T=75
+    hill climb #1504: T=117 -> T=49
+    hill climb #1505: T=117 -> T=84
+    hill climb #1506: T=117 -> T=66
+    hill climb #1507: T=117 -> T=43
+    hill climb #1508: T=117 -> T=36
+    hill climb #1509: T=117 -> T=75
+    hill climb #1510: T=117 -> T=36
+    hill climb #1511: T=117 -> T=88
+    hill climb #1512: T=117 -> T=76
+    hill climb #1513: T=117 -> T=68
+    hill climb #1514: T=117 -> T=75
+    hill climb #1516: T=117 -> T=67
+    hill climb #1517: T=117 -> T=61
+    hill climb #1518: T=117 -> T=64
+    hill climb #1519: T=117 -> T=64
+    hill climb #1520: T=117 -> T=39
+    hill climb #1521: T=117 -> T=49
+    hill climb #1522: T=117 -> T=89
+    hill climb #1523: T=117 -> T=74
+    hill climb #1524: T=117 -> T=73
+    hill climb #1525: T=117 -> T=36
+    hill climb #1526: T=117 -> T=43
+    hill climb #1527: T=117 -> T=84
+    hill climb #1528: T=117 -> T=36
+    hill climb #1529: T=117 -> T=54
+    hill climb #1530: T=117 -> T=43
+    hill climb #1531: T=117 -> T=43
+    hill climb #1532: T=117 -> T=71
+    hill climb #1533: T=118 -> T=80
+    hill climb #1534: T=118 -> T=65
+    hill climb #1535: T=118 -> T=67
+    hill climb #1536: T=118 -> T=36
+    hill climb #1537: T=118 -> T=36
+    hill climb #1538: T=118 -> T=49
+    hill climb #1539: T=118 -> T=49
+    hill climb #1540: T=118 -> T=43
+    hill climb #1541: T=118 -> T=67
+    hill climb #1542: T=118 -> T=36
+    hill climb #1543: T=118 -> T=43
+    hill climb #1544: T=118 -> T=39
+    hill climb #1545: T=118 -> T=34
+    hill climb #1546: T=118 -> T=39
+    hill climb #1547: T=118 -> T=36
+    hill climb #1548: T=118 -> T=82
+    hill climb #1549: T=118 -> T=36
+    hill climb #1550: T=118 -> T=64
+    hill climb #1551: T=118 -> T=104
+    hill climb #1552: T=118 -> T=36
+    hill climb #1553: T=118 -> T=74
+    hill climb #1554: T=118 -> T=69
+    hill climb #1555: T=118 -> T=65
+    hill climb #1556: T=118 -> T=35
+    hill climb #1557: T=118 -> T=69
+    hill climb #1558: T=118 -> T=36
+    hill climb #1559: T=118 -> T=39
+    hill climb #1560: T=118 -> T=35
+    hill climb #1561: T=118 -> T=67
+    hill climb #1562: T=118 -> T=68
+    hill climb #1563: T=118 -> T=70
+    hill climb #1564: T=118 -> T=39
+    hill climb #1565: T=118 -> T=36
+    hill climb #1566: T=118 -> T=82
+    hill climb #1567: T=118 -> T=39
+    hill climb #1568: T=118 -> T=70
+    hill climb #1569: T=118 -> T=67
+    hill climb #1570: T=118 -> T=66
+    hill climb #1571: T=118 -> T=88
+    hill climb #1572: T=118 -> T=87
+    hill climb #1573: T=118 -> T=54
+    hill climb #1574: T=118 -> T=36
+    hill climb #1575: T=118 -> T=43
+    hill climb #1576: T=118 -> T=84
+    hill climb #1577: T=118 -> T=36
+    hill climb #1578: T=118 -> T=66
+    hill climb #1579: T=118 -> T=67
+    hill climb #1580: T=118 -> T=36
+    hill climb #1581: T=118 -> T=39
+    hill climb #1582: T=118 -> T=77
+    hill climb #1583: T=118 -> T=36
+    hill climb #1584: T=118 -> T=78
+    hill climb #1585: T=118 -> T=59
+    hill climb #1586: T=118 -> T=43
+    hill climb #1587: T=118 -> T=49
+    hill climb #1588: T=118 -> T=54
+    hill climb #1589: T=119 -> T=65
+    hill climb #1590: T=119 -> T=81
+    hill climb #1591: T=119 -> T=110
+    hill climb #1592: T=119 -> T=79
+    hill climb #1593: T=119 -> T=35
+    hill climb #1594: T=119 -> T=62
+    hill climb #1595: T=119 -> T=61
+    hill climb #1596: T=119 -> T=73
+    hill climb #1597: T=119 -> T=87
+    hill climb #1598: T=119 -> T=67
+    hill climb #1599: T=119 -> T=77
+    hill climb #1600: T=119 -> T=39
+    hill climb #1601: T=119 -> T=43
+    hill climb #1602: T=119 -> T=36
+    hill climb #1603: T=119 -> T=36
+    hill climb #1604: T=119 -> T=44
+    hill climb #1605: T=119 -> T=72
+    hill climb #1606: T=119 -> T=64
+    hill climb #1607: T=119 -> T=65
+    hill climb #1608: T=119 -> T=87
+    hill climb #1609: T=119 -> T=43
+    hill climb #1610: T=119 -> T=74
+    hill climb #1611: T=119 -> T=118
+    hill climb #1612: T=119 -> T=43
+    hill climb #1613: T=119 -> T=63
+    hill climb #1614: T=119 -> T=71
+    hill climb #1615: T=119 -> T=69
+    hill climb #1616: T=119 -> T=36
+    hill climb #1617: T=119 -> T=36
+    hill climb #1618: T=119 -> T=78
+    hill climb #1619: T=119 -> T=65
+    hill climb #1620: T=119 -> T=36
+    hill climb #1621: T=119 -> T=77
+    hill climb #1622: T=119 -> T=43
+    hill climb #1623: T=119 -> T=83
+    hill climb #1624: T=119 -> T=78
+    hill climb #1625: T=119 -> T=77
+    hill climb #1626: T=119 -> T=36
+    hill climb #1627: T=119 -> T=70
+    hill climb #1628: T=119 -> T=66
+    hill climb #1629: T=119 -> T=112
+    hill climb #1630: T=119 -> T=72
+    hill climb #1631: T=119 -> T=73
+    hill climb #1632: T=119 -> T=64
+    hill climb #1633: T=119 -> T=82
+    hill climb #1634: T=119 -> T=37
+    hill climb #1635: T=119 -> T=36
+    hill climb #1636: T=119 -> T=44
+    hill climb #1637: T=119 -> T=78
+    hill climb #1638: T=119 -> T=87
+    hill climb #1639: T=119 -> T=36
+    hill climb #1640: T=119 -> T=73
+    hill climb #1641: T=119 -> T=99
+    hill climb #1642: T=119 -> T=58
+    hill climb #1643: T=119 -> T=35
+    hill climb #1644: T=119 -> T=84
+    hill climb #1645: T=119 -> T=39
+    hill climb #1646: T=119 -> T=36
+    hill climb #1647: T=119 -> T=61
+    hill climb #1648: T=119 -> T=43
+    hill climb #1649: T=120 -> T=72
+    hill climb #1650: T=120 -> T=85
+    hill climb #1651: T=120 -> T=73
+    hill climb #1652: T=120 -> T=43
+    hill climb #1653: T=120 -> T=76
+    hill climb #1654: T=120 -> T=36
+    hill climb #1655: T=120 -> T=83
+    hill climb #1656: T=120 -> T=67
+    hill climb #1657: T=120 -> T=66
+    hill climb #1658: T=120 -> T=43
+    hill climb #1659: T=120 -> T=37
+    hill climb #1660: T=120 -> T=84
+    hill climb #1661: T=120 -> T=36
+    hill climb #1662: T=120 -> T=65
+    hill climb #1663: T=120 -> T=76
+    hill climb #1664: T=120 -> T=70
+    hill climb #1665: T=120 -> T=67
+    hill climb #1666: T=120 -> T=106
+    hill climb #1667: T=120 -> T=36
+    hill climb #1668: T=120 -> T=43
+    hill climb #1669: T=120 -> T=76
+    hill climb #1670: T=120 -> T=36
+    hill climb #1671: T=120 -> T=87
+    hill climb #1672: T=120 -> T=36
+    hill climb #1673: T=120 -> T=36
+    hill climb #1674: T=120 -> T=36
+    hill climb #1675: T=120 -> T=78
+    hill climb #1676: T=120 -> T=65
+    hill climb #1677: T=120 -> T=76
+    hill climb #1678: T=120 -> T=71
+    hill climb #1679: T=120 -> T=63
+    hill climb #1680: T=120 -> T=56
+    hill climb #1681: T=120 -> T=54
+    hill climb #1682: T=120 -> T=42
+    hill climb #1683: T=120 -> T=73
+    hill climb #1684: T=120 -> T=72
+    hill climb #1685: T=120 -> T=73
+    hill climb #1686: T=120 -> T=34
+    hill climb #1687: T=120 -> T=87
+    hill climb #1688: T=120 -> T=55
+    hill climb #1689: T=120 -> T=67
+    hill climb #1690: T=120 -> T=43
+    hill climb #1691: T=120 -> T=75
+    hill climb #1692: T=120 -> T=81
+    hill climb #1693: T=120 -> T=39
+    hill climb #1694: T=120 -> T=36
+    hill climb #1695: T=120 -> T=49
+    hill climb #1696: T=120 -> T=40
+    hill climb #1697: T=120 -> T=62
+    hill climb #1698: T=120 -> T=52
+    hill climb #1699: T=120 -> T=75
+    hill climb #1700: T=120 -> T=118
+    hill climb #1701: T=120 -> T=43
+    hill climb #1702: T=120 -> T=39
+    hill climb #1703: T=120 -> T=36
+    hill climb #1704: T=120 -> T=35
+    hill climb #1705: T=120 -> T=77
+    hill climb #1706: T=120 -> T=67
+    hill climb #1707: T=120 -> T=73
+    hill climb #1708: T=120 -> T=74
+    hill climb #1709: T=120 -> T=44
+    hill climb #1710: T=120 -> T=35
+    hill climb #1711: T=120 -> T=66
+    hill climb #1712: T=120 -> T=62
+    hill climb #1713: T=120 -> T=39
+    hill climb #1714: T=120 -> T=37
+    hill climb #1715: T=120 -> T=58
+    hill climb #1716: T=120 -> T=88
+    hill climb #1717: T=120 -> T=39
+    hill climb #1718: T=120 -> T=36
+    hill climb #1719: T=120 -> T=68
+    hill climb #1720: T=120 -> T=72
+    hill climb #1721: T=120 -> T=35
+    hill climb #1722: T=120 -> T=78
+    hill climb #1723: T=120 -> T=39
+    hill climb #1724: T=120 -> T=34
+    hill climb #1725: T=120 -> T=82
+    hill climb #1726: T=120 -> T=86
+    hill climb #1727: T=120 -> T=77
+    hill climb #1728: T=120 -> T=36
+    hill climb #1729: T=120 -> T=75
+    hill climb #1730: T=120 -> T=36
+    hill climb #1731: T=120 -> T=65
+    hill climb #1732: T=120 -> T=67
+    hill climb #1733: T=120 -> T=73
+    hill climb #1734: T=120 -> T=39
+    hill climb #1735: T=120 -> T=43
+    hill climb #1736: T=120 -> T=73
+    hill climb #1737: T=120 -> T=35
+    hill climb #1738: T=120 -> T=55
+    hill climb #1739: T=120 -> T=43
+    hill climb #1740: T=120 -> T=36
+    hill climb #1741: T=120 -> T=43
+    hill climb #1742: T=120 -> T=85
+    hill climb #1743: T=120 -> T=72
+    hill climb #1744: T=120 -> T=70
+    hill climb #1745: T=120 -> T=43
+    hill climb #1746: T=120 -> T=39
+    hill climb #1747: T=120 -> T=43
+    hill climb #1748: T=120 -> T=66
+    hill climb #1749: T=120 -> T=83
+    hill climb #1750: T=120 -> T=43
+    hill climb #1751: T=120 -> T=43
+    hill climb #1752: T=120 -> T=67
+    hill climb #1753: T=120 -> T=36
+    hill climb #1754: T=120 -> T=72
+    hill climb #1755: T=120 -> T=78
+    hill climb #1756: T=120 -> T=36
+    hill climb #1757: T=120 -> T=43
+    hill climb #1758: T=120 -> T=73
+    hill climb #1759: T=120 -> T=77
+    hill climb #1760: T=120 -> T=76
+    hill climb #1761: T=120 -> T=76
+    hill climb #1762: T=120 -> T=54
+    hill climb #1763: T=120 -> T=59
+    hill climb #1764: T=120 -> T=54
+    hill climb #1765: T=120 -> T=73
+    hill climb #1766: T=120 -> T=36
+    hill climb #1767: T=120 -> T=53
+    hill climb #1768: T=120 -> T=66
+    hill climb #1769: T=120 -> T=78
+    hill climb #1770: T=120 -> T=55
+    hill climb #1771: T=120 -> T=117
+    hill climb #1772: T=120 -> T=36
+    hill climb #1773: T=120 -> T=56
+    hill climb #1774: T=120 -> T=65
+    hill climb #1775: T=120 -> T=71
+    hill climb #1776: T=120 -> T=39
+    hill climb #1777: T=120 -> T=72
+    hill climb #1778: T=120 -> T=65
+    hill climb #1779: T=120 -> T=39
+    hill climb #1780: T=120 -> T=35
+    hill climb #1781: T=120 -> T=43
+    hill climb #1782: T=120 -> T=43
+    hill climb #1783: T=120 -> T=64
+    hill climb #1784: T=120 -> T=84
+    hill climb #1785: T=120 -> T=67
+    hill climb #1786: T=120 -> T=83
+    hill climb #1787: T=121 -> T=78
+    hill climb #1788: T=121 -> T=79
+    hill climb #1789: T=121 -> T=82
+    hill climb #1790: T=121 -> T=76
+    hill climb #1791: T=121 -> T=39
+    hill climb #1792: T=121 -> T=72
+    hill climb #1793: T=121 -> T=66
+    hill climb #1794: T=121 -> T=42
+    hill climb #1795: T=121 -> T=100
+    hill climb #1796: T=121 -> T=63
+    hill climb #1797: T=121 -> T=72
+    hill climb #1798: T=121 -> T=82
+    hill climb #1799: T=121 -> T=67
+    hill climb #1800: T=121 -> T=82
+    hill climb #1801: T=121 -> T=67
+    hill climb #1802: T=121 -> T=83
+    hill climb #1803: T=121 -> T=68
+    hill climb #1804: T=121 -> T=116
+    hill climb #1805: T=121 -> T=76
+    hill climb #1806: T=121 -> T=77
+    hill climb #1807: T=121 -> T=36
+    hill climb #1808: T=121 -> T=73
+    hill climb #1809: T=121 -> T=64
+    hill climb #1810: T=121 -> T=43
+    hill climb #1811: T=121 -> T=84
+    hill climb #1812: T=121 -> T=77
+    hill climb #1813: T=121 -> T=76
+    hill climb #1814: T=121 -> T=39
+    hill climb #1815: T=121 -> T=73
+    hill climb #1816: T=121 -> T=36
+    hill climb #1817: T=121 -> T=85
+    hill climb #1818: T=121 -> T=73
+    hill climb #1819: T=121 -> T=76
+    hill climb #1820: T=121 -> T=89
+    hill climb #1821: T=121 -> T=35
+    hill climb #1822: T=121 -> T=36
+    hill climb #1823: T=121 -> T=76
+    hill climb #1824: T=121 -> T=77
+    hill climb #1825: T=121 -> T=74
+    hill climb #1826: T=121 -> T=60
+    hill climb #1827: T=121 -> T=35
+    hill climb #1828: T=121 -> T=36
+    hill climb #1829: T=121 -> T=78
+    hill climb #1830: T=121 -> T=83
+    hill climb #1831: T=121 -> T=82
+    hill climb #1832: T=121 -> T=89
+    hill climb #1833: T=121 -> T=39
+    hill climb #1834: T=121 -> T=36
+    hill climb #1835: T=121 -> T=72
+    hill climb #1836: T=121 -> T=66
+    hill climb #1837: T=121 -> T=53
+    hill climb #1838: T=121 -> T=74
+    hill climb #1839: T=121 -> T=118
+    hill climb #1840: T=121 -> T=36
+    hill climb #1841: T=121 -> T=34
+    hill climb #1842: T=121 -> T=36
+    hill climb #1843: T=121 -> T=73
+    hill climb #1844: T=121 -> T=64
+    hill climb #1845: T=121 -> T=52
+    hill climb #1846: T=121 -> T=42
+    hill climb #1847: T=121 -> T=39
+    hill climb #1848: T=121 -> T=119
+    hill climb #1849: T=122 -> T=36
+    hill climb #1850: T=122 -> T=39
+    hill climb #1851: T=122 -> T=35
+    hill climb #1852: T=122 -> T=39
+    hill climb #1853: T=122 -> T=83
+    hill climb #1854: T=122 -> T=72
+    hill climb #1855: T=122 -> T=43
+    hill climb #1856: T=122 -> T=35
+    hill climb #1857: T=122 -> T=73
+    hill climb #1858: T=122 -> T=67
+    hill climb #1859: T=122 -> T=73
+    hill climb #1860: T=122 -> T=65
+    hill climb #1861: T=122 -> T=35
+    hill climb #1862: T=122 -> T=39
+    hill climb #1863: T=122 -> T=36
+    hill climb #1864: T=122 -> T=43
+    hill climb #1865: T=122 -> T=70
+    hill climb #1866: T=122 -> T=35
+    hill climb #1867: T=122 -> T=43
+    hill climb #1868: T=122 -> T=70
+    hill climb #1869: T=122 -> T=39
+    hill climb #1870: T=122 -> T=72
+    hill climb #1871: T=122 -> T=36
+    hill climb #1872: T=122 -> T=68
+    hill climb #1873: T=122 -> T=82
+    hill climb #1874: T=122 -> T=36
+    hill climb #1875: T=122 -> T=60
+    hill climb #1876: T=122 -> T=76
+    hill climb #1877: T=122 -> T=53
+    hill climb #1878: T=122 -> T=82
+    hill climb #1879: T=122 -> T=78
+    hill climb #1880: T=122 -> T=67
+    hill climb #1881: T=122 -> T=39
+    hill climb #1882: T=122 -> T=88
+    hill climb #1883: T=122 -> T=70
+    hill climb #1884: T=122 -> T=39
+    hill climb #1885: T=122 -> T=77
+    hill climb #1886: T=122 -> T=36
+    hill climb #1887: T=122 -> T=36
+    hill climb #1888: T=122 -> T=43
+    hill climb #1889: T=122 -> T=70
+    hill climb #1890: T=122 -> T=73
+    hill climb #1891: T=122 -> T=64
+    hill climb #1892: T=122 -> T=66
+    hill climb #1893: T=122 -> T=39
+    hill climb #1894: T=122 -> T=60
+    hill climb #1895: T=122 -> T=66
+    hill climb #1896: T=122 -> T=36
+    hill climb #1897: T=122 -> T=77
+    hill climb #1898: T=122 -> T=74
+    hill climb #1899: T=122 -> T=73
+    hill climb #1900: T=122 -> T=36
+    hill climb #1901: T=122 -> T=39
+    hill climb #1902: T=122 -> T=40
+    hill climb #1903: T=122 -> T=84
+    hill climb #1904: T=122 -> T=66
+    hill climb #1905: T=122 -> T=74
+    hill climb #1906: T=122 -> T=116
+    hill climb #1907: T=122 -> T=43
+    hill climb #1908: T=122 -> T=68
+    hill climb #1909: T=122 -> T=36
+    hill climb #1910: T=122 -> T=62
+    hill climb #1911: T=122 -> T=66
+    hill climb #1912: T=122 -> T=105
+    hill climb #1913: T=122 -> T=34
+    hill climb #1914: T=122 -> T=67
+    hill climb #1915: T=122 -> T=79
+    hill climb #1916: T=122 -> T=73
+    hill climb #1917: T=122 -> T=111
+    hill climb #1918: T=122 -> T=76
+    hill climb #1919: T=122 -> T=65
+    hill climb #1920: T=122 -> T=88
+    hill climb #1921: T=122 -> T=43
+    hill climb #1922: T=122 -> T=43
+    hill climb #1923: T=122 -> T=55
+    hill climb #1924: T=122 -> T=75
+    hill climb #1925: T=122 -> T=36
+    hill climb #1926: T=122 -> T=75
+    hill climb #1927: T=122 -> T=39
+    hill climb #1928: T=122 -> T=36
+    hill climb #1929: T=122 -> T=43
+    hill climb #1930: T=122 -> T=36
+    hill climb #1931: T=122 -> T=39
+    hill climb #1932: T=122 -> T=73
+    hill climb #1933: T=122 -> T=36
+    hill climb #1934: T=122 -> T=36
+    hill climb #1935: T=122 -> T=54
+    hill climb #1936: T=122 -> T=36
+    hill climb #1937: T=122 -> T=37
+    hill climb #1938: T=122 -> T=85
+    hill climb #1939: T=122 -> T=43
+    hill climb #1940: T=122 -> T=43
+    hill climb #1941: T=122 -> T=67
+    hill climb #1942: T=122 -> T=66
+    hill climb #1943: T=122 -> T=66
+    hill climb #1944: T=122 -> T=65
+    hill climb #1945: T=122 -> T=69
+    hill climb #1946: T=122 -> T=66
+    hill climb #1947: T=122 -> T=76
+    hill climb #1948: T=122 -> T=35
+    hill climb #1949: T=122 -> T=36
+    hill climb #1950: T=122 -> T=74
+    hill climb #1951: T=122 -> T=76
+    hill climb #1952: T=122 -> T=65
+    hill climb #1953: T=122 -> T=39
+    hill climb #1954: T=122 -> T=83
+    hill climb #1955: T=122 -> T=43
+    hill climb #1956: T=122 -> T=35
+    hill climb #1957: T=122 -> T=68
+    hill climb #1958: T=122 -> T=74
+    hill climb #1959: T=122 -> T=42
+    hill climb #1960: T=122 -> T=83
+    hill climb #1961: T=122 -> T=67
+    hill climb #1962: T=122 -> T=83
+    hill climb #1963: T=122 -> T=35
+    hill climb #1964: T=122 -> T=36
+    hill climb #1965: T=122 -> T=34
+    hill climb #1966: T=122 -> T=78
+    hill climb #1967: T=122 -> T=36
+    hill climb #1968: T=122 -> T=36
+    hill climb #1969: T=122 -> T=68
+    hill climb #1970: T=122 -> T=35
+    hill climb #1971: T=122 -> T=84
+    hill climb #1972: T=122 -> T=81
+    hill climb #1973: T=122 -> T=76
+    hill climb #1974: T=123 -> T=66
+    hill climb #1975: T=123 -> T=40
+    hill climb #1976: T=123 -> T=70
+    hill climb #1977: T=123 -> T=70
+    hill climb #1978: T=123 -> T=59
+    hill climb #1979: T=123 -> T=67
+    hill climb #1980: T=123 -> T=85
+    hill climb #1981: T=123 -> T=107
+    hill climb #1982: T=123 -> T=69
+    hill climb #1983: T=123 -> T=78
+    hill climb #1984: T=123 -> T=84
+    hill climb #1985: T=123 -> T=36
+    hill climb #1986: T=123 -> T=77
+    hill climb #1987: T=123 -> T=118
+    hill climb #1988: T=123 -> T=67
+    hill climb #1989: T=123 -> T=72
+    hill climb #1990: T=123 -> T=78
+    hill climb #1991: T=123 -> T=76
+    hill climb #1992: T=123 -> T=75
+    hill climb #1993: T=123 -> T=66
+    hill climb #1994: T=123 -> T=79
+    hill climb #1995: T=123 -> T=118
+    hill climb #1996: T=123 -> T=36
+    hill climb #1997: T=123 -> T=67
+    hill climb #1998: T=123 -> T=88
+    hill climb #1999: T=123 -> T=37
+    hill climb #2000: T=123 -> T=107
+    hill climb #2001: T=123 -> T=35
+    hill climb #2002: T=123 -> T=83
+    hill climb #2003: T=123 -> T=39
+    hill climb #2004: T=123 -> T=83
+    hill climb #2005: T=123 -> T=43
+    hill climb #2006: T=123 -> T=66
+    hill climb #2007: T=123 -> T=39
+    hill climb #2008: T=123 -> T=112
+    hill climb #2009: T=123 -> T=67
+    hill climb #2010: T=123 -> T=35
+    hill climb #2011: T=123 -> T=34
+    hill climb #2012: T=123 -> T=39
+    hill climb #2013: T=123 -> T=49
+    hill climb #2014: T=123 -> T=83
+    hill climb #2015: T=123 -> T=39
+    hill climb #2016: T=123 -> T=43
+    hill climb #2017: T=123 -> T=68
+    hill climb #2018: T=123 -> T=39
+    hill climb #2019: T=123 -> T=39
+    hill climb #2020: T=123 -> T=57
+    hill climb #2021: T=123 -> T=118
+    hill climb #2022: T=123 -> T=67
+    hill climb #2023: T=123 -> T=39
+    hill climb #2024: T=123 -> T=36
+    hill climb #2025: T=123 -> T=75
+    hill climb #2026: T=123 -> T=59
+    hill climb #2027: T=123 -> T=58
+    hill climb #2028: T=123 -> T=39
+    hill climb #2029: T=123 -> T=72
+    hill climb #2030: T=123 -> T=79
+    hill climb #2031: T=123 -> T=43
+    hill climb #2032: T=123 -> T=67
+    hill climb #2033: T=123 -> T=83
+    hill climb #2034: T=123 -> T=62
+    hill climb #2035: T=123 -> T=54
+    hill climb #2036: T=123 -> T=36
+    hill climb #2037: T=124 -> T=75
+    hill climb #2038: T=124 -> T=84
+    hill climb #2039: T=124 -> T=43
+    hill climb #2040: T=124 -> T=89
+    hill climb #2041: T=124 -> T=67
+    hill climb #2042: T=124 -> T=68
+    hill climb #2043: T=124 -> T=36
+    hill climb #2044: T=124 -> T=75
+    hill climb #2045: T=124 -> T=36
+    hill climb #2046: T=124 -> T=70
+    hill climb #2047: T=124 -> T=36
+    hill climb #2048: T=124 -> T=71
+    hill climb #2049: T=124 -> T=75
+    hill climb #2050: T=124 -> T=65
+    hill climb #2051: T=124 -> T=65
+    hill climb #2052: T=124 -> T=53
+    hill climb #2053: T=124 -> T=36
+    hill climb #2054: T=124 -> T=36
+    hill climb #2055: T=124 -> T=79
+    hill climb #2056: T=124 -> T=63
+    hill climb #2057: T=124 -> T=77
+    hill climb #2058: T=124 -> T=43
+    hill climb #2059: T=124 -> T=43
+    hill climb #2060: T=124 -> T=43
+    hill climb #2061: T=124 -> T=77
+    hill climb #2062: T=124 -> T=58
+    hill climb #2063: T=124 -> T=54
+    hill climb #2064: T=124 -> T=36
+    hill climb #2065: T=124 -> T=36
+    hill climb #2066: T=124 -> T=68
+    hill climb #2067: T=124 -> T=34
+    hill climb #2068: T=124 -> T=34
+    hill climb #2069: T=124 -> T=76
+    hill climb #2070: T=124 -> T=67
+    hill climb #2071: T=124 -> T=34
+    hill climb #2072: T=124 -> T=64
+    hill climb #2073: T=124 -> T=43
+    hill climb #2074: T=124 -> T=36
+    hill climb #2075: T=124 -> T=43
+    hill climb #2076: T=124 -> T=89
+    hill climb #2077: T=124 -> T=72
+    hill climb #2078: T=124 -> T=76
+    hill climb #2079: T=124 -> T=43
+    hill climb #2080: T=124 -> T=35
+    hill climb #2081: T=124 -> T=59
+    hill climb #2082: T=124 -> T=103
+    hill climb #2083: T=124 -> T=69
+    hill climb #2084: T=124 -> T=36
+    hill climb #2085: T=124 -> T=53
+    hill climb #2086: T=124 -> T=88
+    hill climb #2087: T=124 -> T=76
+    hill climb #2088: T=124 -> T=36
+    hill climb #2089: T=124 -> T=77
+    hill climb #2090: T=124 -> T=75
+    hill climb #2091: T=124 -> T=36
+    hill climb #2092: T=124 -> T=75
+    hill climb #2093: T=124 -> T=57
+    hill climb #2094: T=124 -> T=36
+    hill climb #2095: T=124 -> T=72
+    hill climb #2096: T=124 -> T=54
+    hill climb #2097: T=124 -> T=36
+    hill climb #2098: T=124 -> T=66
+    hill climb #2099: T=124 -> T=67
+    hill climb #2100: T=124 -> T=85
+    hill climb #2101: T=124 -> T=36
+    hill climb #2102: T=124 -> T=73
+    hill climb #2103: T=124 -> T=34
+    hill climb #2104: T=124 -> T=71
+    hill climb #2105: T=124 -> T=67
+    hill climb #2106: T=124 -> T=36
+    hill climb #2107: T=124 -> T=77
+    hill climb #2108: T=124 -> T=77
+    hill climb #2109: T=124 -> T=77
+    hill climb #2110: T=124 -> T=36
+    hill climb #2111: T=124 -> T=71
+    hill climb #2112: T=124 -> T=71
+    hill climb #2113: T=124 -> T=67
+    hill climb #2114: T=124 -> T=43
+    hill climb #2115: T=124 -> T=84
+    hill climb #2116: T=124 -> T=35
+    hill climb #2117: T=124 -> T=44
+    hill climb #2118: T=124 -> T=43
+    hill climb #2119: T=124 -> T=43
+    hill climb #2120: T=124 -> T=66
+    hill climb #2121: T=124 -> T=73
+    hill climb #2122: T=124 -> T=43
+    hill climb #2123: T=124 -> T=36
+    hill climb #2124: T=124 -> T=35
+    hill climb #2125: T=124 -> T=66
+    hill climb #2126: T=124 -> T=36
+    hill climb #2127: T=124 -> T=49
+    hill climb #2128: T=124 -> T=66
+    hill climb #2129: T=124 -> T=63
+    hill climb #2130: T=124 -> T=49
+    hill climb #2131: T=124 -> T=85
+    hill climb #2132: T=124 -> T=62
+    hill climb #2133: T=124 -> T=35
+    hill climb #2134: T=124 -> T=59
+    hill climb #2135: T=124 -> T=54
+    hill climb #2136: T=124 -> T=72
+    hill climb #2137: T=124 -> T=67
+    hill climb #2138: T=124 -> T=39
+    hill climb #2139: T=124 -> T=43
+    hill climb #2140: T=124 -> T=66
+    hill climb #2141: T=124 -> T=36
+    hill climb #2142: T=124 -> T=43
+    hill climb #2143: T=124 -> T=87
+    hill climb #2144: T=124 -> T=65
+    hill climb #2145: T=124 -> T=116
+    hill climb #2146: T=124 -> T=39
+    hill climb #2147: T=124 -> T=78
+    hill climb #2148: T=124 -> T=65
+    hill climb #2149: T=124 -> T=65
+    hill climb #2150: T=124 -> T=36
+    hill climb #2151: T=124 -> T=76
+    hill climb #2152: T=124 -> T=52
+    hill climb #2153: T=124 -> T=39
+    hill climb #2154: T=124 -> T=42
+    hill climb #2155: T=124 -> T=76
+    hill climb #2156: T=124 -> T=35
+    hill climb #2157: T=124 -> T=43
+    hill climb #2158: T=124 -> T=70
+    hill climb #2159: T=124 -> T=39
+    hill climb #2160: T=124 -> T=71
+    hill climb #2161: T=124 -> T=35
+    hill climb #2162: T=124 -> T=84
+    hill climb #2163: T=124 -> T=34
+    hill climb #2164: T=124 -> T=55
+    hill climb #2165: T=124 -> T=68
+    hill climb #2166: T=124 -> T=68
+    hill climb #2167: T=124 -> T=75
+    hill climb #2168: T=124 -> T=36
+    hill climb #2169: T=124 -> T=43
+    hill climb #2170: T=124 -> T=57
+    hill climb #2171: T=124 -> T=43
+    hill climb #2172: T=124 -> T=54
+    hill climb #2173: T=124 -> T=43
+    hill climb #2174: T=125 -> T=76
+    hill climb #2175: T=125 -> T=119
+    hill climb #2176: T=125 -> T=64
+    hill climb #2177: T=125 -> T=71
+    hill climb #2178: T=125 -> T=63
+    hill climb #2179: T=125 -> T=82
+    hill climb #2180: T=125 -> T=43
+    hill climb #2181: T=125 -> T=75
+    hill climb #2182: T=125 -> T=73
+    hill climb #2183: T=125 -> T=62
+    hill climb #2184: T=125 -> T=64
+    hill climb #2185: T=125 -> T=49
+    hill climb #2186: T=125 -> T=34
+    hill climb #2187: T=125 -> T=73
+    hill climb #2188: T=125 -> T=114
+    hill climb #2189: T=125 -> T=43
+    hill climb #2190: T=125 -> T=87
+    hill climb #2191: T=125 -> T=70
+    hill climb #2192: T=125 -> T=37
+    hill climb #2193: T=125 -> T=66
+    hill climb #2194: T=125 -> T=76
+    hill climb #2195: T=125 -> T=36
+    hill climb #2196: T=125 -> T=83
+    hill climb #2197: T=125 -> T=55
+    hill climb #2198: T=125 -> T=39
+    hill climb #2199: T=125 -> T=89
+    hill climb #2200: T=125 -> T=71
+    hill climb #2201: T=125 -> T=35
+    hill climb #2202: T=125 -> T=66
+    hill climb #2203: T=125 -> T=43
+    hill climb #2204: T=125 -> T=73
+    hill climb #2205: T=125 -> T=71
+    hill climb #2206: T=125 -> T=76
+    hill climb #2207: T=125 -> T=70
+    hill climb #2208: T=125 -> T=71
+    hill climb #2209: T=125 -> T=67
+    hill climb #2210: T=125 -> T=39
+    hill climb #2211: T=125 -> T=77
+    hill climb #2212: T=125 -> T=36
+    hill climb #2213: T=125 -> T=36
+    hill climb #2214: T=125 -> T=71
+    hill climb #2215: T=125 -> T=36
+    hill climb #2216: T=125 -> T=75
+    hill climb #2217: T=125 -> T=71
+    hill climb #2218: T=125 -> T=39
+    hill climb #2219: T=125 -> T=88
+    hill climb #2220: T=125 -> T=78
+    hill climb #2221: T=125 -> T=76
+    hill climb #2222: T=125 -> T=83
+    hill climb #2223: T=125 -> T=87
+    hill climb #2224: T=125 -> T=34
+    hill climb #2225: T=125 -> T=36
+    hill climb #2226: T=125 -> T=36
+    hill climb #2227: T=125 -> T=89
+    hill climb #2228: T=125 -> T=69
+    hill climb #2229: T=125 -> T=43
+    hill climb #2230: T=125 -> T=35
+    hill climb #2231: T=125 -> T=79
+    hill climb #2232: T=125 -> T=87
+    hill climb #2233: T=125 -> T=36
+    hill climb #2234: T=125 -> T=70
+    hill climb #2235: T=125 -> T=74
+    hill climb #2236: T=125 -> T=73
+    hill climb #2237: T=125 -> T=64
+    hill climb #2238: T=125 -> T=112
+    hill climb #2239: T=125 -> T=75
+    hill climb #2240: T=125 -> T=66
+    hill climb #2241: T=125 -> T=39
+    hill climb #2242: T=125 -> T=39
+    hill climb #2243: T=125 -> T=67
+    hill climb #2244: T=125 -> T=84
+    hill climb #2245: T=125 -> T=105
+    hill climb #2246: T=125 -> T=74
+    hill climb #2247: T=125 -> T=36
+    hill climb #2248: T=125 -> T=36
+    hill climb #2249: T=126 -> T=43
+    hill climb #2250: T=126 -> T=36
+    hill climb #2251: T=126 -> T=118
+    hill climb #2252: T=126 -> T=117
+    hill climb #2253: T=126 -> T=39
+    hill climb #2254: T=126 -> T=82
+    hill climb #2255: T=126 -> T=75
+    hill climb #2256: T=126 -> T=36
+    hill climb #2257: T=126 -> T=39
+    hill climb #2258: T=126 -> T=44
+    hill climb #2259: T=126 -> T=39
+    hill climb #2260: T=126 -> T=83
+    hill climb #2261: T=126 -> T=67
+    hill climb #2262: T=126 -> T=40
+    hill climb #2263: T=126 -> T=65
+    hill climb #2264: T=126 -> T=77
+    hill climb #2265: T=126 -> T=84
+    hill climb #2266: T=126 -> T=38
+    hill climb #2267: T=126 -> T=77
+    hill climb #2268: T=126 -> T=83
+    hill climb #2269: T=126 -> T=37
+    hill climb #2270: T=126 -> T=70
+    hill climb #2271: T=126 -> T=66
+    hill climb #2272: T=126 -> T=36
+    hill climb #2273: T=126 -> T=76
+    hill climb #2274: T=126 -> T=36
+    hill climb #2275: T=126 -> T=36
+    hill climb #2276: T=126 -> T=36
+    hill climb #2277: T=126 -> T=43
+    hill climb #2278: T=126 -> T=43
+    hill climb #2279: T=126 -> T=83
+    hill climb #2280: T=126 -> T=87
+    hill climb #2281: T=126 -> T=39
+    hill climb #2282: T=126 -> T=36
+    hill climb #2283: T=126 -> T=72
+    hill climb #2284: T=126 -> T=65
+    hill climb #2285: T=126 -> T=36
+    hill climb #2286: T=126 -> T=40
+    hill climb #2287: T=126 -> T=43
+    hill climb #2288: T=126 -> T=36
+    hill climb #2289: T=126 -> T=76
+    hill climb #2290: T=126 -> T=36
+    hill climb #2291: T=126 -> T=40
+    hill climb #2292: T=126 -> T=78
+    hill climb #2293: T=126 -> T=67
+    hill climb #2294: T=126 -> T=39
+    hill climb #2295: T=126 -> T=74
+    hill climb #2296: T=126 -> T=39
+    hill climb #2297: T=126 -> T=67
+    hill climb #2298: T=126 -> T=76
+    hill climb #2299: T=126 -> T=35
+    hill climb #2300: T=126 -> T=39
+    hill climb #2301: T=126 -> T=74
+    hill climb #2302: T=126 -> T=55
+    hill climb #2303: T=126 -> T=73
+    hill climb #2304: T=126 -> T=82
+    hill climb #2305: T=126 -> T=70
+    hill climb #2306: T=126 -> T=64
+    hill climb #2307: T=126 -> T=75
+    hill climb #2308: T=126 -> T=67
+    hill climb #2309: T=126 -> T=76
+    hill climb #2310: T=126 -> T=73
+    hill climb #2311: T=126 -> T=37
+    hill climb #2312: T=126 -> T=69
+    hill climb #2313: T=126 -> T=88
+    hill climb #2314: T=126 -> T=76
+    hill climb #2315: T=126 -> T=83
+    hill climb #2316: T=126 -> T=36
+    hill climb #2317: T=126 -> T=51
+    hill climb #2318: T=126 -> T=36
+    hill climb #2319: T=126 -> T=72
+    hill climb #2320: T=126 -> T=77
+    hill climb #2321: T=126 -> T=64
+    hill climb #2322: T=126 -> T=39
+    hill climb #2323: T=126 -> T=104
+    hill climb #2324: T=126 -> T=64
+    hill climb #2325: T=126 -> T=77
+    hill climb #2326: T=126 -> T=64
+    hill climb #2327: T=126 -> T=83
+    hill climb #2328: T=126 -> T=84
+    hill climb #2329: T=126 -> T=69
+    hill climb #2330: T=126 -> T=36
+    hill climb #2331: T=126 -> T=64
+    hill climb #2332: T=126 -> T=66
+    hill climb #2333: T=126 -> T=36
+    hill climb #2334: T=126 -> T=36
+    hill climb #2335: T=126 -> T=67
+    hill climb #2336: T=126 -> T=75
+    hill climb #2337: T=126 -> T=84
+    hill climb #2338: T=126 -> T=36
+    hill climb #2339: T=126 -> T=76
+    hill climb #2340: T=126 -> T=82
+    hill climb #2341: T=126 -> T=49
+    hill climb #2342: T=126 -> T=78
+    hill climb #2343: T=126 -> T=65
+    hill climb #2344: T=126 -> T=43
+    hill climb #2345: T=126 -> T=43
+    hill climb #2346: T=126 -> T=39
+    hill climb #2347: T=126 -> T=65
+    hill climb #2348: T=126 -> T=65
+    hill climb #2349: T=126 -> T=40
+    hill climb #2350: T=126 -> T=59
+    hill climb #2351: T=126 -> T=70
+    hill climb #2352: T=126 -> T=36
+    hill climb #2353: T=126 -> T=65
+    hill climb #2354: T=126 -> T=67
+    hill climb #2355: T=126 -> T=40
+    hill climb #2356: T=127 -> T=78
+    hill climb #2357: T=127 -> T=36
+    hill climb #2358: T=127 -> T=36
+    hill climb #2359: T=127 -> T=63
+    hill climb #2360: T=127 -> T=35
+    hill climb #2361: T=127 -> T=84
+    hill climb #2362: T=127 -> T=117
+    hill climb #2363: T=127 -> T=87
+    hill climb #2364: T=127 -> T=84
+    hill climb #2365: T=127 -> T=76
+    hill climb #2366: T=127 -> T=77
+    hill climb #2367: T=127 -> T=88
+    hill climb #2368: T=127 -> T=76
+    hill climb #2369: T=127 -> T=84
+    hill climb #2370: T=127 -> T=85
+    hill climb #2371: T=127 -> T=77
+    hill climb #2372: T=127 -> T=81
+    hill climb #2373: T=127 -> T=36
+    hill climb #2374: T=127 -> T=75
+    hill climb #2375: T=127 -> T=36
+    hill climb #2376: T=127 -> T=43
+    hill climb #2377: T=127 -> T=39
+    hill climb #2378: T=127 -> T=67
+    hill climb #2379: T=127 -> T=77
+    hill climb #2380: T=127 -> T=79
+    hill climb #2381: T=127 -> T=68
+    hill climb #2382: T=127 -> T=79
+    hill climb #2383: T=127 -> T=73
+    hill climb #2384: T=127 -> T=77
+    hill climb #2385: T=127 -> T=76
+    hill climb #2386: T=127 -> T=74
+    hill climb #2387: T=127 -> T=36
+    hill climb #2388: T=127 -> T=87
+    hill climb #2389: T=127 -> T=84
+    hill climb #2390: T=127 -> T=69
+    hill climb #2391: T=127 -> T=43
+    hill climb #2392: T=127 -> T=36
+    hill climb #2393: T=127 -> T=43
+    hill climb #2394: T=127 -> T=72
+    hill climb #2395: T=128 -> T=84
+    hill climb #2396: T=128 -> T=72
+    hill climb #2397: T=128 -> T=82
+    hill climb #2398: T=128 -> T=36
+    hill climb #2399: T=128 -> T=39
+    hill climb #2400: T=128 -> T=77
+    hill climb #2401: T=128 -> T=77
+    hill climb #2402: T=128 -> T=64
+    hill climb #2403: T=128 -> T=36
+    hill climb #2404: T=128 -> T=64
+    hill climb #2405: T=128 -> T=69
+    hill climb #2406: T=128 -> T=74
+    hill climb #2407: T=128 -> T=51
+    hill climb #2408: T=128 -> T=74
+    hill climb #2409: T=128 -> T=87
+    hill climb #2410: T=128 -> T=39
+    hill climb #2411: T=128 -> T=64
+    hill climb #2412: T=128 -> T=85
+    hill climb #2413: T=128 -> T=76
+    hill climb #2414: T=128 -> T=36
+    hill climb #2415: T=128 -> T=76
+    hill climb #2416: T=128 -> T=71
+    hill climb #2417: T=128 -> T=44
+    hill climb #2418: T=128 -> T=36
+    hill climb #2419: T=128 -> T=74
+    hill climb #2420: T=128 -> T=82
+    hill climb #2421: T=128 -> T=36
+    hill climb #2422: T=128 -> T=39
+    hill climb #2423: T=128 -> T=72
+    hill climb #2424: T=128 -> T=43
+    hill climb #2425: T=128 -> T=77
+    hill climb #2426: T=128 -> T=118
+    hill climb #2427: T=128 -> T=85
+    hill climb #2428: T=128 -> T=76
+    hill climb #2429: T=128 -> T=43
+    hill climb #2430: T=128 -> T=59
+    hill climb #2431: T=128 -> T=36
+    hill climb #2432: T=128 -> T=54
+    hill climb #2433: T=128 -> T=83
+    hill climb #2434: T=128 -> T=73
+    hill climb #2435: T=128 -> T=37
+    hill climb #2436: T=128 -> T=88
+    hill climb #2437: T=128 -> T=39
+    hill climb #2438: T=128 -> T=43
+    hill climb #2439: T=128 -> T=82
+    hill climb #2440: T=128 -> T=74
+    hill climb #2441: T=128 -> T=88
+    hill climb #2442: T=128 -> T=36
+    hill climb #2443: T=128 -> T=77
+    hill climb #2444: T=128 -> T=71
+    hill climb #2445: T=128 -> T=76
+    hill climb #2446: T=128 -> T=82
+    hill climb #2447: T=128 -> T=66
+    hill climb #2448: T=128 -> T=64
+    hill climb #2449: T=128 -> T=83
+    hill climb #2450: T=128 -> T=43
+    hill climb #2451: T=128 -> T=79
+    hill climb #2452: T=128 -> T=68
+    hill climb #2453: T=128 -> T=83
+    hill climb #2454: T=128 -> T=66
+    hill climb #2455: T=128 -> T=34
+    hill climb #2456: T=128 -> T=44
+    hill climb #2457: T=128 -> T=57
+    hill climb #2458: T=128 -> T=37
+    hill climb #2459: T=128 -> T=85
+    hill climb #2460: T=128 -> T=88
+    hill climb #2461: T=128 -> T=70
+    hill climb #2462: T=128 -> T=61
+    hill climb #2463: T=128 -> T=43
+    hill climb #2464: T=128 -> T=68
+    hill climb #2465: T=128 -> T=36
+    hill climb #2466: T=128 -> T=66
+    hill climb #2467: T=128 -> T=36
+    hill climb #2468: T=128 -> T=36
+    hill climb #2469: T=128 -> T=39
+    hill climb #2470: T=128 -> T=36
+    hill climb #2471: T=128 -> T=35
+    hill climb #2472: T=128 -> T=43
+    hill climb #2473: T=128 -> T=76
+    hill climb #2474: T=128 -> T=70
+    hill climb #2475: T=128 -> T=43
+    hill climb #2476: T=128 -> T=36
+    hill climb #2477: T=128 -> T=75
+    hill climb #2478: T=128 -> T=39
+    hill climb (complement) #2542: T=804 -> T=56
+    hill climb (complement) #2647: T=939 -> T=50
+    hill climb (complement) #2982: T=1174 -> T=89
+    hill climb (complement) #3074: T=1231 -> T=65
+    hill climb (complement) #3080: T=1237 -> T=24
+    hill climb (complement) #3125: T=1262 -> T=107
+    hill climb (complement) #3178: T=1293 -> T=62
+    hill climb (complement) #3195: T=1305 -> T=75
+    hill climb (complement) #3269: T=1352 -> T=113
+    hill climb (complement) #3280: T=1362 -> T=32
+    hill climb (complement) #3285: T=1364 -> T=72
+    hill climb (complement) #3334: T=1388 -> T=52
+    hill climb (complement) #3336: T=1390 -> T=27
+    hill climb (complement) #3503: T=1464 -> T=48
+    hill climb (complement) #3918: T=1591 -> T=68
+    hill climb (complement) #4202: T=1655 -> T=115
+    hill climb (complement) #4258: T=1666 -> T=112
+    hill climb (complement) #4312: T=1679 -> T=15
+    hill climb (complement) #4314: T=1679 -> T=66
+    hill climb (complement) #4448: T=1706 -> T=58
+    hill climb (complement) #4600: T=1734 -> T=67
+    hill climb (complement) #4626: T=1740 -> T=32
+    hill climb (complement) #4966: T=1804 -> T=104
+    hill climb (complement) #5148: T=1837 -> T=91
+    hill climb (complement) #5338: T=1872 -> T=106
+    hill climb (complement) #5566: T=1914 -> T=95
+    hill climb (complement) #5651: T=1930 -> T=119
+    hill climb (complement) #6164: T=2018 -> T=107
+    hill climb (complement) #6408: T=2064 -> T=112
+    hill climb (complement) #6455: T=2072 -> T=126
+    hill climb (complement) #6656: T=2110 -> T=124
+    hill climb (complement) #7274: T=2234 -> T=157
+    hill climb (complement) #7307: T=2242 -> T=88
+    hill climb (complement) #7445: T=2271 -> T=96
+    hill climb (complement) #7545: T=2300 -> T=58
+    hill climb (complement) #7565: T=2304 -> T=108
+    hill climb (complement) #7618: T=2318 -> T=16
+    hill climb (complement) #7810: T=2385 -> T=92
+    hill climb (complement) #7856: T=2402 -> T=106
+    hill climb (complement) #7929: T=2432 -> T=105
+    hill climb (complement) #7996: T=2458 -> T=57
+    hill climb (complement) #8006: T=2463 -> T=92
+    hill climb (complement) #8062: T=2490 -> T=169
+    hill climb (complement) #8142: T=2533 -> T=194
+    hill climb (complement) #8242: T=2590 -> T=84
+    hill climb (complement) #8273: T=2613 -> T=132
+    hill climb (complement) #8287: T=2628 -> T=173
+    hill climb (complement) #8362: T=2663 -> T=96
+    hill climb (complement) #8409: T=2684 -> T=73
+    hill climb (complement) #8586: T=2775 -> T=90
+    hill climb (complement) #8672: T=2808 -> T=116
+    hill climb (complement) #8681: T=2813 -> T=53
+    hill climb (complement) #8900: T=2906 -> T=56
+    hill climb (complement) #9091: T=2983 -> T=170
+    hill climb (complement) #9183: T=3018 -> T=135
+    hill climb (complement) #9293: T=3052 -> T=118
+    hill climb (complement) #9446: T=3097 -> T=144
+    hill climb (complement) #9492: T=3108 -> T=228
+    hill climb (complement) #9499: T=3112 -> T=172
+    hill climb (complement) #9680: T=3165 -> T=92
+    hill climb (complement) #10002: T=3254 -> T=163
+    hill climb (complement) #10218: T=3312 -> T=116
+    hill climb (complement) #10230: T=3315 -> T=97
+    hill climb (complement) #10291: T=3330 -> T=91
+    hill climb (complement) #11242: T=3566 -> T=295
+    hill climb (complement) #11422: T=3608 -> T=136
+    hill climb (complement) #11431: T=3611 -> T=111
+    hill climb (complement) #11723: T=3687 -> T=184
+    hill climb (complement) #11883: T=3724 -> T=66
+    hill climb (complement) #12229: T=3810 -> T=336
+    hill climb (complement) #12942: T=3976 -> T=60
+    hill climb (complement) #13070: T=4008 -> T=264
+    hill climb (complement) #13559: T=4136 -> T=84
+    hill climb (complement) #13673: T=4170 -> T=75
+    hill climb (complement) #13688: T=4174 -> T=88
+    hill climb (complement) #13947: T=4258 -> T=146
+    hill climb (complement) #14138: T=4342 -> T=199
+    hill climb (complement) #14196: T=4370 -> T=192
+    hill climb (complement) #14225: T=4386 -> T=120
+    hill climb (complement) #14286: T=4421 -> T=200
+    hill climb (complement) #14323: T=4443 -> T=106
+    hill climb (complement) #14440: T=4512 -> T=148
+    hill climb (complement) #14550: T=4599 -> T=103
+    hill climb (complement) #14551: T=4599 -> T=85
+    hill climb (complement) #14572: T=4614 -> T=153
+    hill climb (complement) #14634: T=4652 -> T=94
+    hill climb (complement) #14665: T=4672 -> T=300
+    hill climb (complement) #14697: T=4692 -> T=288
+    hill climb (complement) #14702: T=4694 -> T=142
+    hill climb (complement) #14750: T=4726 -> T=111
+    hill climb (complement) #14797: T=4754 -> T=334
+    hill climb (complement) #14799: T=4756 -> T=149
+    hill climb (complement) #14803: T=4760 -> T=268
+    hill climb (complement) #14805: T=4762 -> T=293
+    hill climb (complement) #14843: T=4788 -> T=141
+    hill climb (complement) #14927: T=4864 -> T=92
+    hill climb (complement) #14975: T=4904 -> T=436
+    hill climb (complement) #14991: T=4918 -> T=226
+    hill climb (complement) #15020: T=4938 -> T=249
+    hill climb (complement) #15027: T=4944 -> T=129
+    hill climb (complement) #15054: T=4962 -> T=276
+    hill climb (complement) #15204: T=5064 -> T=197
+    hill climb (complement) #15223: T=5080 -> T=389
+    hill climb (complement) #15288: T=5116 -> T=187
+    hill climb (complement) #15298: T=5122 -> T=153
+    hill climb (complement) #15309: T=5128 -> T=179
+    hill climb (complement) #15358: T=5154 -> T=20
+    hill climb (complement) #15385: T=5169 -> T=157
+    hill climb (complement) #15388: T=5171 -> T=154
+    hill climb (complement) #15395: T=5174 -> T=243
+    hill climb (complement) #15405: T=5180 -> T=163
+    hill climb (complement) #15433: T=5202 -> T=146
+    hill climb (complement) #15454: T=5218 -> T=66
+    hill climb (complement) #15473: T=5226 -> T=327
+    hill climb (complement) #15554: T=5284 -> T=86
+    hill climb (complement) #15561: T=5290 -> T=111
+    hill climb (complement) #15570: T=5295 -> T=283
+    hill climb (complement) #15579: T=5298 -> T=110
+    hill climb (complement) #15588: T=5306 -> T=295
+    hill climb (complement) #15635: T=5334 -> T=160
+    hill climb (complement) #15868: T=5462 -> T=296
+    hill climb (complement) #15870: T=5463 -> T=130
+    hill climb (complement) #15903: T=5484 -> T=141
+    hill climb (complement) #15936: T=5498 -> T=195
+    hill climb (complement) #15991: T=5536 -> T=267
+    hill climb (complement) #16029: T=5557 -> T=161
+    hill climb (complement) #16031: T=5558 -> T=340
+    hill climb (complement) #16121: T=5614 -> T=207
+    hill climb (complement) #16122: T=5614 -> T=404
+    hill climb (complement) #16182: T=5648 -> T=308
+    hill climb (complement) #16242: T=5680 -> T=56
+    hill climb (complement) #16285: T=5703 -> T=57
+    hill climb (complement) #16352: T=5734 -> T=203
+    hill climb (complement) #16586: T=5852 -> T=334
+    hill climb (complement) #16835: T=5950 -> T=366
+    hill climb (complement) #16906: T=5984 -> T=318
+    hill climb (complement) #16964: T=6010 -> T=161
+    hill climb (complement) #16991: T=6021 -> T=265
+    hill climb (complement) #17081: T=6052 -> T=167
+    hill climb (complement) #17136: T=6072 -> T=361
+    hill climb (complement) #17782: T=6354 -> T=175
+    hill climb (complement) #17807: T=6363 -> T=173
+    hill climb (complement) #18493: T=6624 -> T=330
+    hill climb (complement) #18575: T=6654 -> T=466
+    hill climb (complement) #18656: T=6682 -> T=452
+    hill climb (complement) #18952: T=6788 -> T=231
+    hill climb (complement) #18988: T=6798 -> T=413
+    hill climb (complement) #18997: T=6802 -> T=151
+    hill climb (complement) #19032: T=6811 -> T=313
+    hill climb (complement) #19513: T=7000 -> T=217
+    hill climb (complement) #20223: T=7292 -> T=292
+    hill climb (complement) #20252: T=7304 -> T=214
+    hill climb (complement) #20327: T=7342 -> T=573
+    hill climb (complement) #20366: T=7354 -> T=66
+    hill climb (complement) #20732: T=7532 -> T=234
+    hill climb (complement) #20783: T=7560 -> T=374
+    hill climb (complement) #20861: T=7608 -> T=160
+    hill climb (complement) #20920: T=7638 -> T=417
+    hill climb (complement) #21029: T=7705 -> T=202
+    hill climb (complement) #21107: T=7764 -> T=257
+    hill climb (complement) #21165: T=7796 -> T=291
+    hill climb (complement) #21184: T=7810 -> T=192
+    hill climb (complement) #21253: T=7864 -> T=517
+    hill climb (complement) #21303: T=7906 -> T=190
+    hill climb (complement) #21369: T=7962 -> T=380
+    hill climb (complement) #21373: T=7965 -> T=321
+    hill climb (complement) #21531: T=8100 -> T=467
+    hill climb (complement) #21651: T=8206 -> T=312
+    hill climb (complement) #21750: T=8294 -> T=220
+    hill climb (complement) #21849: T=8386 -> T=170
+    hill climb (complement) #21919: T=8479 -> T=395
+    hill climb (complement) #21953: T=8522 -> T=230
+    hill climb (complement) #22060: T=8636 -> T=645
+    hill climb (complement) #22083: T=8665 -> T=406
+    hill climb (complement) #22108: T=8690 -> T=400
+    hill climb (complement) #22118: T=8700 -> T=392
+    hill climb (complement) #22193: T=8794 -> T=434
+    hill climb (complement) #22276: T=8894 -> T=129
+    hill climb (complement) #22386: T=9014 -> T=544
+    hill climb (complement) #22400: T=9030 -> T=425
+    hill climb (complement) #22437: T=9074 -> T=270
+    hill climb (complement) #22455: T=9096 -> T=395
+    hill climb (complement) #22467: T=9114 -> T=302
+    hill climb (complement) #22479: T=9120 -> T=305
+    hill climb (complement) #22488: T=9128 -> T=256
+    hill climb (complement) #22495: T=9138 -> T=231
+    hill climb (complement) #22597: T=9249 -> T=343
+    hill climb (complement) #22674: T=9324 -> T=554
+    hill climb (complement) #22713: T=9364 -> T=482
+    hill climb (complement) #22744: T=9390 -> T=276
+    hill climb (complement) #22769: T=9410 -> T=357
+    hill climb (complement) #22813: T=9460 -> T=318
+    hill climb (complement) #22915: T=9562 -> T=280
+    hill climb (complement) #22930: T=9574 -> T=438
+    hill climb (complement) #22944: T=9584 -> T=362
+    hill climb (complement) #22995: T=9627 -> T=200
+    hill climb (complement) #23051: T=9678 -> T=439
+    hill climb (complement) #23124: T=9740 -> T=200
+    hill climb (complement) #23189: T=9798 -> T=533
+    hill climb (complement) #23432: T=10009 -> T=96
+    hill climb (complement) #23466: T=10034 -> T=360
+    hill climb (complement) #23573: T=10114 -> T=296
+    hill climb (complement) #23584: T=10124 -> T=325
+    hill climb (complement) #23591: T=10128 -> T=301
+    hill climb (complement) #23658: T=10190 -> T=279
+    hill climb (complement) #23755: T=10274 -> T=276
+    hill climb (complement) #23785: T=10295 -> T=721
+    hill climb (complement) #23842: T=10344 -> T=292
+    hill climb (complement) #23847: T=10346 -> T=310
+    hill climb (complement) #23855: T=10351 -> T=257
+    hill climb (complement) #23872: T=10364 -> T=492
+    hill climb (complement) #23956: T=10428 -> T=212
+    hill climb (complement) #24009: T=10462 -> T=630
+    hill climb (complement) #24073: T=10515 -> T=328
+    hill climb (complement) #24477: T=10792 -> T=254
+    hill climb (complement) #24480: T=10796 -> T=474
+    hill climb (complement) #24543: T=10841 -> T=550
+    hill climb (complement) #24649: T=10898 -> T=550
+    hill climb (complement) #24669: T=10912 -> T=728
+    hill climb (complement) #24699: T=10934 -> T=432
+    hill climb (complement) #24709: T=10936 -> T=497
+    hill climb (complement) #24738: T=10956 -> T=512
+    hill climb (complement) #25025: T=11126 -> T=445
+    hill climb (complement) #25063: T=11149 -> T=257
+    hill climb (complement) #25206: T=11230 -> T=219
+    hill climb (complement) #25316: T=11307 -> T=279
+    hill climb (complement) #25373: T=11344 -> T=315
+    hill climb (complement) #25623: T=11498 -> T=640
+    hill climb (complement) #25715: T=11560 -> T=211
+    hill climb (complement) #26317: T=11932 -> T=683
+    hill climb (complement) #26380: T=11966 -> T=324
+    hill climb (complement) #26461: T=12018 -> T=84
+    hill climb (complement) #26518: T=12062 -> T=800
+    hill climb (complement) #26679: T=12162 -> T=451
+    hill climb (complement) #26783: T=12225 -> T=629
+    hill climb (complement) #26815: T=12244 -> T=679
+    hill climb (complement) #26866: T=12280 -> T=446
+    hill climb (complement) #27357: T=12624 -> T=162
+    hill climb (complement) #27557: T=12764 -> T=791
+    hill climb (complement) #27601: T=12808 -> T=489
+    hill climb (complement) #27714: T=12904 -> T=792
+    hill climb (complement) #27751: T=12935 -> T=444
+    hill climb (complement) #27871: T=13030 -> T=493
+    hill climb (complement) #27977: T=13128 -> T=833
+    hill climb (complement) #28144: T=13278 -> T=480
+    hill climb (complement) #28277: T=13402 -> T=1108
+    hill climb (complement) #28363: T=13484 -> T=454
+    hill climb (complement) #28418: T=13530 -> T=554
+    hill climb (complement) #28421: T=13534 -> T=854
+    hill climb (complement) #28444: T=13560 -> T=408
+    hill climb (complement) #28822: T=13968 -> T=397
+    hill climb (complement) #28868: T=14030 -> T=788
+    hill climb (complement) #28883: T=14052 -> T=957
+    hill climb (complement) #28889: T=14058 -> T=465
+    hill climb (complement) #28890: T=14058 -> T=858
+    hill climb (complement) #28964: T=14166 -> T=866
+    hill climb (complement) #28988: T=14204 -> T=478
+    hill climb (complement) #28996: T=14212 -> T=904
+    hill climb (complement) #29007: T=14226 -> T=482
+    hill climb (complement) #29123: T=14370 -> T=910
+    hill climb (complement) #29245: T=14554 -> T=779
+    hill climb (complement) #29260: T=14572 -> T=337
+    hill climb (complement) #29271: T=14584 -> T=762
+    hill climb (complement) #29300: T=14622 -> T=476
+    hill climb (complement) #29400: T=14828 -> T=453
+    hill climb (complement) #29401: T=14828 -> T=390
+    hill climb (complement) #29407: T=14832 -> T=660
+    hill climb (complement) #29435: T=14876 -> T=1214
+    hill climb (complement) #29451: T=14896 -> T=977
+    hill climb (complement) #29472: T=14926 -> T=904
+    hill climb (complement) #29486: T=14948 -> T=1107
+    hill climb (complement) #29530: T=15018 -> T=934
+    hill climb (complement) #29621: T=15166 -> T=485
+    hill climb (complement) #29664: T=15254 -> T=752
+    hill climb (complement) #29671: T=15266 -> T=487
+    hill climb (complement) #29702: T=15330 -> T=844
+    hill climb (complement) #29712: T=15340 -> T=498
+    hill climb (complement) #29728: T=15372 -> T=438
+    hill climb (complement) #29737: T=15400 -> T=298
+    hill climb (complement) #29823: T=15548 -> T=995
+    hill climb (complement) #29830: T=15556 -> T=516
+    hill climb (complement) #29878: T=15634 -> T=962
+    hill climb (complement) #29916: T=15714 -> T=619
+    hill climb (complement) #29931: T=15744 -> T=923
+    hill climb (complement) #29964: T=15795 -> T=354
+    hill climb (complement) #29995: T=15870 -> T=427
+    hill climb (complement) #30088: T=16012 -> T=747
+    hill climb (complement) #30139: T=16092 -> T=524
+    hill climb (complement) #30193: T=16176 -> T=814
+    hill climb (complement) #30195: T=16186 -> T=437
+    hill climb (complement) #30293: T=16348 -> T=464
+    hill climb (complement) #30340: T=16424 -> T=910
+    hill climb (complement) #30400: T=16517 -> T=748
+    hill climb (complement) #30415: T=16540 -> T=720
+    hill climb (complement) #30447: T=16580 -> T=699
+    hill climb (complement) #30449: T=16582 -> T=786
+    hill climb (complement) #30497: T=16662 -> T=1046
+    hill climb (complement) #30517: T=16696 -> T=938
+    hill climb (complement) #30527: T=16714 -> T=1112
+    hill climb (complement) #30535: T=16720 -> T=441
+    hill climb (complement) #30587: T=16804 -> T=1024
+    hill climb (complement) #30613: T=16842 -> T=1005
+    hill climb (complement) #30697: T=16958 -> T=484
+    hill climb (complement) #30744: T=17060 -> T=555
+    hill climb (complement) #30779: T=17130 -> T=439
+    hill climb (complement) #30783: T=17140 -> T=646
+    hill climb (complement) #30867: T=17264 -> T=1334
+    hill climb (complement) #30872: T=17271 -> T=550
+    hill climb (complement) #30894: T=17322 -> T=430
+    hill climb (complement) #30997: T=17468 -> T=668
+    hill climb (complement) #31016: T=17490 -> T=732
+    hill climb (complement) #31253: T=17846 -> T=1267
+    hill climb (complement) #31272: T=17870 -> T=283
+    hill climb (complement) #31314: T=17932 -> T=727
+    hill climb (complement) #31411: T=18066 -> T=1016
+    hill climb (complement) #31434: T=18094 -> T=1233
+    hill climb (complement) #31456: T=18121 -> T=1049
+    hill climb (complement) #31701: T=18470 -> T=618
+    hill climb (complement) #31821: T=18632 -> T=794
+    hill climb (complement) #31827: T=18642 -> T=665
+    hill climb (complement) #31896: T=18746 -> T=850
+    hill climb (complement) #32328: T=19284 -> T=917
+    hill climb (complement) #32347: T=19304 -> T=285
+    hill climb (complement) #32569: T=19556 -> T=1135
+    hill climb (complement) #32615: T=19600 -> T=807
+    hill climb (complement) #32665: T=19652 -> T=1191
+    hill climb (complement) #32772: T=19778 -> T=678
+    hill climb (complement) #32815: T=19842 -> T=992
+    hill climb (complement) #32850: T=19881 -> T=499
+    hill climb (complement) #33242: T=20348 -> T=864
+    hill climb (complement) #33312: T=20432 -> T=570
+    hill climb (complement) #34188: T=21489 -> T=958
+    hill climb (complement) #34237: T=21549 -> T=962
+    hill climb (complement) #34489: T=21896 -> T=701
+    hill climb (complement) #35170: T=22906 -> T=356
+    hill climb (complement) #35807: T=24211 -> T=1150
+    hill climb from identity: T=40 -> T=36
+    Hill climb time: 4905.99 s
+
+========================================
+  Results (102890 candidates evaluated)
+  Raw ANF Sum T = 215
+========================================
+  1. m=8 T=123 (union=15, compression 14.3333×) M=[0100000..; 1000110..; 0001100..; 1100100..; 1010100..; 0000100..; 0000000..; 0111101..]
+    Per-output T: oseloregdst0=3 oseloregdst1=4 oselopB0=4 oselopB1=9 oaluop0=4 oaluop1=0 oaluop2=7 oaluopext0=2 oaluopext1=0 oaluopext2=3 oaluopext3=9 ohalt=2 oregwrite=8 oselpcopA=4 oselpcopB=4 obeqz=8 obnez=8 obgez=0 obltz=0 ojump=4 oCin=13 oinvA=15 oinvB=2 osign=0 omemwrite=8 oselwb=2
+  2. m=9 T=129 (union=16, compression 13.4375×) M=[0000100..; 1001100..; 0100000..; 0000000..; 0100101..; 0000000..; 1111000..; 0000010..; 0101000..]
+    Per-output T: oseloregdst0=3 oseloregdst1=3 oselopB0=4 oselopB1=6 oaluop0=4 oaluop1=4 oaluop2=6 oaluopext0=3 oaluopext1=3 oaluopext2=3 oaluopext3=6 ohalt=16 oregwrite=7 oselpcopA=7 oselpcopB=8 obeqz=4 obnez=4 obgez=8 obltz=2 ojump=7 oCin=8 oinvA=8 oinvB=4 osign=1 omemwrite=0 oselwb=0
+  3. m=11 T=132 (union=20, compression 10.75×) M=[1000000..; 0101010..; 1000000..; 1000000..; 0001000..; 0101100..; 0000000..; 0000000..; 1110000..; 1110001..; 1001100..]
+    Per-output T: oseloregdst0=6 oseloregdst1=8 oselopB0=10 oselopB1=6 oaluop0=2 oaluop1=8 oaluop2=6 oaluopext0=8 oaluopext1=6 oaluopext2=8 oaluopext3=6 ohalt=16 oregwrite=8 oselpcopA=0 oselpcopB=8 obeqz=1 obnez=0 obgez=0 obltz=4 ojump=8 oCin=4 oinvA=0 oinvB=4 osign=1 omemwrite=4 oselwb=0
+  4. m=9 T=176 (union=24, compression 8.95833×) M=[0101100..; 0001101..; 0001000..; 1000100..; 0100100..; 0000000..; 1110100..; 0000100..; 1101010..]
+    Per-output T: oseloregdst0=12 oseloregdst1=12 oselopB0=4 oselopB1=2 oaluop0=8 oaluop1=6 oaluop2=6 oaluopext0=12 oaluopext1=14 oaluopext2=14 oaluopext3=6 ohalt=16 oregwrite=14 oselpcopA=8 oselpcopB=16 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=12 oCin=0 oinvA=0 oinvB=0 osign=2 omemwrite=4 oselwb=8
+  5. m=8 T=190 (union=27, compression 7.96296×) M=[1011011..; 0100111..; 1010000..; 0001000..; 1000011..; 1010111..; 0000000..; 1001101..]
+    Per-output T: oseloregdst0=15 oseloregdst1=7 oselopB0=12 oselopB1=2 oaluop0=8 oaluop1=12 oaluop2=4 oaluopext0=15 oaluopext1=15 oaluopext2=15 oaluopext3=14 ohalt=16 oregwrite=15 oselpcopA=13 oselpcopB=7 obeqz=0 obnez=0 obgez=0 obltz=0 ojump=6 oCin=0 oinvA=0 oinvB=0 osign=0 omemwrite=8 oselwb=6
+  6. m=8 T=240 (union=32, compression 6.71875×) M=[1110011..; 1000000..; 0000000..; 1111000..; 1001000..; 1001111..; 1101011..; 1010010..]
+    Per-output T: oseloregdst0=12 oseloregdst1=19 oselopB0=23 oselopB1=9 oaluop0=4 oaluop1=12 oaluop2=15 oaluopext0=8 oaluopext1=13 oaluopext2=19 oaluopext3=14 ohalt=14 oregwrite=11 oselpcopA=0 oselpcopB=12 obeqz=7 obnez=0 obgez=0 obltz=8 ojump=12 oCin=10 oinvA=0 oinvB=10 osign=0 omemwrite=8 oselwb=0
+  7. m=8 T=241 (union=32, compression 6.71875×) M=[0110100..; 0110010..; 0111000..; 0100101..; 1100110..; 0000010..; 0000000..; 0100110..]
+    Per-output T: oseloregdst0=12 oseloregdst1=16 oselopB0=16 oselopB1=14 oaluop0=10 oaluop1=8 oaluop2=10 oaluopext0=10 oaluopext1=8 oaluopext2=10 oaluopext3=12 ohalt=1 oregwrite=12 oselpcopA=16 oselpcopB=10 obeqz=4 obnez=8 obgez=4 obltz=8 ojump=8 oCin=12 oinvA=4 oinvB=12 osign=0 omemwrite=12 oselwb=4
+  8. m=7 T=167 (union=34, compression 6.32353×) M=[0111110..; 0111100..; 0001001..; 0010100..; 1000000..; 0010000..; 0001000..]
+    Per-output T: oseloregdst0=7 oseloregdst1=7 oselopB0=8 oselopB1=6 oaluop0=9 oaluop1=9 oaluop2=4 oaluopext0=9 oaluopext1=10 oaluopext2=9 oaluopext3=7 ohalt=15 oregwrite=7 oselpcopA=4 oselpcopB=7 obeqz=8 obnez=4 obgez=2 obltz=4 ojump=3 oCin=10 oinvA=3 oinvB=9 osign=0 omemwrite=4 oselwb=2
+  9. m=7 T=203 (union=34, compression 6.32353×) M=[0010000..; 0110100..; 0011100..; 1000010..; 1101000..; 0001000..; 0111101..]
+    Per-output T: oseloregdst0=11 oseloregdst1=5 oselopB0=8 oselopB1=6 oaluop0=13 oaluop1=9 oaluop2=5 oaluopext0=7 oaluopext1=10 oaluopext2=11 oaluopext3=7 ohalt=4 oregwrite=12 oselpcopA=14 oselpcopB=18 obeqz=4 obnez=8 obgez=2 obltz=4 ojump=4 oCin=12 oinvA=5 oinvB=9 osign=0 omemwrite=7 oselwb=8
+  10. m=7 T=209 (union=34, compression 6.32353×) M=[0010000..; 0101100..; 1111100..; 0000100..; 0001000..; 0111001..; 0010010..]
+    Per-output T: oseloregdst0=10 oseloregdst1=9 oselopB0=6 oselopB1=5 oaluop0=14 oaluop1=9 oaluop2=5 oaluopext0=7 oaluopext1=9 oaluopext2=11 oaluopext3=8 ohalt=8 oregwrite=9 oselpcopA=14 oselpcopB=18 obeqz=4 obnez=8 obgez=8 obltz=15 ojump=4 oCin=9 oinvA=3 oinvB=10 osign=0 omemwrite=4 oselwb=2
+  11. m=7 T=167 (union=34, compression 6.32353×) M=[0010100..; 0010000..; 0001000..; 0111100..; 0001001..; 0110110..; 1000000..]
+    Per-output T: oseloregdst0=7 oseloregdst1=7 oselopB0=8 oselopB1=6 oaluop0=9 oaluop1=9 oaluop2=4 oaluopext0=9 oaluopext1=10 oaluopext2=9 oaluopext3=7 ohalt=15 oregwrite=7 oselpcopA=4 oselpcopB=7 obeqz=8 obnez=4 obgez=2 obltz=4 ojump=3 oCin=10 oinvA=3 oinvB=9 osign=0 omemwrite=4 oselwb=2
+  12. m=7 T=219 (union=34, compression 6.32353×) M=[0000100..; 1100000..; 0010000..; 0001000..; 0100100..; 1100101..; 1001110..]
+    Per-output T: oseloregdst0=12 oseloregdst1=11 oselopB0=6 oselopB1=5 oaluop0=14 oaluop1=9 oaluop2=5 oaluopext0=9 oaluopext1=11 oaluopext2=11 oaluopext3=6 ohalt=4 oregwrite=13 oselpcopA=14 oselpcopB=18 obeqz=4 obnez=8 obgez=8 obltz=15 ojump=4 oCin=9 oinvA=6 oinvB=7 osign=0 omemwrite=2 oselwb=8
+  13. m=7 T=200 (union=34, compression 6.32353×) M=[0001100..; 0101010..; 0101100..; 0001000..; 1000000..; 0101101..; 0010000..]
+    Per-output T: oseloregdst0=7 oseloregdst1=9 oselopB0=11 oselopB1=5 oaluop0=10 oaluop1=8 oaluop2=4 oaluopext0=6 oaluopext1=15 oaluopext2=15 oaluopext3=13 ohalt=8 oregwrite=10 oselpcopA=4 oselpcopB=7 obeqz=8 obnez=4 obgez=8 obltz=15 ojump=3 oCin=7 oinvA=4 oinvB=7 osign=0 omemwrite=8 oselwb=4
+  14. m=7 T=204 (union=34, compression 6.32353×) M=[0010000..; 1010000..; 0111000..; 0100010..; 0001000..; 0001100..; 1100001..]
+    Per-output T: oseloregdst0=7 oseloregdst1=9 oselopB0=11 oselopB1=5 oaluop0=16 oaluop1=8 oaluop2=4 oaluopext0=6 oaluopext1=15 oaluopext2=15 oaluopext3=13 ohalt=4 oregwrite=10 oselpcopA=7 oselpcopB=4 obeqz=4 obnez=8 obgez=15 obltz=8 ojump=3 oCin=7 oinvA=6 oinvB=7 osign=0 omemwrite=8 oselwb=4
+  15. m=7 T=212 (union=34, compression 6.32353×) M=[0011100..; 0111000..; 1001100..; 0001000..; 0100101..; 0101110..; 0010000..]
+    Per-output T: oseloregdst0=11 oseloregdst1=8 oselopB0=8 oselopB1=4 oaluop0=14 oaluop1=5 oaluop2=5 oaluopext0=11 oaluopext1=14 oaluopext2=15 oaluopext3=11 ohalt=4 oregwrite=13 oselpcopA=7 oselpcopB=11 obeqz=2 obnez=4 obgez=8 obltz=4 ojump=4 oCin=8 oinvA=10 oinvB=12 osign=0 omemwrite=11 oselwb=8
+  16. m=7 T=212 (union=34, compression 6.32353×) M=[0010000..; 0001000..; 0101000..; 1010000..; 1100011..; 0001100..; 0110010..]
+    Per-output T: oseloregdst0=6 oseloregdst1=10 oselopB0=11 oselopB1=5 oaluop0=16 oaluop1=12 oaluop2=4 oaluopext0=7 oaluopext1=14 oaluopext2=16 oaluopext3=13 ohalt=4 oregwrite=11 oselpcopA=7 oselpcopB=4 obeqz=8 obnez=15 obgez=8 obltz=4 ojump=3 oCin=9 oinvA=6 oinvB=7 osign=0 omemwrite=8 oselwb=4
+  17. m=7 T=205 (union=34, compression 6.32353×) M=[0000010..; 0001000..; 0001100..; 0111000..; 0010000..; 1110111..; 1011100..]
+    Per-output T: oseloregdst0=7 oseloregdst1=9 oselopB0=8 oselopB1=5 oaluop0=14 oaluop1=8 oaluop2=4 oaluopext0=6 oaluopext1=12 oaluopext2=12 oaluopext3=12 ohalt=4 oregwrite=10 oselpcopA=7 oselpcopB=4 obeqz=8 obnez=4 obgez=8 obltz=15 ojump=3 oCin=9 oinvA=10 oinvB=7 osign=0 omemwrite=11 oselwb=8
+  18. m=7 T=224 (union=34, compression 6.32353×) M=[0010000..; 0001000..; 0000100..; 0110111..; 0000010..; 0100100..; 1110100..]
+    Per-output T: oseloregdst0=12 oseloregdst1=11 oselopB0=6 oselopB1=5 oaluop0=14 oaluop1=8 oaluop2=5 oaluopext0=11 oaluopext1=11 oaluopext2=11 oaluopext3=6 ohalt=8 oregwrite=13 oselpcopA=14 oselpcopB=18 obeqz=4 obnez=8 obgez=8 obltz=15 ojump=4 oCin=9 oinvA=3 oinvB=10 osign=0 omemwrite=2 oselwb=8
+  19. m=7 T=196 (union=34, compression 6.32353×) M=[0100000..; 0010000..; 0001000..; 0111010..; 0001100..; 1111100..; 1111101..]
+    Per-output T: oseloregdst0=7 oseloregdst1=6 oselopB0=6 oselopB1=7 oaluop0=21 oaluop1=8 oaluop2=4 oaluopext0=4 oaluopext1=6 oaluopext2=8 oaluopext3=8 ohalt=4 oregwrite=13 oselpcopA=8 oselpcopB=11 obeqz=8 obnez=15 obgez=4 obltz=8 ojump=3 oCin=9 oinvA=6 oinvB=7 osign=0 omemwrite=7 oselwb=8
+  20. m=7 T=177 (union=34, compression 6.32353×) M=[0010100..; 0001000..; 1000100..; 0000001..; 0000100..; 0000010..; 0100100..]
+    Per-output T: oseloregdst0=8 oseloregdst1=7 oselopB0=9 oselopB1=7 oaluop0=18 oaluop1=8 oaluop2=4 oaluopext0=7 oaluopext1=9 oaluopext2=7 oaluopext3=5 ohalt=8 oregwrite=8 oselpcopA=7 oselpcopB=4 obeqz=2 obnez=4 obgez=8 obltz=4 ojump=3 oCin=8 oinvA=10 oinvB=12 osign=0 omemwrite=6 oselwb=4
+
+Best candidate: m=8, T_sum=123, T_union=15
+// Transform z = Mx + b (GF(2)):
+// m=8, n=7
+// z_0 = opcode1
+// z_1 = opcode0 + opcode4 + opext0
+// z_2 = opcode3 + opcode4 + 1
+// z_3 = opcode0 + opcode1 + opcode4 + 1
+// z_4 = opcode0 + opcode2 + opcode4 + 1
+// z_5 = opcode4
+// z_6 = 1
+// z_7 = opcode1 + opcode2 + opcode3 + opcode4 + opext1 + 1
+  Evaluating best candidate (m=8) for output...
+  Saved affine: /home/wangfz/bool/cpp/results/ctrl/ctrl_d1a_opt1.affine (s=8, n=7)
+  Saved poly: /home/wangfz/bool/cpp/results/ctrl/ctrl_d1a_opt1.poly (m=8, 26 outputs, 315 terms)
+  Saved stats: /home/wangfz/bool/cpp/results/ctrl/ctrl_d1a_opt1_stats.txt (n=7, k=26, sum_T=308, union_T=39)
+
+Total time: 5073.37 s

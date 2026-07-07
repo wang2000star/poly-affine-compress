@@ -1,0 +1,20 @@
+--- Circuit ---
+  Inputs: 7, Outputs: 26, Gates: 181
+  Warning: n=7 ≤ 20. Use optimize_anf_opt1/opt2 instead (truth table approach is faster for small n).
+  Max-m: 12, Random: 100000, Hill-climb: 100000
+
+Phase 1: Per-output search (z-space evaluation)
+  Output 0/26 (oseloregdst0)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=6 T=4 (4296.78 s)
+  Output 1/26 (oseloregdst1)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=5 T=3 (4175.92 s)
+  Output 2/26 (oselopB0)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=5 T=4 (4109.08 s)
+  Output 3/26 (oselopB1)...
+    m≤12, search=100000 random + 100000 hill-climb
+    m=5 T=3 (6552.37 s)
+  Output 4/26 (oaluop0)...
+    m≤12, search=100000 random + 100000 hill-climb

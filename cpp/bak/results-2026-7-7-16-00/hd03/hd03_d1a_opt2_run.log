@@ -1,0 +1,54 @@
+--- Circuit ---
+  Inputs: 16, Outputs: 8, Gates: 64
+  Warning: n=16 ≤ 20. Use optimize_anf_opt1/opt2 instead (truth table approach is faster for small n).
+  Max-m: 12, Random: 15000, Hill-climb: 15000
+
+Phase 1: Per-output search (z-space evaluation)
+  Output 0/8 (om_7)...
+    m≤12, search=15000 random + 15000 hill-climb
+    [identity fallback: m=n=16 T=255]
+    m=16 T=255 (0.326286 s)
+  Output 1/8 (om_6)...
+    m≤12, search=15000 random + 15000 hill-climb
+    [identity fallback: m=n=16 T=127]
+    m=16 T=127 (0.283601 s)
+  Output 2/8 (om_5)...
+    m≤12, search=15000 random + 15000 hill-climb
+    [identity fallback: m=n=16 T=63]
+    m=16 T=63 (0.290573 s)
+  Output 3/8 (om_4)...
+    m≤12, search=15000 random + 15000 hill-climb
+    [identity fallback: m=n=16 T=31]
+    m=16 T=31 (0.300003 s)
+  Output 4/8 (om_3)...
+    m≤12, search=15000 random + 15000 hill-climb
+    [identity fallback: m=n=16 T=15]
+    m=16 T=15 (0.319518 s)
+  Output 5/8 (om_2)...
+    m≤12, search=15000 random + 15000 hill-climb
+    [identity fallback: m=n=16 T=7]
+    m=16 T=7 (0.327241 s)
+  Output 6/8 (om_1)...
+    m≤12, search=15000 random + 15000 hill-climb
+    m=6 T=2 (745.328 s)
+  Output 7/8 (om_0)...
+    m≤12, search=15000 random + 15000 hill-climb
+    m=4 T=1 (438.53 s)
+
+=== Results ===
+  om_7: T=255 m=16
+  om_6: T=127 m=16
+  om_5: T=63 m=16
+  om_4: T=31 m=16
+  om_3: T=15 m=16
+  om_2: T=7 m=16
+  om_1: T=2 m=6
+  om_0: T=1 m=4
+  Sum T = 501
+  Union T = 501
+  Saved: /home/wangfz/bool/cpp/results/hd03/hd03_d1a_opt2.affine (s=106)
+  Saved: /home/wangfz/bool/cpp/results/hd03/hd03_d1a_opt2.poly (m=106, 8 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd03/hd03_d1a_opt2_stats.txt (n=16, k=8, sum_T=501, union_T=501)
+  Saved: /home/wangfz/bool/cpp/results/hd03/hd03_d1a_opt2_verify.txt
+
+Total time: 1185.85 s

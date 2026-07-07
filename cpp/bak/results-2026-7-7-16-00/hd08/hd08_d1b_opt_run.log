@@ -1,0 +1,12 @@
+GateBuilder: hd08
+  threshold=2147483647 out_dir=/home/wangfz/bool/cpp/results/hd08
+  Circuit: 8 inputs, 1 outputs, 37 gates
+  Build complete
+  Output om_0: m=8 T=128 T_nl=120
+    m_used=8 T=128
+  Per-output compression complete
+    om_0: m=8 T=128
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d1b_opt.affine (s=8, n=8)
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d1b_opt.poly (m=8, 1 outputs)
+  Saved: /home/wangfz/bool/cpp/results/hd08/hd08_d1b_opt_stats.txt (sum_T=120, union_T=120)
+  Done. Files written to /home/wangfz/bool/cpp/results/hd08/hd08_d1b_opt.*

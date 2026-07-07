@@ -1,0 +1,13 @@
+# Verification: f(x) = g(Mx+b)
+# n=16
+
+om_7: PASS T=257 m=16
+om_6: PASS T=129 m=16
+om_5: PASS T=65 m=16
+om_4: PASS T=33 m=16
+om_3: PASS T=17 m=16
+om_2: PASS T=9 m=16
+om_1: PASS T=5 m=16
+om_0: PASS T=3 m=16
+
+All: PASS

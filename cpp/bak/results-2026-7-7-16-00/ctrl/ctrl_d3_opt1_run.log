@@ -1,0 +1,488 @@
+--- Circuit ---
+  Inputs: 7, Outputs to optimize: 26
+
+Phase 1: Computing truth table...
+  Truth table: 2^7 = 128 inputs, 2 batches, 26 output(s), 104 thread(s)
+
+Phase 2: Raw ANF baseline...
+  Sum T = 215
+  Max deg = 7
+    oseloregdst0: T=9, m=5
+    oseloregdst1: T=10, m=5
+    oselopB0: T=12, m=4
+    oselopB1: T=8, m=5
+    oaluop0: T=12, m=7
+    oaluop1: T=6, m=5
+    oaluop2: T=5, m=5
+    oaluopext0: T=9, m=5
+    oaluopext1: T=9, m=5
+    oaluopext2: T=10, m=5
+    oaluopext3: T=8, m=5
+    ohalt: T=26, m=5
+    oregwrite: T=14, m=5
+    oselpcopA: T=4, m=4
+    oselpcopB: T=7, m=4
+    obeqz: T=8, m=5
+    obnez: T=4, m=5
+    obgez: T=2, m=5
+    obltz: T=4, m=5
+    ojump: T=3, m=3
+    oCin: T=8, m=6
+    oinvA: T=12, m=7
+    oinvB: T=6, m=7
+    osign: T=0, m=0
+    omemwrite: T=11, m=4
+    oselwb: T=8, m=5
+
+Phase 2c: d1c product-based simplification...
+    [d1c] output 0 (t=5): T_nl 9 → 7 (b=0x1f)
+      → T_union=72
+    [d1c] output 1 (t=5): T_nl 10 → 7 (b=0x5)
+      → T_union=35
+    [d1c] output 2 (t=5): T_nl 12 → 4 (b=0x5)
+      → T_union=35
+    [d1c] output 3 (t=5): T_nl 8 → 3 (b=0x6)
+      → T_union=38
+    [d1c] output 4 (t=7): T_nl 12 → 8 (b=0x44)
+      → T_union=34
+    [d1c] output 5 (t=5): T_nl 6 → 5 (b=0x4)
+      → T_union=34
+    [d1c] output 7 (t=5): T_nl 9 → 8 (b=0x1)
+      → T_union=41
+    [d1c] output 8 (t=5): T_nl 9 → 4 (b=0x9)
+      → T_union=52
+    [d1c] output 9 (t=5): T_nl 10 → 7 (b=0xd)
+      → T_union=42
+    [d1c] output 10 (t=5): T_nl 8 → 6 (b=0x4)
+      → T_union=34
+    [d1c] output 11 (t=5): T_nl 26 → 1 (b=0x1f)
+      → T_union=72
+    [d1c] output 12 (t=5): T_nl 14 → 6 (b=0xa)
+      → T_union=64
+    [d1c] output 13 (t=4): T_nl 4 → 1 (b=0x18)
+      → T_union=64
+    [d1c] output 14 (t=4): T_nl 7 → 1 (b=0x19)
+      → T_union=72
+    [d1c] output 15 (t=5): T_nl 8 → 1 (b=0x13)
+      → T_union=72
+    [d1c] output 16 (t=5): T_nl 4 → 1 (b=0x12)
+      → T_union=64
+    [d1c] output 17 (t=5): T_nl 2 → 1 (b=0x10)
+      → T_union=48
+    [d1c] output 18 (t=5): T_nl 4 → 1 (b=0x11)
+      → T_union=52
+    [d1c] output 19 (t=3): T_nl 3 → 1 (b=0x18)
+      → T_union=64
+    [d1c] output 20 (t=6): T_nl 8 → 6 (b=0x24)
+      → T_union=35
+    [d1c] output 21 (t=7): T_nl 12 → 4 (b=0x46)
+      → T_union=38
+    [d1c] output 22 (t=7): T_nl 6 → 5 (b=0x4)
+      → T_union=34
+    [d1c] output 24 (t=5): T_nl 11 → 2 (b=0xd)
+      → T_union=42
+    [d1c] output 25 (t=5): T_nl 8 → 1 (b=0xe)
+      → T_union=48
+    Searched 26 output(s), 24 improved
+    d1c time: 0.393617 s
+
+Phase 2b: Computing Aut(F) basis...
+  dim(Aut(F)) = 3
+  basis vectors: 1 2 32
+  Aut(F) time: 7.7812e-05 s
+  Dependency union: 7/7 bits (0 don't-care)
+
+Phase 3: Computing Walsh correlations...
+  Output oseloregdst0 top-5 bits: 6(18) 3(10) 4(10) 1(6) 2(6)
+  Output oseloregdst1 top-5 bits: 6(10) 1(6) 3(6) 0(2) 2(2)
+  Output oselopB0 top-5 bits: 2(8) 6(8) 0(4) 1(4) 3(4)
+  Output oselopB1 top-5 bits: 6(22) 4(14) 3(10) 1(6) 2(6)
+  Output oaluop0 top-5 bits: 6(8) 0(6) 1(4) 4(4) 5(2)
+  Output oaluop1 top-5 bits: 1(12) 6(12) 2(4) 3(4) 4(4)
+  Output oaluop2 top-5 bits: 6(26) 2(10) 3(10) 4(10) 0(2)
+  Output oaluopext0 top-5 bits: 6(10) 2(6) 0(2) 1(2) 3(2)
+  Walsh time: 0.00140172 s
+
+Phase 4: Searching for M,b...
+  4a-pr: Progressive M construction (max m=15)...
+    progressive result: m=7 T_union=40
+    progressive time: 0.0159487 s
+  4a: Single-row Walsh (20000 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (10000 candidates)
+  Search time: 17.0176 s
+  4e: Hill climbing from top 10000 candidates (+ identity)
+    hill climb #4: T=35 -> T=34
+    hill climb #5: T=35 -> T=34
+    hill climb #6: T=35 -> T=34
+    hill climb #7: T=38 -> T=34
+    hill climb #8: T=38 -> T=34
+    hill climb #9: T=39 -> T=36
+    hill climb #10: T=40 -> T=36
+    hill climb #11: T=40 -> T=36
+    hill climb #12: T=41 -> T=36
+    hill climb #13: T=42 -> T=36
+    hill climb #14: T=42 -> T=36
+    hill climb #15: T=48 -> T=35
+    hill climb #16: T=48 -> T=36
+    hill climb #17: T=52 -> T=36
+    hill climb #18: T=52 -> T=36
+    hill climb #19: T=62 -> T=43
+    hill climb #20: T=63 -> T=34
+    hill climb #21: T=64 -> T=36
+    hill climb #22: T=64 -> T=36
+    hill climb #23: T=64 -> T=36
+    hill climb #24: T=64 -> T=36
+    hill climb #25: T=68 -> T=36
+    hill climb #26: T=70 -> T=39
+    hill climb #27: T=72 -> T=36
+    hill climb #28: T=72 -> T=35
+    hill climb #29: T=72 -> T=36
+    hill climb #30: T=72 -> T=35
+    hill climb #31: T=72 -> T=36
+    hill climb #32: T=73 -> T=67
+    hill climb #33: T=75 -> T=54
+    hill climb #34: T=76 -> T=56
+    hill climb #35: T=78 -> T=44
+    hill climb #36: T=79 -> T=54
+    hill climb #37: T=80 -> T=36
+    hill climb #38: T=80 -> T=36
+    hill climb #39: T=83 -> T=39
+    hill climb #40: T=84 -> T=72
+    hill climb #41: T=86 -> T=43
+    hill climb #42: T=87 -> T=36
+    hill climb #43: T=88 -> T=43
+    hill climb #44: T=88 -> T=40
+    hill climb #45: T=89 -> T=39
+    hill climb #46: T=89 -> T=36
+    hill climb #47: T=89 -> T=54
+    hill climb #48: T=89 -> T=88
+    hill climb #49: T=90 -> T=36
+    hill climb #50: T=92 -> T=43
+    hill climb #51: T=92 -> T=75
+    hill climb #52: T=92 -> T=76
+    hill climb #53: T=94 -> T=36
+    hill climb #54: T=94 -> T=65
+    hill climb #55: T=94 -> T=66
+    hill climb #56: T=94 -> T=36
+    hill climb #57: T=95 -> T=36
+    hill climb #58: T=95 -> T=36
+    hill climb #59: T=95 -> T=68
+    hill climb #60: T=96 -> T=39
+    hill climb #61: T=96 -> T=35
+    hill climb #62: T=96 -> T=72
+    hill climb #63: T=96 -> T=53
+    hill climb #64: T=97 -> T=36
+    hill climb #65: T=97 -> T=36
+    hill climb #66: T=97 -> T=43
+    hill climb #67: T=98 -> T=70
+    hill climb #68: T=99 -> T=39
+    hill climb #69: T=99 -> T=65
+    hill climb #70: T=100 -> T=36
+    hill climb #71: T=100 -> T=75
+    hill climb #72: T=100 -> T=38
+    hill climb #73: T=100 -> T=74
+    hill climb #74: T=100 -> T=43
+    hill climb #75: T=100 -> T=39
+    hill climb #76: T=101 -> T=36
+    hill climb #77: T=101 -> T=36
+    hill climb #78: T=101 -> T=76
+    hill climb #79: T=102 -> T=67
+    hill climb #80: T=102 -> T=68
+    hill climb #81: T=102 -> T=73
+    hill climb #82: T=102 -> T=100
+    hill climb #83: T=102 -> T=72
+    hill climb #84: T=103 -> T=55
+    hill climb #85: T=103 -> T=65
+    hill climb #86: T=103 -> T=72
+    hill climb #87: T=103 -> T=43
+    hill climb #88: T=104 -> T=77
+    hill climb #89: T=104 -> T=39
+    hill climb #90: T=104 -> T=35
+    hill climb #91: T=104 -> T=55
+    hill climb #92: T=104 -> T=36
+    hill climb #93: T=104 -> T=58
+    hill climb #94: T=104 -> T=39
+    hill climb #95: T=104 -> T=74
+    hill climb #96: T=105 -> T=85
+    hill climb #97: T=105 -> T=43
+    hill climb #98: T=106 -> T=43
+    hill climb #99: T=106 -> T=39
+    hill climb #100: T=106 -> T=43
+    hill climb #101: T=106 -> T=67
+    hill climb #102: T=106 -> T=59
+    hill climb #103: T=106 -> T=65
+    hill climb #104: T=107 -> T=82
+    hill climb #105: T=107 -> T=35
+    hill climb #106: T=107 -> T=82
+    hill climb #107: T=107 -> T=39
+    hill climb #108: T=108 -> T=50
+    hill climb #109: T=108 -> T=70
+    hill climb #110: T=108 -> T=72
+    hill climb #111: T=108 -> T=67
+    hill climb #112: T=108 -> T=72
+    hill climb #113: T=108 -> T=82
+    hill climb #114: T=108 -> T=44
+    hill climb #115: T=109 -> T=36
+    hill climb #116: T=109 -> T=66
+    hill climb #117: T=110 -> T=35
+    hill climb #118: T=110 -> T=39
+    hill climb #119: T=110 -> T=38
+    hill climb #120: T=110 -> T=85
+    hill climb #121: T=110 -> T=73
+    hill climb #122: T=111 -> T=74
+    hill climb #123: T=111 -> T=67
+    hill climb #124: T=111 -> T=67
+    hill climb #125: T=111 -> T=67
+    hill climb #126: T=111 -> T=65
+    hill climb #127: T=111 -> T=74
+    hill climb #128: T=112 -> T=35
+    hill climb #129: T=112 -> T=71
+    hill climb #130: T=112 -> T=36
+    hill climb #131: T=112 -> T=36
+    hill climb #132: T=112 -> T=66
+    hill climb #133: T=112 -> T=36
+    hill climb #134: T=112 -> T=66
+    hill climb #135: T=112 -> T=71
+    hill climb #136: T=112 -> T=36
+    hill climb #137: T=112 -> T=39
+    hill climb #138: T=112 -> T=64
+    hill climb #139: T=112 -> T=64
+    hill climb #140: T=112 -> T=64
+    hill climb #141: T=112 -> T=66
+    hill climb #142: T=113 -> T=35
+    hill climb #143: T=113 -> T=55
+    hill climb #144: T=113 -> T=71
+    hill climb #145: T=113 -> T=35
+    hill climb #146: T=113 -> T=70
+    hill climb #147: T=113 -> T=85
+    hill climb #148: T=114 -> T=36
+    hill climb #149: T=114 -> T=64
+    hill climb #150: T=114 -> T=36
+    hill climb #151: T=114 -> T=72
+    hill climb #152: T=114 -> T=39
+    hill climb #153: T=114 -> T=85
+    hill climb #154: T=114 -> T=82
+    hill climb #155: T=114 -> T=43
+    hill climb #156: T=115 -> T=78
+    hill climb #157: T=115 -> T=74
+    hill climb #158: T=115 -> T=74
+    hill climb #159: T=115 -> T=40
+    hill climb #160: T=115 -> T=55
+    hill climb #161: T=116 -> T=39
+    hill climb #162: T=116 -> T=39
+    hill climb #163: T=116 -> T=76
+    hill climb #164: T=116 -> T=76
+    hill climb #165: T=116 -> T=67
+    hill climb #166: T=116 -> T=66
+    hill climb #167: T=116 -> T=43
+    hill climb #168: T=116 -> T=58
+    hill climb #169: T=116 -> T=77
+    hill climb #170: T=116 -> T=76
+    hill climb #171: T=116 -> T=35
+    hill climb #172: T=117 -> T=43
+    hill climb #173: T=118 -> T=36
+    hill climb #174: T=118 -> T=36
+    hill climb #175: T=118 -> T=35
+    hill climb #176: T=118 -> T=70
+    hill climb #177: T=118 -> T=64
+    hill climb #178: T=118 -> T=43
+    hill climb #179: T=119 -> T=65
+    hill climb #180: T=119 -> T=77
+    hill climb #181: T=119 -> T=36
+    hill climb #182: T=119 -> T=99
+    hill climb #183: T=119 -> T=87
+    hill climb #184: T=119 -> T=39
+    hill climb #185: T=119 -> T=43
+    hill climb #186: T=119 -> T=63
+    hill climb #187: T=120 -> T=74
+    hill climb #188: T=120 -> T=72
+    hill climb #189: T=120 -> T=87
+    hill climb #190: T=120 -> T=83
+    hill climb #191: T=120 -> T=83
+    hill climb #192: T=120 -> T=42
+    hill climb #193: T=120 -> T=43
+    hill climb #194: T=120 -> T=36
+    hill climb #195: T=120 -> T=65
+    hill climb #196: T=120 -> T=36
+    hill climb #197: T=120 -> T=43
+    hill climb #198: T=120 -> T=58
+    hill climb #199: T=120 -> T=65
+    hill climb #200: T=120 -> T=43
+    hill climb #201: T=120 -> T=78
+    hill climb #202: T=120 -> T=78
+    hill climb #203: T=121 -> T=84
+    hill climb #204: T=121 -> T=60
+    hill climb #205: T=121 -> T=74
+    hill climb #206: T=121 -> T=43
+    hill climb #207: T=121 -> T=67
+    hill climb #208: T=122 -> T=39
+    hill climb #209: T=122 -> T=36
+    hill climb #210: T=122 -> T=67
+    hill climb #211: T=122 -> T=67
+    hill climb #212: T=122 -> T=36
+    hill climb #213: T=122 -> T=73
+    hill climb #214: T=122 -> T=76
+    hill climb #215: T=122 -> T=66
+    hill climb #216: T=122 -> T=73
+    hill climb #217: T=122 -> T=70
+    hill climb #218: T=122 -> T=36
+    hill climb #219: T=122 -> T=76
+    hill climb #220: T=122 -> T=74
+    hill climb #221: T=122 -> T=105
+    hill climb #222: T=122 -> T=35
+    hill climb #223: T=123 -> T=75
+    hill climb #224: T=123 -> T=118
+    hill climb #225: T=123 -> T=43
+    hill climb #226: T=123 -> T=67
+    hill climb #227: T=123 -> T=36
+    hill climb #228: T=123 -> T=39
+    hill climb #229: T=124 -> T=53
+    hill climb #230: T=124 -> T=67
+    hill climb #231: T=124 -> T=35
+    hill climb #232: T=124 -> T=77
+    hill climb #233: T=124 -> T=39
+    hill climb #234: T=124 -> T=64
+    hill climb #235: T=124 -> T=77
+    hill climb #236: T=124 -> T=35
+    hill climb #237: T=125 -> T=37
+    hill climb #238: T=125 -> T=74
+    hill climb #239: T=125 -> T=35
+    hill climb #240: T=125 -> T=39
+    hill climb #241: T=125 -> T=66
+    hill climb #242: T=125 -> T=43
+    hill climb #243: T=125 -> T=36
+    hill climb #244: T=125 -> T=36
+    hill climb #245: T=126 -> T=75
+    hill climb #246: T=126 -> T=64
+    hill climb #247: T=126 -> T=67
+    hill climb #248: T=126 -> T=36
+    hill climb #249: T=126 -> T=36
+    hill climb #250: T=126 -> T=82
+    hill climb #251: T=126 -> T=76
+    hill climb #252: T=126 -> T=39
+    hill climb #253: T=126 -> T=75
+    hill climb #254: T=126 -> T=40
+    hill climb #255: T=126 -> T=67
+    hill climb #256: T=126 -> T=37
+    hill climb #257: T=126 -> T=36
+    hill climb #258: T=127 -> T=73
+    hill climb #259: T=127 -> T=36
+    hill climb #260: T=127 -> T=84
+    hill climb #261: T=127 -> T=84
+    hill climb #262: T=128 -> T=39
+    hill climb #263: T=128 -> T=79
+    hill climb #264: T=128 -> T=57
+    hill climb #265: T=128 -> T=87
+    hill climb #266: T=128 -> T=39
+    hill climb #267: T=128 -> T=77
+    hill climb #268: T=128 -> T=82
+    hill climb #269: T=128 -> T=64
+    hill climb #270: T=128 -> T=51
+    hill climb #271: T=128 -> T=43
+    hill climb #272: T=128 -> T=76
+    hill climb #273: T=128 -> T=71
+    hill climb (complement) #331: T=1231 -> T=65
+    hill climb (complement) #339: T=1262 -> T=114
+    hill climb (complement) #777: T=2234 -> T=118
+    hill climb (complement) #834: T=2385 -> T=76
+    hill climb (complement) #853: T=2490 -> T=182
+    hill climb (complement) #860: T=2533 -> T=142
+    hill climb (complement) #905: T=2775 -> T=44
+    hill climb (complement) #937: T=2906 -> T=56
+    hill climb (complement) #961: T=3018 -> T=135
+    hill climb (complement) #1061: T=3315 -> T=171
+    hill climb (complement) #1501: T=4692 -> T=222
+    hill climb (complement) #1527: T=4938 -> T=317
+    hill climb (complement) #1563: T=5080 -> T=330
+    hill climb (complement) #1572: T=5128 -> T=80
+    hill climb (complement) #1644: T=5614 -> T=187
+    hill climb (complement) #1822: T=6354 -> T=420
+    hill climb (complement) #1958: T=6798 -> T=426
+    hill climb (complement) #2190: T=7965 -> T=443
+    hill climb (complement) #2264: T=8636 -> T=631
+    hill climb (complement) #2303: T=9074 -> T=274
+    hill climb (complement) #2363: T=9678 -> T=262
+    hill climb (complement) #2379: T=9798 -> T=501
+    hill climb (complement) #2420: T=10190 -> T=307
+    hill climb (complement) #2441: T=10344 -> T=522
+    hill climb (complement) #2509: T=10841 -> T=518
+    hill climb (complement) #2593: T=11344 -> T=491
+    hill climb (complement) #2623: T=11560 -> T=654
+    hill climb (complement) #2683: T=11966 -> T=632
+    hill climb (complement) #2778: T=12624 -> T=272
+    hill climb (complement) #2837: T=13030 -> T=865
+    hill climb (complement) #2886: T=13402 -> T=992
+    hill climb (complement) #2987: T=14572 -> T=577
+    hill climb (complement) #3005: T=15018 -> T=613
+    hill climb (complement) #3057: T=15714 -> T=485
+    hill climb (complement) #3095: T=16517 -> T=1021
+    hill climb (complement) #3131: T=17264 -> T=1032
+    hill climb (complement) #3147: T=17468 -> T=922
+    hill climb (complement) #3181: T=17932 -> T=1055
+    hill climb (complement) #3352: T=19881 -> T=962
+    hill climb (complement) #3505: T=21896 -> T=469
+    hill climb from identity: T=40 -> T=36
+    Hill climb time: 539.219 s
+
+========================================
+  Results (10399 candidates evaluated)
+  Raw ANF Sum T = 215
+========================================
+  1. m=7 T=191 (union=34, compression 6.32353×) M=[1000000..; 0100000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=9 oselopB0=6 oselopB1=5 oaluop0=9 oaluop1=5 oaluop2=5 oaluopext0=9 oaluopext1=7 oaluopext2=9 oaluopext3=6 ohalt=15 oregwrite=11 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=7 oinvA=6 oinvB=5 osign=0 omemwrite=6 oselwb=4
+  2. m=7 T=211 (union=34, compression 6.32353×) M=[1100000..; 0100000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=7 oselopB0=4 oselopB1=7 oaluop0=16 oaluop1=5 oaluop2=5 oaluopext0=9 oaluopext1=7 oaluopext2=9 oaluopext3=6 ohalt=8 oregwrite=13 oselpcopA=18 oselpcopB=14 obeqz=8 obnez=15 obgez=4 obltz=8 ojump=4 oCin=9 oinvA=10 oinvB=5 osign=0 omemwrite=2 oselwb=8
+  3. m=7 T=211 (union=34, compression 6.32353×) M=[1100000..; 0100000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=7 oselopB0=4 oselopB1=7 oaluop0=16 oaluop1=5 oaluop2=5 oaluopext0=9 oaluopext1=7 oaluopext2=9 oaluopext3=6 ohalt=8 oregwrite=13 oselpcopA=18 oselpcopB=14 obeqz=8 obnez=15 obgez=4 obltz=8 ojump=4 oCin=9 oinvA=10 oinvB=5 osign=0 omemwrite=2 oselwb=8
+  4. m=7 T=191 (union=34, compression 6.32353×) M=[1000000..; 0100000..; 0010000..; 0001000..; 0000100..; 1000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=9 oselopB0=6 oselopB1=5 oaluop0=9 oaluop1=5 oaluop2=5 oaluopext0=9 oaluopext1=7 oaluopext2=9 oaluopext3=6 ohalt=15 oregwrite=11 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=7 oinvA=6 oinvB=5 osign=0 omemwrite=6 oselwb=4
+  5. m=7 T=195 (union=34, compression 6.32353×) M=[1000000..; 0101000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=11 oselopB0=6 oselopB1=5 oaluop0=9 oaluop1=8 oaluop2=5 oaluopext0=11 oaluopext1=11 oaluopext2=13 oaluopext3=8 ohalt=8 oregwrite=9 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=7 oinvA=6 oinvB=5 osign=0 omemwrite=4 oselwb=2
+  6. m=7 T=195 (union=34, compression 6.32353×) M=[1000000..; 0101000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=11 oselopB0=6 oselopB1=5 oaluop0=8 oaluop1=9 oaluop2=5 oaluopext0=11 oaluopext1=11 oaluopext2=13 oaluopext3=8 ohalt=8 oregwrite=9 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=7 oinvA=5 oinvB=6 osign=0 omemwrite=4 oselwb=2
+  7. m=7 T=212 (union=34, compression 6.32353×) M=[0011100..; 1110001..; 1101110..; 0101000..; 0001000..; 1011100..; 0010000..]
+    Per-output T: oseloregdst0=9 oseloregdst1=8 oselopB0=8 oselopB1=4 oaluop0=8 oaluop1=9 oaluop2=5 oaluopext0=12 oaluopext1=15 oaluopext2=17 oaluopext3=11 ohalt=4 oregwrite=13 oselpcopA=11 oselpcopB=7 obeqz=8 obnez=4 obgez=2 obltz=4 ojump=4 oCin=12 oinvA=9 oinvB=9 osign=0 omemwrite=11 oselwb=8
+  8. m=7 T=191 (union=34, compression 6.32353×) M=[1000000..; 0100000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=9 oselopB0=6 oselopB1=5 oaluop0=9 oaluop1=5 oaluop2=5 oaluopext0=9 oaluopext1=7 oaluopext2=9 oaluopext3=6 ohalt=15 oregwrite=11 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=7 oinvA=6 oinvB=5 osign=0 omemwrite=6 oselwb=4
+  9. m=7 T=191 (union=34, compression 6.32353×) M=[1000000..; 0100000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=9 oselopB0=6 oselopB1=5 oaluop0=9 oaluop1=5 oaluop2=5 oaluopext0=9 oaluopext1=7 oaluopext2=9 oaluopext3=6 ohalt=15 oregwrite=11 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=7 oinvA=6 oinvB=5 osign=0 omemwrite=6 oselwb=4
+  10. m=7 T=191 (union=34, compression 6.32353×) M=[1000000..; 0100000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=9 oselopB0=6 oselopB1=5 oaluop0=8 oaluop1=6 oaluop2=5 oaluopext0=9 oaluopext1=7 oaluopext2=9 oaluopext3=6 ohalt=15 oregwrite=11 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=7 oinvA=5 oinvB=6 osign=0 omemwrite=6 oselwb=4
+  11. m=7 T=209 (union=35, compression 6.14286×) M=[0100100..; 0111000..; 1001001..; 0010100..; 1110000..; 1110010..; 0000100..]
+    Per-output T: oseloregdst0=11 oseloregdst1=8 oselopB0=9 oselopB1=12 oaluop0=13 oaluop1=8 oaluop2=5 oaluopext0=10 oaluopext1=8 oaluopext2=6 oaluopext3=6 ohalt=4 oregwrite=8 oselpcopA=8 oselpcopB=8 obeqz=4 obnez=2 obgez=15 obltz=8 ojump=4 oCin=16 oinvA=17 oinvB=13 osign=0 omemwrite=2 oselwb=4
+  12. m=7 T=218 (union=35, compression 6.14286×) M=[0001000..; 0011000..; 0101000..; 0000100..; 1100011..; 0111110..; 1011100..]
+    Per-output T: oseloregdst0=8 oseloregdst1=10 oselopB0=8 oselopB1=5 oaluop0=8 oaluop1=8 oaluop2=4 oaluopext0=9 oaluopext1=15 oaluopext2=13 oaluopext3=12 ohalt=15 oregwrite=9 oselpcopA=7 oselpcopB=4 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=3 oCin=9 oinvA=9 oinvB=8 osign=0 omemwrite=11 oselwb=8
+  13. m=7 T=192 (union=35, compression 6.14286×) M=[1000000..; 0100000..; 0010000..; 0001000..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=10 oseloregdst1=9 oselopB0=6 oselopB1=5 oaluop0=10 oaluop1=5 oaluop2=5 oaluopext0=9 oaluopext1=7 oaluopext2=9 oaluopext3=6 ohalt=15 oregwrite=11 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=6 oinvA=6 oinvB=6 osign=0 omemwrite=6 oselwb=4
+  14. m=7 T=209 (union=35, compression 6.14286×) M=[0111000..; 0000100..; 1001101..; 0011100..; 0001000..; 1000100..; 1000010..]
+    Per-output T: oseloregdst0=10 oseloregdst1=8 oselopB0=13 oselopB1=6 oaluop0=10 oaluop1=6 oaluop2=5 oaluopext0=9 oaluopext1=14 oaluopext2=14 oaluopext3=14 ohalt=4 oregwrite=10 oselpcopA=11 oselpcopB=7 obeqz=2 obnez=4 obgez=8 obltz=4 ojump=4 oCin=6 oinvA=16 oinvB=12 osign=0 omemwrite=8 oselwb=4
+  15. m=7 T=217 (union=35, compression 6.14286×) M=[0000001..; 0111100..; 1010000..; 1001010..; 0000100..; 0010000..; 0011100..]
+    Per-output T: oseloregdst0=9 oseloregdst1=11 oselopB0=7 oselopB1=8 oaluop0=12 oaluop1=9 oaluop2=5 oaluopext0=12 oaluopext1=12 oaluopext2=13 oaluopext3=8 ohalt=8 oregwrite=8 oselpcopA=11 oselpcopB=7 obeqz=8 obnez=15 obgez=8 obltz=4 ojump=4 oCin=13 oinvA=5 oinvB=14 osign=0 omemwrite=4 oselwb=2
+  16. m=7 T=227 (union=35, compression 6.14286×) M=[1100000..; 0101000..; 0010000..; 0011100..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=11 oseloregdst1=9 oselopB0=6 oselopB1=9 oaluop0=11 oaluop1=7 oaluop2=5 oaluopext0=8 oaluopext1=11 oaluopext2=13 oaluopext3=8 ohalt=2 oregwrite=10 oselpcopA=14 oselpcopB=18 obeqz=8 obnez=15 obgez=4 obltz=8 ojump=4 oCin=15 oinvA=17 oinvB=8 osign=0 omemwrite=2 oselwb=4
+  17. m=7 T=236 (union=35, compression 6.14286×) M=[0000100..; 0110100..; 0011000..; 0100100..; 1010101..; 1101100..; 0101010..]
+    Per-output T: oseloregdst0=11 oseloregdst1=8 oselopB0=11 oselopB1=9 oaluop0=14 oaluop1=8 oaluop2=5 oaluopext0=8 oaluopext1=8 oaluopext2=6 oaluopext3=9 ohalt=4 oregwrite=14 oselpcopA=8 oselpcopB=8 obeqz=15 obnez=8 obgez=15 obltz=8 ojump=4 oCin=16 oinvA=4 oinvB=16 osign=0 omemwrite=11 oselwb=8
+  18. m=7 T=204 (union=35, compression 6.14286×) M=[1000000..; 0101000..; 0010000..; 0011100..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=9 oseloregdst1=11 oselopB0=6 oselopB1=7 oaluop0=9 oaluop1=7 oaluop2=5 oaluopext0=13 oaluopext1=11 oaluopext2=13 oaluopext3=8 ohalt=4 oregwrite=8 oselpcopA=7 oselpcopB=11 obeqz=15 obnez=8 obgez=4 obltz=8 ojump=4 oCin=12 oinvA=10 oinvB=8 osign=0 omemwrite=4 oselwb=2
+  19. m=7 T=229 (union=35, compression 6.14286×) M=[0001000..; 1000110..; 0110100..; 1110100..; 1011111..; 0000100..; 0011100..]
+    Per-output T: oseloregdst0=10 oseloregdst1=5 oselopB0=11 oselopB1=7 oaluop0=18 oaluop1=10 oaluop2=5 oaluopext0=9 oaluopext1=11 oaluopext2=9 oaluopext3=9 ohalt=8 oregwrite=18 oselpcopA=18 oselpcopB=14 obeqz=4 obnez=8 obgez=2 obltz=4 ojump=4 oCin=10 oinvA=6 oinvB=10 osign=0 omemwrite=4 oselwb=15
+  20. m=7 T=227 (union=35, compression 6.14286×) M=[1100000..; 0101000..; 0010000..; 0011100..; 0000100..; 0000010..; 0000001..]
+    Per-output T: oseloregdst0=11 oseloregdst1=9 oselopB0=6 oselopB1=9 oaluop0=11 oaluop1=7 oaluop2=5 oaluopext0=8 oaluopext1=11 oaluopext2=13 oaluopext3=8 ohalt=2 oregwrite=10 oselpcopA=14 oselpcopB=18 obeqz=8 obnez=15 obgez=4 obltz=8 ojump=4 oCin=15 oinvA=17 oinvB=8 osign=0 omemwrite=2 oselwb=4
+
+Best candidate: m=7, T_sum=191, T_union=34
+// Transform z = Mx + b (GF(2)):
+// m=7, n=7
+// z_0 = opcode0
+// z_1 = opcode1
+// z_2 = opcode2 + 1
+// z_3 = opcode3
+// z_4 = opcode4
+// z_5 = opext0
+// z_6 = opext1
+  Evaluating best candidate for output...
+  Saved affine: /home/wangfz/bool/cpp/results/ctrl/ctrl_d3_opt1.affine (s=7, n=7)
+  Saved poly: /home/wangfz/bool/cpp/results/ctrl/ctrl_d3_opt1.poly (m=7, 26 outputs, 213 terms)
+  Saved stats: /home/wangfz/bool/cpp/results/ctrl/ctrl_d3_opt1_stats.txt (n=7, k=26, sum_T=191, union_T=34)
+
+Total time: 556.651 s

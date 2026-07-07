@@ -1,0 +1,41 @@
+--- Circuit ---
+  Inputs: 8, Outputs: 8, Strategy: opt2 (per-output transforms)
+
+Phase 1: Computing truth table...
+  Truth table: 2^8 = 256 inputs, 4 batches, 8 outputs
+
+Phase 2: Per-output search
+  Output 0/8 (y_0)...
+    d1c: support=255 t=8 raw_T=18 best_T=13 best_b=0
+    m=8 T=13
+  Output 1/8 (y_1)...
+    d1c: support=255 t=8 raw_T=19 best_T=14 best_b=0
+    m=8 T=14
+  Output 2/8 (y_2)...
+    d1c: support=255 t=8 raw_T=15 best_T=11 best_b=0
+    m=8 T=11
+  Output 3/8 (y_3)...
+    d1c: support=255 t=8 raw_T=18 best_T=14 best_b=0
+    m=8 T=14
+  Output 4/8 (y_4)...
+    d1c: support=255 t=8 raw_T=21 best_T=16 best_b=0
+    m=8 T=16
+  Output 5/8 (y_5)...
+    d1c: support=255 t=8 raw_T=12 best_T=8 best_b=0
+    m=8 T=8
+  Output 6/8 (y_6)...
+    d1c: support=255 t=8 raw_T=14 best_T=9 best_b=0
+    m=8 T=9
+  Output 7/8 (y_7)...
+    d1c: support=255 t=8 raw_T=14 best_T=10 best_b=0
+    m=8 T=10
+
+Phase 3: Merging and deduplicating transforms
+  Dedup: 64 → 8 z variables
+  Sum T = 95
+  Union T = 28
+  Saved: /home/wangfz/bool/cpp/results/aes_bool/aes_bool_d1c_opt2.affine (s=8)
+  Saved: /home/wangfz/bool/cpp/results/aes_bool/aes_bool_d1c_opt2.poly (m=8, 8 outputs)
+  Saved: /home/wangfz/bool/cpp/results/aes_bool/aes_bool_d1c_opt2_stats.txt (sum_T=95, union_T=28)
+
+Total time: skipped
