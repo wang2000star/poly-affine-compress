@@ -76,7 +76,10 @@ def write_circuit(m: int, k: int, terms: list, path: str) -> None:
                 elif len(vars_in) == 1:
                     sig = vars_in[0]
                 else:
-                    sig = new_gate(" * ".join(vars_in))
+                    # 拆成 2-input AND 链（解析器不支持多输入 AND）
+                    sig = vars_in[0]
+                    for v in vars_in[1:]:
+                        sig = new_gate(f"{sig} * {v}")
                 sigs.append(sig)
 
             # XOR chain
