@@ -1,0 +1,53 @@
+GateBuilder: aes_bool
+  threshold=2147483647 out_dir=/home/wangfz/bool/cpp/results/aes_bool
+  Circuit: 8 inputs, 8 outputs, 4033 gates
+    processed 200/4033 stmts, next_m=8
+    processed 400/4033 stmts, next_m=8
+    processed 600/4033 stmts, next_m=8
+    processed 800/4033 stmts, next_m=8
+    processed 1000/4033 stmts, next_m=8
+    processed 1200/4033 stmts, next_m=8
+    processed 1400/4033 stmts, next_m=8
+    processed 1600/4033 stmts, next_m=8
+    processed 1800/4033 stmts, next_m=8
+    processed 2000/4033 stmts, next_m=8
+    processed 2200/4033 stmts, next_m=8
+    processed 2400/4033 stmts, next_m=8
+    processed 2600/4033 stmts, next_m=8
+    processed 2800/4033 stmts, next_m=8
+    processed 3000/4033 stmts, next_m=8
+    processed 3200/4033 stmts, next_m=8
+    processed 3400/4033 stmts, next_m=8
+    processed 3600/4033 stmts, next_m=8
+    processed 3800/4033 stmts, next_m=8
+    processed 4000/4033 stmts, next_m=8
+  Build complete
+  Output y_0: m=8 T=132 T_nl=127
+    m_used=8 T=132
+  Output y_1: m=8 T=133 T_nl=128
+    m_used=8 T=133
+  Output y_2: m=8 T=145 T_nl=141
+    m_used=8 T=145
+  Output y_3: m=8 T=136 T_nl=132
+    m_used=8 T=136
+  Output y_4: m=8 T=131 T_nl=126
+    m_used=8 T=131
+  Output y_5: m=8 T=114 T_nl=110
+    m_used=8 T=114
+  Output y_6: m=8 T=112 T_nl=108
+    m_used=8 T=112
+  Output y_7: m=8 T=110 T_nl=106
+    m_used=8 T=110
+  Per-output compression complete
+    y_0: m=8 T=115
+    y_1: m=8 T=121
+    y_2: m=8 T=118
+    y_3: m=8 T=116
+    y_4: m=8 T=110
+    y_5: m=8 T=114
+    y_6: m=8 T=112
+    y_7: m=8 T=110
+  Saved: /home/wangfz/bool/cpp/results/aes_bool/aes_bool_d1b_opt2.affine (s=64, n=8)
+  Saved: /home/wangfz/bool/cpp/results/aes_bool/aes_bool_d1b_opt2.poly (m=64, 8 outputs)
+  Saved: /home/wangfz/bool/cpp/results/aes_bool/aes_bool_d1b_opt2_stats.txt (sum_T=883, union_T=883)
+  Done. Files written to /home/wangfz/bool/cpp/results/aes_bool/aes_bool_d1b_opt2.*

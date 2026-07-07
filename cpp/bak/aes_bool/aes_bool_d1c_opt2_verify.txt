@@ -1,0 +1,14 @@
+# Verification: f(x) = g(Mx+b)
+# n=8, s=16
+# Exhaustive: 2^8 = 256 inputs
+
+output 0: PASS (256 tests)
+output 1: PASS (256 tests)
+output 2: PASS (256 tests)
+output 3: PASS (256 tests)
+output 4: PASS (256 tests)
+output 5: PASS (256 tests)
+output 6: PASS (256 tests)
+output 7: PASS (256 tests)
+
+All outputs PASS (256 tests)
