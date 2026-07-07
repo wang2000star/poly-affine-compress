@@ -39,6 +39,7 @@
 #include <map>
 #include <set>
 #include <filesystem>
+#include <chrono>
 
 struct Opt2Result {
     int m;                              // total z variables
@@ -343,6 +344,7 @@ int main(int argc, char** argv) {
         std::cerr << "  --walsh-k N    top K Walsh bits (default 30)\n";
         std::cerr << "  --random N     random candidates per output (default 40)\n";
         std::cerr << "  --hill-climb N hill climb per output (default 10)\n";
+        std::cerr << "  --time-budget N   time budget in seconds (default 0 = unlimited)\n";
         std::cerr << "  --save-results PREFIX  save combined result\n";
         return 1;
     }
@@ -382,6 +384,7 @@ int main(int argc, char** argv) {
         else if (arg == "--walsh-k" && a + 1 < argc) params.walsh_single_top = std::stoi(argv[++a]);
         else if (arg == "--random" && a + 1 < argc) params.n_random = std::stoi(argv[++a]);
         else if (arg == "--hill-climb" && a + 1 < argc) params.n_hill_climb = std::stoi(argv[++a]);
+        else if (arg == "--time-budget" && a + 1 < argc) params.time_budget = std::stod(argv[++a]);
         else if (arg == "--save-results" && a + 1 < argc) {
             fs::path p(argv[++a]);
             if (p.is_relative()) p = root / p;
@@ -414,7 +417,16 @@ int main(int argc, char** argv) {
 
     // Phase 2: Search per output
     std::cout << "\nPhase 2: Per-output search\n";
+    auto t_p2 = std::chrono::steady_clock::now();
     for (int oi = 0; oi < k; oi++) {
+        if (params.time_budget > 0) {
+            double elapsed = std::chrono::duration<double>(
+                std::chrono::steady_clock::now() - t_p2).count();
+            if (elapsed >= params.time_budget) {
+                std::cout << "  time budget exhausted after " << oi << "/" << k << " outputs\n";
+                break;
+            }
+        }
         std::cout << "  Output " << oi << "/" << k << " (" << circ.outputs[output_indices[oi]] << ")...\n";
         auto cand = search_single_output(tt, oi, n, params, result.m);
         per_output[oi] = cand;

@@ -156,9 +156,9 @@ run_strat() {
 
     set +e
     if [ "$is_gb" -eq 1 ]; then
-        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &>> "$logfile"
+        timeout "$((t + 60))" "$BUILD_DIR/$exe" "$circuit" $extra_args --time-budget "$t" --out-dir "$out_dir" &>> "$logfile"
     else
-        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &>> "$logfile"
+        timeout "$((t + 60))" "$BUILD_DIR/$exe" "$circuit" $extra_args --time-budget "$t" --save-results "$out_dir" &>> "$logfile"
     fi
     local rc=$?
     set -e

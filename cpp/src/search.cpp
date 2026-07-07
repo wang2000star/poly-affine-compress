@@ -1141,6 +1141,71 @@ void run_search(const TruthTable& tt, const Circuit& circ,
     // Phase 4: Generate and evaluate candidates
     std::cout << "\nPhase 4: Searching for M,b...\n";
 
+#ifndef DIRECTION_TAG
+#define DIRECTION_TAG "d1a"
+#endif
+#ifndef STRATEGY_TAG
+#define STRATEGY_TAG "opt1"
+#endif
+
+    auto elapsed = [&]() {
+        return std::chrono::duration<double>(
+            std::chrono::steady_clock::now() - t0).count();
+    };
+
+    // Save best candidate found so far (for time-budget graceful exit)
+    auto save_best_on_timeout = [&]() {
+        if (params.results_dir.empty() || results.empty()) return;
+        auto& best = results[0];
+        if (best.union_T >= INT64_MAX) return;
+
+        std::cout << "\n  Saving current best (T_union=" << best.union_T << ")...\n";
+        namespace fs = std::filesystem;
+        fs::create_directories(params.results_dir);
+
+        std::string base = params.results_dir + "/" + params.inst_name
+                         + "_" DIRECTION_TAG "_" STRATEGY_TAG;
+
+        // Re-evaluate with save_g_tt=true to get g_tt_raw for .poly
+        MbCandidate verified;
+        bool can_save = false;
+        if (best.m <= 32) {
+            verified = evaluate_Mb(tt_copy, best.M_rows.data(), best.b,
+                                   best.m, params.n_threads, true);
+            can_save = (verified.union_T < INT64_MAX);
+
+            if (can_save && best.m > n) {
+                uint64_t cp_masks[16];
+                int n_cp = detect_complement_pairs(
+                    best.M_rows.data(), best.b, best.m, cp_masks, 16);
+                if (n_cp > 0) {
+                    for (int oi = 0; oi < tt.n_outputs; oi++) {
+                        auto& raw = verified.g_tt_raw[oi];
+                        if (raw.empty()) continue;
+                        moebius_packed(raw.data(), best.m);
+                        filter_pairs(raw.data(), best.m, cp_masks, n_cp);
+                        moebius_packed(raw.data(), best.m);
+                    }
+                }
+            }
+        }
+
+        if (can_save) {
+            save_trans(best, circ, n, base + ".affine");
+            save_opt_expr(verified.g_tt_raw, circ, output_indices, best.m, base + ".poly");
+            save_opt_T(verified.g_tt_raw, circ, output_indices, best.m, base + "_stats.txt");
+            std::cout << "  Saved: " << base << ".*\n";
+        } else {
+            save_trans(best, circ, n, base + ".affine");
+            std::cout << "  Saved: " << base << ".affine (transform only)\n";
+        }
+    };
+
+    auto time_budget_exhausted = [&]() -> bool {
+        if (params.time_budget <= 0) return false;
+        return elapsed() >= params.time_budget;
+    };
+
     // 4a-c: Walsh-guided + random (n ≤ 20 full search; 21-32 permutation only)
     if (n <= 20) {
         CandidateGenerator gen(n, params.max_m, walsh);
@@ -1182,11 +1247,17 @@ void run_search(const TruthTable& tt, const Circuit& circ,
 
         std::cout << "  4c: Random M,b (" << params.n_random << " candidates)\n";
         auto random_cands = gen.gen_random(params.n_random, params.max_m);
+        int rc_idx = 0;
         for (auto& [rows, b] : random_cands) {
             int m = (int)rows.size();
             uint32_t M[32] = {0};
             for (int j = 0; j < m; j++) M[j] = rows[j];
             results.push_back(evaluate_Mb(tt_copy, M, b, m, params.n_threads));
+            if ((++rc_idx) % 1000 == 0 && time_budget_exhausted()) {
+                save_best_on_timeout();
+                std::cout << "time budget exhausted\n";
+                return;
+            }
         }
 
         auto t_search0 = std::chrono::steady_clock::now();
@@ -1279,6 +1350,12 @@ void run_search(const TruthTable& tt, const Circuit& circ,
                       << ": T=" << cand.union_T
                       << " (compression " << compression << "×)"
                       << " time=" << eval_time << "s\n";
+
+            if (time_budget_exhausted()) {
+                save_best_on_timeout();
+                std::cout << "time budget exhausted\n";
+                return;
+            }
         }
         auto t_n32_1 = std::chrono::steady_clock::now();
         std::cout << "    n32 random time: " << std::chrono::duration<double>(t_n32_1 - t_n32_0).count() << " s\n";
@@ -1301,6 +1378,10 @@ void run_search(const TruthTable& tt, const Circuit& circ,
 
         auto t_hc0 = std::chrono::steady_clock::now();
         for (int ci = 0; ci < n_climb; ci++) {
+            if (time_budget_exhausted()) {
+                std::cout << "    Hill climb interrupted by time budget\n";
+                break;
+            }
             auto& base = results[ci];
             if (base.union_T >= INT64_MAX) continue;
 
@@ -1327,16 +1408,24 @@ void run_search(const TruthTable& tt, const Circuit& circ,
                     }
                 }
             }
+
+            if (time_budget_exhausted()) {
+                save_best_on_timeout();
+                std::cout << "time budget exhausted\n";
+                return;
+            }
         }
 
-        // Hill climb from identity
-        uint32_t ident[32] = {0};
-        for (int i = 0; i < n; i++) ident[i] = (1u << i);
-        MbCandidate ident_cand = evaluate_Mb(tt_copy, ident, 0, n, params.n_threads);
-        auto ident_improved = hill_climb(tt_copy, ident_cand, n, params.n_threads);
-        if (ident_improved.union_T < ident_cand.union_T) {
-            results.push_back(ident_improved);
-            std::cout << "    hill climb from identity: T=" << ident_cand.union_T << " -> T=" << ident_improved.union_T << "\n";
+        // Hill climb from identity (skip if budget exhausted)
+        if (!time_budget_exhausted()) {
+            uint32_t ident[32] = {0};
+            for (int i = 0; i < n; i++) ident[i] = (1u << i);
+            MbCandidate ident_cand = evaluate_Mb(tt_copy, ident, 0, n, params.n_threads);
+            auto ident_improved = hill_climb(tt_copy, ident_cand, n, params.n_threads);
+            if (ident_improved.union_T < ident_cand.union_T) {
+                results.push_back(ident_improved);
+                std::cout << "    hill climb from identity: T=" << ident_cand.union_T << " -> T=" << ident_improved.union_T << "\n";
+            }
         }
 
         auto t_hc1 = std::chrono::steady_clock::now();

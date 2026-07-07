@@ -33,6 +33,7 @@ int main(int argc, char** argv) {
         std::cerr << "  --use-progressive 0/1  progressive M construction (default 1)\n";
         std::cerr << "  --progressive-max-m N  max m for progressive search (default auto)\n";
         std::cerr << "  --dep-filter 0/1  dependency-set row filtering (default 1)\n";
+        std::cerr << "  --time-budget N   time budget in seconds (default 0 = unlimited)\n";
         std::cerr << "  --anf-out DIR  save raw ANF to {DIR}/{inst}_raw.poly + _stats.txt\n";
         std::cerr << "  --save-results DIR  save best candidate to {DIR}/{inst}_d1a_opt1.*\n";
         return 1;
@@ -107,6 +108,8 @@ int main(int argc, char** argv) {
             params.progressive_max_m = std::stoi(argv[++a]);
         else if (arg == "--dep-filter" && a + 1 < argc)
             params.use_dep_filter = (std::stoi(argv[++a]) != 0);
+        else if (arg == "--time-budget" && a + 1 < argc)
+            params.time_budget = std::stod(argv[++a]);
     }
     // Make output paths absolute (relative to project root)
     {
