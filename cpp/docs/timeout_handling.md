@@ -25,9 +25,31 @@
 - 如果超时且无候选，也 break 退出，标记无结果
 - 日志输出 `"time budget exhausted"` 字符串，供脚本侧检测
 
-### 脚本侧
+### 脚本侧（run_strat）
 
-`run_strat` 根据以下三个信号判断状态：
-1. **exit code**：`timeout` 杀 → 124-137；内部 budget 退出 → 0
-2. **结果文件**：`${inst}_${strat}.affine` 是否存在
-3. **日志关键词**：`"time budget exhausted"` 是否出现（仅内部 budget 退出）
+每次运行前，先写入一行摘要头：
+
+```
+# [inst] [strat] args="--random N --hill-climb N" timeout=600s
+```
+
+运行结束后，追加结果行：
+
+```
+# result: [search_status] [timeout_status] [solution_status]
+```
+
+搜索状态：`search_ended` / `search_not_ended`
+超时状态：`timeout` / `no_timeout`
+解状态：`has_solution` / `no_solution`
+
+四种情况：
+- ① → `search_not_ended timeout no_solution`
+- ② → `search_not_ended timeout has_solution`
+- ③ → `search_ended no_timeout has_solution`
+- ④ → `search_ended no_timeout no_solution`
+
+判断依据：
+1. **exit code**：`timeout` 杀 → 124-137；内部 budget 退出或正常结束 → 0
+2. **结果文件**：`.affine` 是否存在且非空
+3. **C++ 日志关键词**：`"time budget exhausted"` 是否出现

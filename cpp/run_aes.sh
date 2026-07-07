@@ -56,36 +56,80 @@ run_strat() {
 
     local t="${STRAT_TIMEOUT[${INST}_${strat}]:-$TIMEOUT}"
     local logfile="$out_dir/${INST}_${strat}_run.log"
+
+    # 写入摘要头
+    echo "# ${INST} ${strat} args=\"${extra_args}\" timeout=${t}s" > "$logfile"
+
     echo -e "  ${BLUE}[${strat}]${NC} $INST (timeout=${t}s)"
 
     set +e
     if [ "$is_gb" -eq 1 ]; then
-        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &> "$logfile"
+        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &>> "$logfile"
     else
-        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &> "$logfile"
+        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &>> "$logfile"
     fi
     local rc=$?
     set -e
 
-    if [ $rc -eq 0 ] && grep -q "Verified\|All outputs verified\|Done\.\|Phase" "$logfile" 2>/dev/null; then
-        if grep -q "no valid transform" "$logfile" 2>/dev/null; then
-            local nv=$(grep -c "no valid transform" "$logfile")
-            echo -e "    ${RED}✗ ${nv} outputs have no valid transform${NC}"
-            tail -3 "$logfile" | sed 's/^/      /'
-            fail_cnt=$((fail_cnt + 1))
-        else
-            echo -e "    ${GREEN}✓ PASS${NC}"
-            pass_cnt=$((pass_cnt + 1))
-        fi
-    elif [ $rc -ne 0 ]; then
-        echo -e "    ${RED}✗ FAIL (exit $rc)${NC}"
-        tail -5 "$logfile" | sed 's/^/      /'
-        fail_cnt=$((fail_cnt + 1))
-    else
-        echo -e "    ${YELLOW}? CHECK (exit=0)${NC}"
-        tail -3 "$logfile" | sed 's/^/      /'
-        pass_cnt=$((pass_cnt + 1))
+    # ---- 四种结果状态判断 ----
+    # ① search_not_ended timeout no_solution
+    # ② search_not_ended timeout has_solution
+    # ③ search_ended   no_timeout has_solution
+    # ④ search_ended   no_timeout no_solution
+
+    local search_status="search_ended"
+    local timeout_status="no_timeout"
+    local solution_status="no_solution"
+
+    # 是否有解
+    local has_solution=0
+    [ -s "$out_dir/${INST}_${strat}.affine" ] && has_solution=1
+
+    # 是否超时：exit code 124-137 或日志含 "time budget exhausted"
+    local is_timeout=0
+    if [ $rc -ge 124 ] && [ $rc -le 137 ] 2>/dev/null; then
+        is_timeout=1
+    elif grep -q "time budget exhausted" "$logfile" 2>/dev/null; then
+        is_timeout=1
     fi
+
+    if [ $is_timeout -eq 1 ]; then
+        search_status="search_not_ended"
+        timeout_status="timeout"
+    fi
+    [ $has_solution -eq 1 ] && solution_status="has_solution"
+
+    # 追加结果行
+    echo "# result: ${search_status} ${timeout_status} ${solution_status}" >> "$logfile"
+
+    # 终端输出
+    case "${search_status}_${timeout_status}_${solution_status}" in
+        search_not_ended_timeout_no_solution)
+            echo -e "    ${RED}✗ ① search_not_ended / timeout / no_solution${NC}"
+            fail_cnt=$((fail_cnt + 1))
+            ;;
+        search_not_ended_timeout_has_solution)
+            echo -e "    ${YELLOW}⚠ ② search_not_ended / timeout / has_solution (best saved)${NC}"
+            tail -3 "$logfile" | sed 's/^/      /'
+            pass_cnt=$((pass_cnt + 1))
+            ;;
+        search_ended_no_timeout_has_solution)
+            if grep -q "no valid transform" "$logfile" 2>/dev/null; then
+                local nv=$(grep -c "no valid transform" "$logfile")
+                echo -e "    ${RED}✗ ${nv} outputs have no valid transform${NC}"
+                tail -3 "$logfile" | sed 's/^/      /'
+                fail_cnt=$((fail_cnt + 1))
+            else
+                echo -e "    ${GREEN}✓ ③ search_ended / no_timeout / has_solution${NC}"
+                pass_cnt=$((pass_cnt + 1))
+            fi
+            ;;
+        search_ended_no_timeout_no_solution)
+            echo -e "    ${YELLOW}? ④ search_ended / no_timeout / no_solution${NC}"
+            tail -3 "$logfile" | sed 's/^/      /'
+            pass_cnt=$((pass_cnt + 1))
+            ;;
+    esac
 }
 
 run_verify() {
