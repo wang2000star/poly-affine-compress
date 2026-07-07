@@ -22,8 +22,8 @@ TIMEOUT="${TIMEOUT:-86400}"
 # ---- 参数 ----
 # n=8 评估极快 (2^8=256 穷举)，搜索可以很激进
 P_COMMON="--random 100000 --hill-climb 100000"
-P_D2="--random 100000 --hill-climb 100000 --max-m 6"
-P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
+P_D2="--random 100000 --hill-climb 100000 --max-m 12"
+P_D1C="--walsh-k 100 --random 10000 --hill-climb 10000"
 P_OPT2="--random 100000 --hill-climb 2000 --max-m 12"
 
 # ---- 配色 ----
