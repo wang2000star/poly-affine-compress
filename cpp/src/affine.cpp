@@ -293,9 +293,7 @@ MbCandidate evaluate_Mb_bijective(
             union_anf[w] |= per_thread_g[0][w];
     }
 
-    cand.union_T = 0;
-    for (int64_t w = 0; w < n_words_g; w++)
-        cand.union_T += __builtin_popcountll(union_anf[w]);
+    cand.union_T = count_T(union_anf.data(), m);
 
     for (int t = 0; t < use_threads; t++)
         free(per_thread_g[t]);
@@ -358,9 +356,7 @@ MbCandidate evaluate_Mb(
                 for (int64_t w = 0; w < n_words_g; w++)
                     union_anf[w] |= anf[w];
             }
-            cand.union_T = 0;
-            for (int64_t w = 0; w < n_words_g; w++)
-                cand.union_T += __builtin_popcountll(union_anf[w]);
+            cand.union_T = count_T(union_anf.data(), m);
         } else {
             cand.union_T = cand.total_T;
         }

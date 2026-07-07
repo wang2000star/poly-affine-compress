@@ -224,9 +224,7 @@ void save_opt_T(const std::vector<std::vector<uint64_t>>& g_tt_raw,
         }
     }
 
-    int64_t union_T = 0;
-    for (int64_t w = 0; w < n_words; w++)
-        union_T += __builtin_popcountll(union_data[w]);
+    int64_t union_T = count_T(union_data.data(), m);
 
     // 5-line pure numeric
     f << circ.n_inputs << "\n";
