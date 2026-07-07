@@ -16,6 +16,9 @@ INST="aes_bool"
 
 TIMEOUT="${TIMEOUT:-86400}"
 
+# 按实例×策略的超时配置（覆盖 $TIMEOUT）
+[ -f "$SCRIPT_DIR/time.cfg" ] && source "$SCRIPT_DIR/time.cfg"
+
 # ---- 参数 ----
 # n=8 评估极快 (2^8=256 穷举)，搜索可以很激进
 P_COMMON="--random 100000 --hill-climb 100000"
@@ -51,14 +54,15 @@ run_strat() {
         d1b_opt|d1b_opt2) is_gb=1 ;;
     esac
 
+    local t="${STRAT_TIMEOUT[${INST}_${strat}]:-$TIMEOUT}"
     local logfile="$out_dir/${INST}_${strat}_run.log"
-    echo -e "  ${BLUE}[${strat}]${NC} $INST"
+    echo -e "  ${BLUE}[${strat}]${NC} $INST (timeout=${t}s)"
 
     set +e
     if [ "$is_gb" -eq 1 ]; then
-        timeout "$TIMEOUT" "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &> "$logfile"
+        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &> "$logfile"
     else
-        timeout "$TIMEOUT" "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &> "$logfile"
+        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &> "$logfile"
     fi
     local rc=$?
     set -e

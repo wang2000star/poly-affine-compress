@@ -24,6 +24,9 @@ MODE="${1:-test}"
 # Strategy timeout per run (seconds). Override: TIMEOUT=1800 ./run_complete.sh --full
 TIMEOUT="${TIMEOUT:-86400}"
 
+# 按实例×策略的超时配置（覆盖 $TIMEOUT）
+[ -f "$SCRIPT_DIR/time.cfg" ] && source "$SCRIPT_DIR/time.cfg"
+
 # ---- 参数集 ----
 if [ "$MODE" = "--full" ]; then
     # 共享/单输出搜索（跑一次）→ 最大力度
@@ -143,14 +146,15 @@ run_strat() {
         d1b_opt|d1b_opt2) is_gb=1 ;;
     esac
 
+    local t="${STRAT_TIMEOUT[${inst}_${strat}]:-$TIMEOUT}"
     local logfile="$out_dir/${inst}_${strat}_run.log"
-    echo -e "  ${BLUE}[${strat}]${NC} $inst"
+    echo -e "  ${BLUE}[${strat}]${NC} $inst (timeout=${t}s)"
 
     set +e
     if [ "$is_gb" -eq 1 ]; then
-        timeout "$TIMEOUT" "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &> "$logfile"
+        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --out-dir "$out_dir" &> "$logfile"
     else
-        timeout "$TIMEOUT" "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &> "$logfile"
+        timeout "$t" "$BUILD_DIR/$exe" "$circuit" $extra_args --save-results "$out_dir" &> "$logfile"
     fi
     local rc=$?
     set -e
