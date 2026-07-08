@@ -22,7 +22,6 @@
 #include <set>
 #include <filesystem>
 #include <climits>
-
 namespace fs = std::filesystem;
 
 static std::string trim(const std::string& s) {
@@ -124,6 +123,7 @@ int main(int argc, char** argv) {
     std::string circ_path;
     int threshold = INT32_MAX;  // no inline compression; done per-output below
     std::string out_dir = "";
+    int time_budget = 0;
 
     // ---- Resolve project root from executable path, then chdir ----
     {
@@ -142,6 +142,12 @@ int main(int argc, char** argv) {
                 fs::path p(argv[++i]);
                 if (p.is_relative()) p = root / p;
                 out_dir = p.string();
+            }
+            else if (arg == "--time-budget" && i + 1 < argc)
+                time_budget = std::stoi(argv[++i]);
+            else if (arg.size() >= 2 && arg[0] == '-' && arg[1] == '-') {
+                // skip unknown --option and its value
+                if (i + 1 < argc && argv[i+1][0] != '-') i++;
             }
             else if (arg[0] != '-')
                 circ_path = arg;
