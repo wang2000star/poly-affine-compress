@@ -45,14 +45,11 @@ elif [ "$MODE" = "--list" ]; then
     exit 0
 
 elif [ "$MODE" = "--clean" ]; then
-    echo "=== Cleaning n=32 results/ (keeping results.md) ==="
+    echo "=== Cleaning n=32 results/ ==="
     for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
-        if [ -d "$RESULTS_DIR/$inst" ]; then
-            find "$RESULTS_DIR/$inst" -type f ! -name 'results.md' -delete 2>/dev/null
-            rmdir "$RESULTS_DIR/$inst" 2>/dev/null || true
-        fi
+        [ -d "$RESULTS_DIR/$inst" ] && trash "$RESULTS_DIR/$inst"/* 2>/dev/null
     done
-    echo "  Done (kept results/results.md)"
+    echo "  Done"
     exit 0
 else
     # 快速测试

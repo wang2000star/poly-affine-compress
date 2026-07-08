@@ -41,10 +41,7 @@ elif [ "$MODE" = "--list" ]; then
     exit 0
 elif [ "$MODE" = "--clean" ]; then
     echo "=== Cleaning results/aes_bool/ ==="
-    if [ -d "$RESULTS_DIR/$INST" ]; then
-        find "$RESULTS_DIR/$INST" -type f -delete 2>/dev/null
-        rmdir "$RESULTS_DIR/$INST" 2>/dev/null || true
-    fi
+    [ -d "$RESULTS_DIR/$INST" ] && trash "$RESULTS_DIR/$INST"/* 2>/dev/null
     echo "  Done"
     exit 0
 else

@@ -82,14 +82,11 @@ elif [ "$MODE" = "--list" ]; then
     exit 0
 
 elif [ "$MODE" = "--clean" ]; then
-    echo "=== Cleaning results/ (keeping results.md) ==="
+    echo "=== Cleaning results/ ==="
     for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc; do
-        if [ -d "$RESULTS_DIR/$inst" ]; then
-            find "$RESULTS_DIR/$inst" -type f ! -name 'results.md' -delete 2>/dev/null
-            rmdir "$RESULTS_DIR/$inst" 2>/dev/null || true
-        fi
+        [ -d "$RESULTS_DIR/$inst" ] && trash "$RESULTS_DIR/$inst"/* 2>/dev/null
     done
-    echo "  Done (kept results/results.md)"
+    echo "  Done"
     exit 0
 
 elif [ "$MODE" = "--update-md" ]; then
