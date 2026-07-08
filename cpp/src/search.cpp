@@ -770,6 +770,11 @@ static MbCandidate hill_climb_complement(
         row_locked[comp_bit] = true;
     }
 
+    auto is_better = [](const MbCandidate& a, const MbCandidate& b) -> bool {
+        if (a.union_T != b.union_T) return a.union_T < b.union_T;
+        return a.total_T < b.total_T;
+    };
+
     MbCandidate cur = best;
     bool improved;
     int pass = 0;
@@ -786,9 +791,9 @@ static MbCandidate hill_climb_complement(
                 cur.M_rows[r] ^= (1u << c);
                 MbCandidate cand = evaluate_with_pair_filter(
                     tt, cur.M_rows.data(), cur.b, m, n_threads, pair_masks, n_pairs);
-                if (cand.union_T < best.union_T && cand.union_T != INT64_MAX)
+                if (cand.union_T != INT64_MAX && is_better(cand, best))
                     best = cand;
-                if (cand.union_T < cur.union_T && cand.union_T != INT64_MAX) {
+                if (cand.union_T != INT64_MAX && is_better(cand, cur)) {
                     cur = cand;
                     improved = true;
                 } else {
@@ -803,9 +808,9 @@ static MbCandidate hill_climb_complement(
             cur.b ^= (1ULL << r);
             MbCandidate cand = evaluate_with_pair_filter(
                 tt, cur.M_rows.data(), cur.b, m, n_threads, pair_masks, n_pairs);
-            if (cand.union_T < best.union_T && cand.union_T != INT64_MAX)
+            if (cand.union_T != INT64_MAX && is_better(cand, best))
                 best = cand;
-            if (cand.union_T < cur.union_T && cand.union_T != INT64_MAX) {
+            if (cand.union_T != INT64_MAX && is_better(cand, cur)) {
                 cur = cand;
                 improved = true;
             } else {
@@ -830,6 +835,12 @@ MbCandidate hill_climb(const TruthTable& tt, const MbCandidate& start,
         return evaluate_Mb(tt, M, b, m, n_threads);
     };
 
+    // Compare: union_T primary, total_T tiebreaker
+    auto is_better = [](const MbCandidate& a, const MbCandidate& b) -> bool {
+        if (a.union_T != b.union_T) return a.union_T < b.union_T;
+        return a.total_T < b.total_T;
+    };
+
     MbCandidate cur = best;
     bool improved;
     int pass = 0;
@@ -843,9 +854,9 @@ MbCandidate hill_climb(const TruthTable& tt, const MbCandidate& start,
             for (int c = 0; c < n && !improved; c++) {
                 cur.M_rows[r] ^= (1u << c);
                 MbCandidate cand = eval(cur.M_rows.data(), cur.b);
-                if (cand.union_T < best.union_T && cand.union_T != INT64_MAX)
+                if (cand.union_T != INT64_MAX && is_better(cand, best))
                     best = cand;
-                if (cand.union_T < cur.union_T && cand.union_T != INT64_MAX) {
+                if (cand.union_T != INT64_MAX && is_better(cand, cur)) {
                     cur = cand;
                     improved = true;
                 } else {
@@ -857,9 +868,9 @@ MbCandidate hill_climb(const TruthTable& tt, const MbCandidate& start,
         for (int r = 0; r < m && !improved; r++) {
             cur.b ^= (1ULL << r);
             MbCandidate cand = eval(cur.M_rows.data(), cur.b);
-            if (cand.union_T < best.union_T && cand.union_T != INT64_MAX)
+            if (cand.union_T != INT64_MAX && is_better(cand, best))
                 best = cand;
-            if (cand.union_T < cur.union_T && cand.union_T != INT64_MAX) {
+            if (cand.union_T != INT64_MAX && is_better(cand, cur)) {
                 cur = cand;
                 improved = true;
             } else {
@@ -1161,6 +1172,12 @@ void run_search(const TruthTable& tt, const Circuit& circ,
     // Save best candidate found so far (for time-budget graceful exit)
     auto save_best_on_timeout = [&]() {
         if (params.results_dir.empty() || results.empty()) return;
+        // Re-sort: union_T primary, total_T tiebreaker
+        std::sort(results.begin(), results.end(),
+            [](auto& a, auto& b) {
+                if (a.union_T != b.union_T) return a.union_T < b.union_T;
+                return a.total_T < b.total_T;
+            });
         auto& best = results[0];
         if (best.union_T >= INT64_MAX) return;
 
@@ -1380,7 +1397,19 @@ void run_search(const TruthTable& tt, const Circuit& circ,
     // 4e: Hill climbing from top candidates
     if (params.n_hill_climb > 0) {
         std::sort(results.begin(), results.end(),
-            [](auto& a, auto& b) { return a.union_T < b.union_T; });
+            [](auto& a, auto& b) {
+                if (a.union_T != b.union_T) return a.union_T < b.union_T;
+                return a.total_T < b.total_T;
+            });
+
+        int64_t global_best_union = results.empty() ? INT64_MAX : results[0].union_T;
+        int64_t global_best_total = results.empty() ? INT64_MAX : results[0].total_T;
+
+        auto is_global_improvement = [&](const MbCandidate& c) -> bool {
+            if (c.union_T < global_best_union) return true;
+            if (c.union_T == global_best_union && c.total_T < global_best_total) return true;
+            return false;
+        };
 
         int n_climb = std::min(params.n_hill_climb, (int)results.size());
         std::cout << "  4e: Hill climbing from top " << n_climb << " candidates (+ identity)\n";
@@ -1399,7 +1428,13 @@ void run_search(const TruthTable& tt, const Circuit& circ,
                 auto improved = hill_climb(tt_copy, base, n, params.n_threads);
                 if (improved.union_T < base.union_T) {
                     results.push_back(improved);
-                    std::cout << "    hill climb #" << ci << ": T=" << base.union_T << " -> T=" << improved.union_T << "\n";
+                    if (is_global_improvement(improved)) {
+                        global_best_union = improved.union_T;
+                        global_best_total = improved.total_T;
+                        std::cout << "    hill climb #" << ci << ": T_union=" << base.union_T
+                                  << " -> " << improved.union_T
+                                  << " (sum=" << improved.total_T << ")\n";
+                    }
                 }
             } else if (base.m > n && base.m <= 32) {
                 // Complement m>n hill climb: detect complement pairs dynamically
@@ -1412,8 +1447,14 @@ void run_search(const TruthTable& tt, const Circuit& circ,
                                                            hc_pair_masks, n_hc_pairs);
                     if (improved.union_T < base.union_T) {
                         results.push_back(improved);
-                        std::cout << "    hill climb (complement) #" << ci
-                                  << ": T=" << base.union_T << " -> T=" << improved.union_T << "\n";
+                        if (is_global_improvement(improved)) {
+                            global_best_union = improved.union_T;
+                            global_best_total = improved.total_T;
+                            std::cout << "    hill climb (complement) #" << ci
+                                      << ": T_union=" << base.union_T
+                                      << " -> " << improved.union_T
+                                      << " (sum=" << improved.total_T << ")\n";
+                        }
                     }
                 }
             }
@@ -1433,7 +1474,13 @@ void run_search(const TruthTable& tt, const Circuit& circ,
             auto ident_improved = hill_climb(tt_copy, ident_cand, n, params.n_threads);
             if (ident_improved.union_T < ident_cand.union_T) {
                 results.push_back(ident_improved);
-                std::cout << "    hill climb from identity: T=" << ident_cand.union_T << " -> T=" << ident_improved.union_T << "\n";
+                if (is_global_improvement(ident_improved)) {
+                    global_best_union = ident_improved.union_T;
+                    global_best_total = ident_improved.total_T;
+                    std::cout << "    hill climb from identity: T_union=" << ident_cand.union_T
+                              << " -> " << ident_improved.union_T
+                              << " (sum=" << ident_improved.total_T << ")\n";
+                }
             }
         }
 
@@ -1443,7 +1490,10 @@ void run_search(const TruthTable& tt, const Circuit& circ,
 
     // Phase 5: Report
     std::sort(results.begin(), results.end(),
-        [](auto& a, auto& b) { return a.union_T < b.union_T; });
+        [](auto& a, auto& b) {
+            if (a.union_T != b.union_T) return a.union_T < b.union_T;
+            return a.total_T < b.total_T;
+        });
 
     std::cout << "\n========================================\n";
     std::cout << "  Results (" << results.size() << " candidates evaluated)\n";
