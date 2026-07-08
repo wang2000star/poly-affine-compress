@@ -937,7 +937,46 @@ void upward_pass_bit(uint64_t* data, int n, int i) {
     }
 }
 
-// Exhaustive search for best b ∈ {0,1}^t for one output.
+// ============================================================
+//  d1c pair-substitution: extend building blocks from xj+1 to xj+xk+1
+// ============================================================
+
+// Apply substitution xi ← xi⊕xj to ANF in-place.
+// For each monomial containing i:
+//   if also contains j: keep m, also add m\{i}   (cancellation by XOR)
+//   if doesn't contain j: keep m, also add m\{i}∪{j}  (variable replacement)
+static void substitute_pair_anf(uint64_t* anf, int n, int i, int j) {
+    int64_t total = (n < 6) ? (1 << n) : (int64_t(1) << n);
+    for (int64_t m = 0; m < total; m++) {
+        if (!(m & (1ULL << i))) continue;
+        int64_t w = m >> 6;
+        uint64_t bit = 1ULL << (m & 63);
+        if (!(anf[w] & bit)) continue;
+        int64_t m2 = (m & (1ULL << j)) ? (m ^ (1ULL << i))
+                                       : (m ^ (1ULL << i) ^ (1ULL << j));
+        anf[m2 >> 6] ^= (1ULL << (m2 & 63));
+    }
+}
+
+// Compute support mask from packed ANF (shared helper)
+static uint64_t compute_support_from_anf(const uint64_t* anf, int n) {
+    int64_t n_words = (n < 6) ? 1 : (int64_t(1) << (n - 6));
+    uint64_t support = 0, lower = 0;
+    for (int64_t w = 0; w < n_words; w++) {
+        uint64_t val = anf[w];
+        if (val == 0) continue;
+        support |= ((uint64_t)w << 6);
+        for (uint64_t v = val; v; v &= v - 1)
+            lower |= (uint64_t)__builtin_ctzll(v);
+    }
+    support |= lower;
+    if (n < 64) support &= (1ULL << n) - 1;
+    return support;
+}
+
+// ============================================================
+//  Exhaustive search for best b (existing, unchanged)
+// ============================================================
 // g(z) = f(z⊕b).  Tries all 2^t b-vectors via selective upward Möbius on f's ANF.
 // Returns T_nl(g_best), sets best_b.  Returns -1 if t too large.
 int64_t exhaustive_search_best_b(const uint64_t* f_anf, int n,
@@ -1099,6 +1138,61 @@ void run_search(const TruthTable& tt, const Circuit& circ,
                         results.push_back(cand);
                         std::cout << "      → T_union=" << cand.union_T << "\n";
                     }
+                }
+            }
+
+            // Pair-substitution extension: for n≤16, also try xi ⊕ xj building blocks
+            static const int MAX_PAIR_D1C_N = 16;
+            static const int MAX_PAIR_TRIALS = 200;
+            if (n <= MAX_PAIR_D1C_N) {
+                int64_t n_words = (n < 6) ? 1 : (int64_t(1) << (n - 6));
+                for (int oi = 0; oi < tt.n_outputs; oi++) {
+                    auto& oi_i = out_info[oi];
+                    if (oi_i.t == 0 || oi_i.t > max_exhaustive_t) continue;
+
+                    moebius_packed(tt_copy.tt[oi].data(), n);
+                    uint64_t* orig_anf = tt_copy.tt[oi].data();
+                    int64_t baseline_T = oi_i.T_nl;
+
+                    int n_pair_trials = 0;
+                    for (int si_idx = 0; si_idx < n && n_pair_trials < MAX_PAIR_TRIALS; si_idx++) {
+                        if (!(oi_i.support_mask & (1ULL << si_idx))) continue;
+                        for (int sj = 0; sj < n && n_pair_trials < MAX_PAIR_TRIALS; sj++) {
+                            if (sj == si_idx) continue;
+                            n_pair_trials++;
+
+                            // Copy ANF and apply pair substitution
+                            std::vector<uint64_t> buf(n_words);
+                            memcpy(buf.data(), orig_anf, n_words * sizeof(uint64_t));
+                            substitute_pair_anf(buf.data(), n, si_idx, sj);
+
+                            // Recompute support for pair-substituted ANF
+                            uint64_t pair_support = compute_support_from_anf(buf.data(), n);
+                            int pair_t = __builtin_popcountll(pair_support);
+                            if (pair_t == 0 || pair_t > max_exhaustive_t) continue;
+
+                            uint64_t pair_b = 0;
+                            int64_t pair_T = exhaustive_search_best_b(
+                                buf.data(), n, pair_support, max_exhaustive_t, pair_b);
+
+                            if (pair_T >= 0 && pair_T < baseline_T) {
+                                baseline_T = pair_T;
+                                uint32_t M[32] = {0};
+                                for (int k = 0; k < n && k < 32; k++)
+                                    M[k] = (1u << k);
+                                M[si_idx] = (1u << si_idx) | (1u << sj);
+
+                                auto cand = evaluate_Mb(tt_copy, M, pair_b, n, params.n_threads);
+                                if (cand.union_T < INT64_MAX) {
+                                    results.push_back(cand);
+                                    std::cout << "    [d1c-pair] output " << oi
+                                              << ": x" << si_idx << "←x" << si_idx << "⊕x" << sj
+                                              << " T_union=" << cand.union_T << "\n";
+                                }
+                            }
+                        }
+                    }
+                    moebius_packed(orig_anf, n);  // restore truth table
                 }
             }
 

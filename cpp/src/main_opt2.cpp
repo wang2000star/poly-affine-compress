@@ -41,6 +41,7 @@
 #include <filesystem>
 #include <chrono>
 #include <csignal>
+#include <cstring>
 
 struct Opt2Result {
     int m;                              // total z variables
@@ -51,6 +52,38 @@ struct Opt2Result {
     int64_t union_T;                    // unique monomials
     std::vector<std::vector<uint64_t>> g_tt_raw; // per-output g truth tables (post-merge index)
 };
+
+// ============================================================
+//  d1c pair-substitution helpers
+// ============================================================
+
+static void substitute_pair_anf_opt2(uint64_t* anf, int n, int i, int j) {
+    int64_t total = (n < 6) ? (1 << n) : (int64_t(1) << n);
+    for (int64_t m = 0; m < total; m++) {
+        if (!(m & (1ULL << i))) continue;
+        int64_t w = m >> 6;
+        uint64_t bit = 1ULL << (m & 63);
+        if (!(anf[w] & bit)) continue;
+        int64_t m2 = (m & (1ULL << j)) ? (m ^ (1ULL << i))
+                                       : (m ^ (1ULL << i) ^ (1ULL << j));
+        anf[m2 >> 6] ^= (1ULL << (m2 & 63));
+    }
+}
+
+static uint64_t compute_support_from_anf_opt2(const uint64_t* anf, int n) {
+    int64_t n_words = (n < 6) ? 1 : (int64_t(1) << (n - 6));
+    uint64_t support = 0, lower = 0;
+    for (int64_t w = 0; w < n_words; w++) {
+        uint64_t val = anf[w];
+        if (val == 0) continue;
+        support |= ((uint64_t)w << 6);
+        for (uint64_t v = val; v; v &= v - 1)
+            lower |= (uint64_t)__builtin_ctzll(v);
+    }
+    support |= lower;
+    if (n < 64) support &= (1ULL << n) - 1;
+    return support;
+}
 
 // Run search for a single output
 static MbCandidate search_single_output(
@@ -145,7 +178,55 @@ static MbCandidate search_single_output(
                         candidates.push_back(cand);
                 }
             }
+
+            // Pair-substitution extension: for n≤16, also try xi ⊕ xj building blocks
+            if (n <= 16) {
+            int64_t best_baseline = (best_T >= 0) ? best_T : INT64_MAX;
+            if (best_baseline == INT64_MAX) {
+                best_baseline = 0;
+                for (int64_t w = 0; w < n_words; w++)
+                    best_baseline += __builtin_popcountll(anf[w]);
+            }
+
+            static const int MAX_PAIR_TRIALS = 200;
+            int n_pair_trials = 0;
+            for (int si = 0; si < n && n_pair_trials < MAX_PAIR_TRIALS; si++) {
+                if (!(support_mask & (1ULL << si))) continue;
+                for (int sj = 0; sj < n && n_pair_trials < MAX_PAIR_TRIALS; sj++) {
+                    if (sj == si) continue;
+                    n_pair_trials++;
+
+                    std::vector<uint64_t> buf(n_words);
+                    memcpy(buf.data(), anf, n_words * sizeof(uint64_t));
+                    substitute_pair_anf_opt2(buf.data(), n, si, sj);
+
+                    uint64_t pair_support = compute_support_from_anf_opt2(buf.data(), n);
+                    int pair_t = __builtin_popcountll(pair_support);
+                    if (pair_t == 0 || pair_t > 20) continue;
+
+                    uint64_t pair_b = 0;
+                    int64_t pair_T = exhaustive_search_best_b(
+                        buf.data(), n, pair_support, 20, pair_b);
+
+                    if (pair_T >= 0 && pair_T < best_baseline) {
+                        best_baseline = pair_T;
+                        uint32_t M_pair[32] = {0};
+                        for (int k = 0; k < n && k < 32; k++)
+                            M_pair[k] = (1u << k);
+                        M_pair[si] = (1u << si) | (1u << sj);
+
+                        auto cand = evaluate_Mb(tt1, M_pair, pair_b, n, n_threads);
+                        cand.m = n;
+                        if (cand.total_T >= 0) {
+                            candidates.push_back(cand);
+                            std::cerr << "    d1c-pair: x" << si << "←x" << si << "⊕x" << sj
+                                      << " T=" << cand.total_T << "\n";
+                        }
+                    }
+                }
+            }
         }
+    }
     }
 
     // Phase 2: Walsh correlations (n ≤ 32, skip if walsh-k=0)
