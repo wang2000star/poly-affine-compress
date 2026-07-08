@@ -657,6 +657,77 @@ int main(int argc, char** argv) {
     std::cout << "  Sum T = " << result.sum_T << "\n";
     std::cout << "  Union T = " << result.union_T << "\n";
 
+    // ---- Zero-column cleanup: remove unused z variables ----
+    // If a z_j never appears in any monomial, its affine row is dead weight.
+    // Remove it from M,b and renumber remaining columns.
+    {
+        int m_before_cleanup = shared_m;
+        int m_cur = shared_m;
+        bool any_removed = false;
+        for (int iteration = 0; iteration < 10; iteration++) {
+            // Detect used columns
+            std::vector<bool> used(m_cur, false);
+            for (int oi = 0; oi < k; oi++) {
+                for (const auto& svars : out_all_terms[oi]) {
+                    for (int v : svars) {
+                        if (v >= 0 && v < m_cur) used[v] = true;
+                    }
+                }
+            }
+            // Build old→new mapping
+            std::vector<int> remap(m_cur, -1);
+            int new_m = 0;
+            for (int j = 0; j < m_cur; j++) {
+                if (used[j]) remap[j] = new_m++;
+            }
+            if (new_m == m_cur) break;  // clean
+            any_removed = true;
+            // Remap monomials
+            for (int oi = 0; oi < k; oi++) {
+                for (auto& svars : out_all_terms[oi]) {
+                    for (int& v : svars) v = remap[v];
+                    std::sort(svars.begin(), svars.end());
+                }
+            }
+            // Rebuild M and b
+            std::vector<uint32_t> new_M(new_m);
+            uint64_t new_b = 0;
+            for (int j = 0; j < m_cur; j++) {
+                if (remap[j] >= 0) {
+                    new_M[remap[j]] = result.M_rows[j];
+                    if ((result.b >> j) & 1)
+                        new_b |= (1ULL << remap[j]);
+                }
+            }
+            result.M_rows = std::move(new_M);
+            result.b = new_b;
+            m_cur = new_m;
+        }
+        if (any_removed) {
+            shared_m = m_cur;
+            result.m = shared_m;
+            // Recompute shared_terms and sum_T/union_T
+            shared_terms.clear();
+            out_deg2_count.assign(k, 0);
+            for (int oi = 0; oi < k; oi++) {
+                for (const auto& svars : out_all_terms[oi]) {
+                    int deg = (int)svars.size();
+                    if (deg >= 2) {
+                        out_deg2_count[oi]++;
+                        shared_terms.insert(svars);
+                    }
+                }
+            }
+            result.sum_T = 0;
+            for (int oi = 0; oi < k; oi++)
+                result.sum_T += out_deg2_count[oi];
+            result.union_T = (int64_t)shared_terms.size();
+            std::cout << "  Zero-col cleanup: " << m_before_cleanup << " → " << shared_m
+                      << " z variables (removed " << (m_before_cleanup - shared_m) << " unused)\n";
+            std::cout << "  Sum T = " << result.sum_T << "\n";
+            std::cout << "  Union T = " << result.union_T << "\n";
+        }
+    }
 
     // ---- Save results ----
     if (!save_prefix.empty()) {
