@@ -1,6 +1,6 @@
 #!/bin/bash
 # ====================================================================
-# run_complete.sh — 完整策略组合运行脚本
+# run_complete.sh — 非 n=32 实例完整策略组合运行脚本
 #
 # 单输出 (k_nl=1):  5 种策略
 #   d1a_opt  d1b_opt  d2_opt  d3_opt  d1c_opt
@@ -10,6 +10,8 @@
 #
 # 无效组合（不存在）：
 #   d2_opt1  d1b_opt1  d1c_opt1
+#
+# n=32 实例参见 run_n32.sh
 # ====================================================================
 set -e
 
@@ -40,7 +42,6 @@ if [ "$MODE" = "--full" ]; then
     # n=16 评估最慢，k=8 → 15000/15000
     # n=10-11 中等，k=7-11 → 50000/50000
     # n=7-8 评估极快，k=8-256 → 50000~100000/50000~100000
-    # n=32 稀疏评估 → 20000/20000
     declare -A OPT2_P  # d1a_opt2
     OPT2_P[hd03]="--random 15000 --hill-climb 15000 --max-m 12"
     OPT2_P[hd04]="--random 15000 --hill-climb 15000 --max-m 12"
@@ -59,14 +60,9 @@ if [ "$MODE" = "--full" ]; then
     D3_P[ctrl]="--random 100000 --hill-climb 500"
     D3_P[dec]="--random 50000 --hill-climb 200"
 
-    declare -A N32_P  # n=32 per-output
-    for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
-        N32_P[$inst]="--random 20000 --hill-climb 20000 --n32-random 1000"
-    done
-
     P_DEFAULT_OPT2="--random 30000 --hill-climb 30000 --max-m 12"
 elif [ "$MODE" = "--list" ]; then
-    echo "=== Instance × Strategy Matrix ==="
+    echo "=== Instance × Strategy Matrix (non-n32) ==="
     echo ""
     echo "单输出 (k_nl=1, 5 strategies):"
     echo "  hd08 → d1a_opt  d1b_opt  d2_opt  d3_opt  d1c_opt"
@@ -75,8 +71,7 @@ elif [ "$MODE" = "--list" ]; then
     echo "  hd07 hd03 hd04 ctrl dec int2float cavlc"
     echo "  → d1a_opt1  d1a_opt2  d1b_opt2  d2_opt2  d3_opt1  d3_opt2  d1c_opt2"
     echo ""
-    echo "n=32 实例 (仅 d1a_opt2 / d3_opt2 / d1b_opt2):"
-    echo "  hd10 hd01 hd02 hd09 hd11 hd12"
+    echo "n=32 实例参见 run_n32.sh"
     echo ""
     echo "---"
     echo "其他用法:"
@@ -88,7 +83,7 @@ elif [ "$MODE" = "--list" ]; then
 
 elif [ "$MODE" = "--clean" ]; then
     echo "=== Cleaning results/ (keeping results.md) ==="
-    for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02 hd09 hd11 hd12; do
+    for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc; do
         if [ -d "$RESULTS_DIR/$inst" ]; then
             find "$RESULTS_DIR/$inst" -type f ! -name 'results.md' -delete 2>/dev/null
             rmdir "$RESULTS_DIR/$inst" 2>/dev/null || true
@@ -106,18 +101,15 @@ else
     P_COMMON="--random 20 --walsh-k 10 --hill-climb 2"
     P_D2="--random 20 --hill-climb 2 --max-m 4"
     P_D1C="--walsh-k 0 --random 0 --hill-climb 0"
-    declare -A OPT2_P D3_P N32_P
+    declare -A OPT2_P D3_P
     for inst in hd07 hd03 hd04 int2float cavlc ctrl dec; do
         OPT2_P[$inst]="--random 20 --hill-climb 2 --max-m 8"
         D3_P[$inst]="--random 20 --hill-climb 2"
     done
-    for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
-        N32_P[$inst]="--random 10 --n32-random 5 --hill-climb 1"
-    done
 fi
 
 # ---- 配色 ----
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+RED='\033[0;31m'; BLUE='\033[0;34m'; NC='\033[0m'
 
 check_exe() {
     if [ ! -f "$BUILD_DIR/$1" ]; then
@@ -194,14 +186,14 @@ run_multi_output() {
 echo "============================================"
 echo " ANF Optimization — Complete Strategy Matrix"
 echo " Mode: ${MODE}"
+echo " Instances: non-n32 (hd08 hd07 hd03 hd04 ctrl dec int2float cavlc)"
 echo "============================================"
 echo ""
 
 # ---- 预处理 ----
 echo "--- Preprocessing ---"
-for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc hd10 hd01 hd02 hd09 hd11 hd12; do
+for inst in hd08 hd07 hd03 hd04 ctrl dec int2float cavlc; do
     mkdir -p "$PREPROCESS_DIR/$inst"
-    # hd10/hd01/hd02 use .txt, others .txt as well
     "$BUILD_DIR/preprocess" "$EXAMPLES_DIR/${inst}.txt" --out-dir "$PREPROCESS_DIR/$inst" &> /dev/null && echo "  $inst ✓" || echo "  $inst ✗"
 done
 echo ""
@@ -215,17 +207,6 @@ echo ""
 echo "=== 多输出实例 (7 strategies) ==="
 for inst in hd07 hd03 hd04 ctrl dec int2float cavlc; do
     run_multi_output "$inst" "$EXAMPLES_DIR/${inst}.txt"
-done
-
-# ---- n=32 实例 ----
-echo ""
-echo "=== n=32 实例 ==="
-for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
-    echo ""
-    echo ">> $inst"
-    run_strat "$inst" "d1a_opt2" "$EXAMPLES_DIR/${inst}.txt" "${N32_P[$inst]}"
-    run_strat "$inst" "d1b_opt2" "$EXAMPLES_DIR/${inst}.txt" ""
-    run_strat "$inst" "d3_opt2"  "$EXAMPLES_DIR/${inst}.txt" "${N32_P[$inst]}"
 done
 
 exit 0
