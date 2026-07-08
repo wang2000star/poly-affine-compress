@@ -36,6 +36,7 @@
 #include <climits>
 #include <chrono>
 #include <filesystem>
+#include <map>
 // Strategy tag from compile-time definition (STRATEGY_TAG is a macro set by CMake)
 #ifndef STRATEGY_TAG
 #define STRATEGY_TAG "lg"
@@ -834,46 +835,63 @@ int main(int argc, char** argv) {
                       << " m=" << results[oi].m << "\n";
         }
     }
-    // Compute sum_T (deg≥2 only), union_T, max_deg from shared z-space poly data.
-    // For opt2 (per-output transforms), M is block-diagonal: each output's z variables
-    // occupy disjoint ranges, so union_T is computed by deduplicating terms in shared space.
-    // First compute per-output z-offsets in shared space
-    std::vector<int> z_offsets_union(k, 0);
-    int s_union = 0;
+    // === Dedup: merge per-output (M_row, b_bit) into shared z-space ===
+    std::map<std::pair<uint32_t, int>, int> sig_to_idx;
     for (int oi = 0; oi < k; oi++) {
-        z_offsets_union[oi] = s_union;
-        if (!results[oi].is_affine && results[oi].m > 0)
-            s_union += results[oi].m;
+        auto& r = results[oi];
+        if (r.is_affine || r.m <= 0) continue;
+        for (int ri = 0; ri < r.m; ri++) {
+            auto key = std::make_pair(r.M_rows[ri], (int)((r.b >> ri) & 1));
+            if (sig_to_idx.find(key) == sig_to_idx.end())
+                sig_to_idx[key] = (int)sig_to_idx.size();
+        }
+    }
+    int shared_m = (int)sig_to_idx.size();
+
+    // Build deduplicated M, b
+    std::vector<uint32_t> dedup_M(shared_m);
+    uint64_t dedup_b = 0;
+    for (auto& [key, idx] : sig_to_idx) {
+        dedup_M[idx] = key.first;
+        if (key.second) dedup_b |= (1ULL << idx);
     }
 
-    int64_t sum_T_d2 = 0;   // deg≥2 only
+    // Remap ANF from per-output local z to shared z, compute sum_T / union_T
+    int64_t sum_T = 0;
     int max_deg = 0;
-    std::set<std::vector<int>> shared_terms; // unique deg≥2 terms (variable indices in shared space)
+    std::set<std::vector<int>> shared_terms;
+    std::vector<std::vector<std::vector<int>>> out_terms(k);
+
     for (int oi = 0; oi < k; oi++) {
         auto& r = results[oi];
         if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
-        int off = z_offsets_union[oi];
+        std::vector<int> vmap(r.m);
+        for (int ri = 0; ri < r.m; ri++) {
+            auto key = std::make_pair(r.M_rows[ri], (int)((r.b >> ri) & 1));
+            vmap[ri] = sig_to_idx[key];
+        }
         int64_t n_z = int64_t(1) << r.m;
         for (int64_t zi = 0; zi < n_z; zi++) {
-            if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
-                int deg = __builtin_popcountll(zi);
-                if (deg > max_deg) max_deg = deg;
-                if (deg >= 2) {
-                    sum_T_d2++;
-                    std::vector<int> svars;
-                    uint64_t rem = (uint64_t)zi;
-                    while (rem) {
-                        int j = __builtin_ctzll(rem);
-                        rem &= rem - 1;
-                        svars.push_back(off + j);
-                    }
-                    shared_terms.insert(std::move(svars));
-                }
+            if (!((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1)) continue;
+            int deg = __builtin_popcountll(zi);
+            if (deg > max_deg) max_deg = deg;
+            std::vector<int> svars;
+            uint64_t rem = (uint64_t)zi;
+            while (rem) {
+                int j = __builtin_ctzll(rem);
+                rem &= rem - 1;
+                if (j < (int)vmap.size()) svars.push_back(vmap[j]);
+            }
+            std::sort(svars.begin(), svars.end());
+            out_terms[oi].push_back(svars);
+            if (deg >= 2) {
+                sum_T++;
+                shared_terms.insert(svars);
             }
         }
     }
     int64_t union_T = (int64_t)shared_terms.size();
-    std::cout << "  Sum T = " << sum_T_d2 << "\n";
+    std::cout << "  Sum T = " << sum_T << "\n";
     std::cout << "  Union T = " << union_T;
     if (n_affine > 0) std::cout << " (" << n_affine << " affine outputs not counted)";
     std::cout << "\n";
@@ -889,78 +907,48 @@ int main(int argc, char** argv) {
         std::string inst_name = fs::path(path).stem().string();
         std::string tag = "_d1a_" + std::string(STRATEGY_TAG);
         std::string base = results_dir + "/" + inst_name + tag;
-        // ---- Compute per-output z-offset in shared space ----
-        std::vector<int> z_offsets(k, 0);
-        int s = 0;
-        for (int oi = 0; oi < k; oi++) {
-            z_offsets[oi] = s;
-            if (!results[oi].is_affine && results[oi].m > 0)
-                s += results[oi].m;
-        }
-        int t = k;
-        // ---- Write .affine (standard [M|b] format) ----
+        // ---- Write .affine (deduplicated) ----
         {
             std::ofstream f(base + ".affine");
             if (f) {
-                f << s << "\n" << s << " " << (n + 1) << "\n";
-                for (int oi = 0; oi < k; oi++) {
-                    auto& r = results[oi];
-                    for (int row = 0; row < r.m; row++) {
-                        for (int col = 0; col < n; col++) {
-                            if (col > 0) f << " ";
-                            f << ((r.M_rows[row] >> col) & 1);
-                        }
-                        f << " " << ((r.b >> row) & 1) << "\n";
+                f << shared_m << "\n" << shared_m << " " << (n + 1) << "\n";
+                for (int r = 0; r < shared_m; r++) {
+                    for (int c = 0; c < n; c++) {
+                        if (c > 0) f << " ";
+                        f << ((dedup_M[r] >> c) & 1);
                     }
+                    f << " " << ((dedup_b >> r) & 1) << "\n";
                 }
-                std::cout << "  Saved: " << base << ".affine (s=" << s << ")\n";
+                std::cout << "  Saved: " << base << ".affine (s=" << shared_m << ")\n";
             }
         }
-        // ---- Write .poly ----
+        // ---- Write .poly (remapped to shared z-space) ----
         {
             std::ofstream f(base + ".poly");
             if (f) {
                 std::vector<int> term_counts(k, 0);
-                int max_deg = 0;
-                // Count terms and find max degree
-                for (int oi = 0; oi < k; oi++) {
-                    auto& r = results[oi];
-                    if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
-                    int64_t n_z = int64_t(1) << r.m;
-                    for (int64_t zi = 0; zi < n_z; zi++) {
-                        if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
-                            term_counts[oi]++;
-                            int deg = __builtin_popcountll(zi);
-                            if (deg > max_deg) max_deg = deg;
-                        }
-                    }
-                }
-                f << s << "\n" << k << "\n";
+                for (int oi = 0; oi < k; oi++)
+                    term_counts[oi] = (int)out_terms[oi].size();
+                f << shared_m << "\n" << k << "\n";
                 for (int oi = 0; oi < k; oi++) {
                     if (oi > 0) f << " ";
                     f << term_counts[oi];
                 }
                 f << "\n";
-                // Terms shifted to shared z-space
                 for (int oi = 0; oi < k; oi++) {
-                    auto& r = results[oi];
-                    if (r.is_affine || r.m <= 0 || r.anf_coeffs.empty()) continue;
-                    int off = z_offsets[oi];
-                    int64_t n_z = int64_t(1) << r.m;
-                    for (int64_t zi = 0; zi < n_z; zi++) {
-                        if ((r.anf_coeffs[zi >> 6] >> (zi & 63)) & 1) {
-                                    f << "[";
-                            for (int b = 0; b < s; b++) {
-                                if (b > 0) f << " , ";
-                                int bit = 0;
-                                if (b >= off && b < off + r.m) bit = (zi >> (b - off)) & 1;
-                                f << bit;
-                            }
-                            f << " , 1]\n";
+                    for (auto& svars : out_terms[oi]) {
+                        f << "[";
+                        int svi = 0;
+                        for (int b = 0; b < shared_m; b++) {
+                            if (b > 0) f << " , ";
+                            int bit = (svi < (int)svars.size() && svars[svi] == b) ? 1 : 0;
+                            if (bit) svi++;
+                            f << bit;
                         }
+                        f << " , 1]\n";
                     }
                 }
-                std::cout << "  Saved: " << base << ".poly (m=" << s
+                std::cout << "  Saved: " << base << ".poly (m=" << shared_m
                           << ", " << k << " outputs)\n";
             }
         }
@@ -968,9 +956,9 @@ int main(int argc, char** argv) {
         {
             std::ofstream f(base + "_stats.txt");
             if (f) {
-                f << n << "\n" << k << "\n" << sum_T_d2 << "\n" << union_T << "\n" << max_deg << "\n";
-                std::cout << "  Saved: " << base << "_stats.txt (n=" << n
-                          << ", k=" << k << ", sum_T=" << sum_T_d2 << ", union_T=" << union_T << ")\n";
+                f << n << "\n" << k << "\n" << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
+                std::cout << "  Saved: " << base << "_stats.txt (sum_T=" << sum_T
+                          << ", union_T=" << union_T << ")\n";
             }
         }
         // ---- Write _verify.txt ----
@@ -978,7 +966,7 @@ int main(int argc, char** argv) {
             std::ofstream f(base + "_verify.txt");
             if (f) {
                 f << "# Verification: f(x) = g(Mx+b)\n";
-                f << "# n=" << n << ", s=" << s << ", t=" << t << "\n\n";
+                f << "# n=" << n << ", s=" << shared_m << "\n\n";
                 bool all_pass = true;
                 for (int oi = 0; oi < k; oi++) {
                     auto& r = results[oi];
@@ -1003,6 +991,10 @@ int main(int argc, char** argv) {
         }       // verify scoped block
         }       // else body
     }           // if (!results_dir.empty())
+    bool any_solved = false;
+    for (auto& r : results)
+        if (r.is_affine || (r.total_T < INT64_MAX && r.m > 0)) { any_solved = true; break; }
+    std::cout << "# STATUS: " << (any_solved ? "has_solution" : "no_solution") << " no_timeout\n";
     std::cout << "\nTotal time: " << total_sec << " s\n";
     return 0;
 }

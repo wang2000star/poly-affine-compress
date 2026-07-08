@@ -18,6 +18,8 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <map>
+#include <set>
 #include <filesystem>
 #include <climits>
 
@@ -305,23 +307,143 @@ int main(int argc, char** argv) {
     for (const auto& r : results)
         printf("    %s: m=%d T=%d\n", r.name.c_str(), r.m_used, r.g_all.T());
 
-    // Prepare z variable names
-    std::vector<std::string> z_names;
-    for (int j = 0; j < 64; j++)
-        z_names.push_back("z_" + std::to_string(j));
+    // ---- Deduplicate M rows across outputs, remap ANF, recalculate stats ----
+    // (M_row, b_bit) → shared z index
+    std::map<std::pair<uint32_t, int>, int> sig_to_idx;
+    for (auto& r : results) {
+        for (int ri = 0; ri < r.m_used; ri++) {
+            auto key = std::make_pair(r.M_rows[ri], (int)((r.b >> ri) & 1));
+            if (sig_to_idx.find(key) == sig_to_idx.end())
+                sig_to_idx[key] = (int)sig_to_idx.size();
+        }
+    }
+    int shared_m = (int)sig_to_idx.size();
 
-    // Write output files
+    // Build deduplicated M, b
+    std::vector<uint32_t> dedup_M(shared_m);
+    uint64_t dedup_b = 0;
+    for (auto& [key, idx] : sig_to_idx) {
+        dedup_M[idx] = key.first;
+        if (key.second) dedup_b |= (1ULL << idx);
+    }
+
+    // Per-output local z → shared z mapping
+    std::vector<std::vector<int>> var_map(results.size());
+    for (int oi = 0; oi < (int)results.size(); oi++) {
+        auto& r = results[oi];
+        var_map[oi].resize(r.m_used);
+        for (int ri = 0; ri < r.m_used; ri++) {
+            auto key = std::make_pair(r.M_rows[ri], (int)((r.b >> ri) & 1));
+            var_map[oi][ri] = sig_to_idx[key];
+        }
+    }
+
+    // Remap ANF terms and compute stats
+    struct OutTerm { std::vector<int> svars; };
+    std::vector<std::vector<OutTerm>> out_terms(results.size());
+    std::set<std::vector<int>> shared_deg2_terms;
+    int64_t sum_T = 0;
+    int max_deg = 0;
+
+    for (int oi = 0; oi < (int)results.size(); oi++) {
+        auto& r = results[oi];
+        for (auto& [mask, v] : r.g_all.terms()) {
+            if (!v) continue;
+            std::vector<int> svars;
+            uint64_t m = mask;
+            while (m) {
+                int j = __builtin_ctzll(m);
+                m &= m - 1;
+                if (j < (int)var_map[oi].size())
+                    svars.push_back(var_map[oi][j]);
+            }
+            std::sort(svars.begin(), svars.end());
+            int deg = (int)svars.size();
+            if (deg > max_deg) max_deg = deg;
+            out_terms[oi].push_back({std::move(svars)});
+            if (deg >= 2) {
+                sum_T++;
+                shared_deg2_terms.insert(out_terms[oi].back().svars);
+            }
+        }
+    }
+    int64_t union_T = (int64_t)shared_deg2_terms.size();
+
+    printf("  Dedup: %d outputs, %d unique z (from %d raw rows)\n",
+           (int)results.size(), shared_m, (int)sig_to_idx.size());
+    printf("  sum_T=%ld union_T=%ld max_deg=%d\n", (long)sum_T, (long)union_T, max_deg);
+
+    // ---- Write output files ----
     fs::create_directories(out_dir);
-    int k_tag = (int)results.size();
 #ifndef STRATEGY_TAG
 #define STRATEGY_TAG "opt2"
 #endif
     std::string tag = "_d1b_" + std::string(STRATEGY_TAG);
     std::string base = out_dir + "/" + inst + tag;
-    write_affine(base + ".affine", results, circ);
-    write_poly(base + ".poly", results);
-    write_stats(base + "_stats.txt", results, circ.n_inputs);
 
-    std::cout << "  Done. Files written to " << (out_dir + "/" + inst + tag + ".*") << "\n";
+    // .affine: s × (n+1) matrix [M | b] (deduplicated)
+    {
+        std::ofstream f(base + ".affine");
+        if (f) {
+            f << shared_m << "\n" << shared_m << " " << (circ.n_inputs + 1) << "\n";
+            for (int r = 0; r < shared_m; r++) {
+                for (int c = 0; c < circ.n_inputs; c++) {
+                    if (c > 0) f << " ";
+                    f << ((dedup_M[r] >> c) & 1);
+                }
+                f << " " << ((dedup_b >> r) & 1) << "\n";
+            }
+            std::cout << "  Saved: " << base << ".affine (s=" << shared_m << ", n=" << circ.n_inputs << ")\n";
+        }
+    }
+
+    // .poly: per-output ANF in shared z-space
+    {
+        int k = (int)results.size();
+        std::vector<int> term_counts(k, 0);
+        for (int oi = 0; oi < k; oi++)
+            term_counts[oi] = (int)out_terms[oi].size();
+
+        std::ofstream f(base + ".poly");
+        if (f) {
+            f << shared_m << "\n" << k << "\n";
+            for (int oi = 0; oi < k; oi++) {
+                if (oi > 0) f << " ";
+                f << term_counts[oi];
+            }
+            f << "\n";
+            for (int oi = 0; oi < k; oi++) {
+                for (const auto& term : out_terms[oi]) {
+                    f << "[";
+                    int svi = 0;
+                    for (int b = 0; b < shared_m; b++) {
+                        if (b > 0) f << " , ";
+                        int bit = (svi < (int)term.svars.size() && term.svars[svi] == b) ? 1 : 0;
+                        if (bit) svi++;
+                        f << bit;
+                    }
+                    f << " , 1]\n";
+                }
+            }
+            std::cout << "  Saved: " << base << ".poly (m=" << shared_m
+                      << ", " << k << " outputs)\n";
+        }
+    }
+
+    // _stats.txt: 5 lines
+    {
+        std::ofstream f(base + "_stats.txt");
+        if (f) {
+            f << circ.n_inputs << "\n" << results.size() << "\n"
+              << sum_T << "\n" << union_T << "\n" << max_deg << "\n";
+            std::cout << "  Saved: " << base << "_stats.txt (sum_T="
+                      << sum_T << ", union_T=" << union_T << ")\n";
+        }
+    }
+
+    bool has_solution = (shared_m > 0);
+    std::cout << "# STATUS: " << (has_solution ? "has_solution" : "no_solution") << " no_timeout\n";
+
+    std::cout << "  Done. Files written to " << base << ".*\n";
     return 0;
 }

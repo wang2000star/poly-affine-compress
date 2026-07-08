@@ -415,6 +415,8 @@ int main(int argc, char** argv) {
               << " inputs, " << tt.n_words << " batches, "
               << k << " outputs\n";
 
+    bool timed_out = false;
+
     // Phase 2: Search per output
     std::cout << "\nPhase 2: Per-output search\n";
     auto t_p2 = std::chrono::steady_clock::now();
@@ -424,6 +426,7 @@ int main(int argc, char** argv) {
                 std::chrono::steady_clock::now() - t_p2).count();
             if (elapsed >= params.time_budget) {
                 std::cout << "  time budget exhausted after " << oi << "/" << k << " outputs\n";
+                timed_out = true;
                 break;
             }
         }
@@ -609,6 +612,10 @@ int main(int argc, char** argv) {
             }
         }
     }
+
+    bool has_solution = (shared_m > 0);
+    std::cout << "# STATUS: " << (has_solution ? "has_solution" : "no_solution")
+              << (timed_out ? " timeout" : " no_timeout") << "\n";
 
     std::cout << "\nTotal time: skipped\n";
     return 0;

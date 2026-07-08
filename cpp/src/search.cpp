@@ -1206,6 +1206,10 @@ void run_search(const TruthTable& tt, const Circuit& circ,
         return elapsed() >= params.time_budget;
     };
 
+    auto has_solution = [&]() -> bool {
+        return !results.empty() && results[0].union_T < INT64_MAX;
+    };
+
     // 4a-c: Walsh-guided + random (n ≤ 20 full search; 21-32 permutation only)
     if (n <= 20) {
         CandidateGenerator gen(n, params.max_m, walsh);
@@ -1255,7 +1259,7 @@ void run_search(const TruthTable& tt, const Circuit& circ,
             results.push_back(evaluate_Mb(tt_copy, M, b, m, params.n_threads));
             if ((++rc_idx) % 1000 == 0 && time_budget_exhausted()) {
                 save_best_on_timeout();
-                std::cout << "time budget exhausted\n";
+                std::cout << "# STATUS: " << (has_solution() ? "has_solution" : "no_solution") << " timeout\n";
                 return;
             }
         }
@@ -1353,7 +1357,7 @@ void run_search(const TruthTable& tt, const Circuit& circ,
 
             if (time_budget_exhausted()) {
                 save_best_on_timeout();
-                std::cout << "time budget exhausted\n";
+                std::cout << "# STATUS: " << (has_solution() ? "has_solution" : "no_solution") << " timeout\n";
                 return;
             }
         }
@@ -1411,7 +1415,7 @@ void run_search(const TruthTable& tt, const Circuit& circ,
 
             if (time_budget_exhausted()) {
                 save_best_on_timeout();
-                std::cout << "time budget exhausted\n";
+                std::cout << "# STATUS: " << (has_solution() ? "has_solution" : "no_solution") << " timeout\n";
                 return;
             }
         }
@@ -1563,6 +1567,9 @@ void run_search(const TruthTable& tt, const Circuit& circ,
             // Verification is done separately via verify_anf tool
         }
     }
+
+    bool final_has_solution = !results.empty() && results[0].union_T < INT64_MAX;
+    std::cout << "# STATUS: " << (final_has_solution ? "has_solution" : "no_solution") << " no_timeout\n";
 
     total_time = std::chrono::duration<double>(
         std::chrono::steady_clock::now() - t0).count();
