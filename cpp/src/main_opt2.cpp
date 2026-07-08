@@ -57,6 +57,8 @@ struct Opt2Result {
 //  d1c pair-substitution helpers
 // ============================================================
 
+static volatile sig_atomic_t g_interrupted_opt2 = 0;
+
 static void substitute_pair_anf_opt2(uint64_t* anf, int n, int i, int j) {
     int64_t total = (n < 6) ? (1 << n) : (int64_t(1) << n);
     for (int64_t m = 0; m < total; m++) {
@@ -191,8 +193,10 @@ static MbCandidate search_single_output(
             static const int MAX_PAIR_TRIALS = 200;
             int n_pair_trials = 0;
             for (int si = 0; si < n && n_pair_trials < MAX_PAIR_TRIALS; si++) {
+                if (g_interrupted_opt2) break;
                 if (!(support_mask & (1ULL << si))) continue;
                 for (int sj = 0; sj < n && n_pair_trials < MAX_PAIR_TRIALS; sj++) {
+                    if (g_interrupted_opt2) break;
                     if (sj == si) continue;
                     n_pair_trials++;
 
@@ -419,7 +423,6 @@ static MbCandidate search_single_output(
     return best_candidate;
 }
 
-static volatile sig_atomic_t g_interrupted_opt2 = 0;
 static void on_signal_opt2(int) { g_interrupted_opt2 = 1; }
 
 int main(int argc, char** argv) {
@@ -515,10 +518,39 @@ int main(int argc, char** argv) {
             std::cout << "  " << (g_interrupted_opt2 ? "interrupted" : "time budget exhausted")
                       << " after " << oi << "/" << k << " outputs\n";
             timed_out = true;
+            // Fallback: identity transform for remaining outputs
+            for (int fj = oi; fj < k; fj++) {
+                uint32_t M_id[32] = {0};
+                for (int r = 0; r < n && r < 32; r++)
+                    M_id[r] = (1u << r);
+                per_output[fj] = evaluate_Mb(tt, M_id, 0ULL, n, params.n_threads);
+                per_output[fj].m = n;
+                result.m += n;
+                result.sum_T += per_output[fj].total_T;
+                std::cout << "  Output " << fj << "/" << k
+                          << " (" << circ.outputs[output_indices[fj]]
+                          << ")... [identity fallback] m=" << n
+                          << " T=" << per_output[fj].total_T << "\n";
+            }
             break;
         }
         std::cout << "  Output " << oi << "/" << k << " (" << circ.outputs[output_indices[oi]] << ")...\n";
         auto cand = search_single_output(tt, oi, n, params, result.m);
+
+        // Verify transform before accepting
+        if (cand.total_T == INT64_MAX || cand.m == 0) {
+            std::cerr << "    WARNING: invalid transform, using identity fallback\n";
+            uint32_t M_id[32] = {0};
+            for (int r = 0; r < n && r < 32; r++)
+                M_id[r] = (1u << r);
+            TruthTable tt_oi;
+            tt_oi.n = n; tt_oi.n_outputs = 1;
+            tt_oi.n_words = tt.n_words;
+            tt_oi.tt = {tt.tt[oi]};
+            cand = evaluate_Mb(tt_oi, M_id, 0ULL, n, params.n_threads);
+            cand.m = n;
+        }
+
         per_output[oi] = cand;
         result.m += cand.m;
         result.sum_T += cand.total_T;

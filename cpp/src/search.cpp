@@ -1156,8 +1156,10 @@ void run_search(const TruthTable& tt, const Circuit& circ,
 
                     int n_pair_trials = 0;
                     for (int si_idx = 0; si_idx < n && n_pair_trials < MAX_PAIR_TRIALS; si_idx++) {
+                        if (g_interrupted) break;
                         if (!(oi_i.support_mask & (1ULL << si_idx))) continue;
                         for (int sj = 0; sj < n && n_pair_trials < MAX_PAIR_TRIALS; sj++) {
+                            if (g_interrupted) break;
                             if (sj == si_idx) continue;
                             n_pair_trials++;
 
