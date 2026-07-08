@@ -501,7 +501,7 @@ int main(int argc, char** argv) {
             while (word) {
                 int bit_idx = __builtin_ctzll(word);
                 word &= word - 1;
-                int mono_mask = (int)((w << 6) | bit_idx);
+                int64_t mono_mask = (int64_t)((w << 6) | bit_idx);
 
                 std::vector<int> svars;
                 int rem = mono_mask;

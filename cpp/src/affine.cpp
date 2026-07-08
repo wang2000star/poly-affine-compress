@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstring>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
 // ============================================================
@@ -119,24 +120,31 @@ MbResult evaluate_Mb_single_output(
         moebius_packed(per_thread_g[0].data(), m);
         return {count_T(per_thread_g[0].data(), m), true};
     } else {
-        // m > 20: single-threaded
-        if (m > 25) {
+        // m > 20: single-threaded with consistency checking
+        // Use hash map for state when m > 27 (2^m array would exceed ~128MB)
+        if (m > 27) {
             int64_t n_words_g_val = (m < 6) ? 1 : (int64_t(1) << (m - 6));
             std::vector<uint64_t> g_tt(std::max(int64_t(1), n_words_g_val), 0);
+            std::unordered_map<int64_t, uint8_t> state_map;
+
             for (int64_t w = 0; w < n_words_f; w++) {
                 uint64_t word = f_tt[w];
-                if (word == 0) continue;
                 int64_t base = w * 64;
                 uint32_t z_base = b;
                 for (int row = 0; row < m; row++) {
                     if (__builtin_popcount(M_rows[row] & (uint32_t)base) & 1)
                         z_base ^= (1u << row);
                 }
-                while (word) {
-                    int bit = __builtin_ctzll(word);
-                    word &= word - 1;
-                    uint32_t z = z_base ^ M_offsets[bit];
-                    g_tt[z >> 6] ^= (1ULL << (z & 63));
+                for (int pos = 0; pos < 64; pos++) {
+                    uint32_t z = z_base ^ M_offsets[pos];
+                    uint8_t bit_val = (word >> pos) & 1;
+                    auto it = state_map.find(z);
+                    if (it == state_map.end()) {
+                        state_map[z] = bit_val + 1;  // 1 = f=0, 2 = f=1
+                        if (bit_val) g_tt[z >> 6] ^= (1ULL << (z & 63));
+                    } else if (it->second != bit_val + 1) {
+                        return {INT64_MAX, false};
+                    }
                 }
             }
             if (g_tt_raw_out) *g_tt_raw_out = g_tt;
@@ -332,12 +340,11 @@ MbCandidate evaluate_Mb(
 
     bool any_inconsistent = false;
     cand.g_tt_raw.clear();
-    if (save_g_tt) cand.g_tt_raw.resize(tt.n_outputs);
+    cand.g_tt_raw.resize(tt.n_outputs);  // always save for union_T computation
     for (int oi = 0; oi < tt.n_outputs; oi++) {
-        std::vector<uint64_t>* g_out = save_g_tt ? &cand.g_tt_raw[oi] : nullptr;
         MbResult res = evaluate_Mb_single_output(
             tt.tt[oi].data(), tt.n, m, M_rows, b,
-            tt.n_words, n_threads, g_out);
+            tt.n_words, n_threads, &cand.g_tt_raw[oi]);
         if (!res.consistent) { any_inconsistent = true; break; }
         cand.per_output_T[oi] = res.T;
         cand.total_T += res.T;
@@ -348,7 +355,7 @@ MbCandidate evaluate_Mb(
         cand.union_T = INT64_MAX;
     } else {
         int64_t n_words_g = (m < 6) ? 1 : (int64_t(1) << (m - 6));
-        if (save_g_tt) {
+        {
             std::vector<uint64_t> union_anf(n_words_g, 0);
             for (int oi = 0; oi < tt.n_outputs; oi++) {
                 std::vector<uint64_t> anf = cand.g_tt_raw[oi];
@@ -357,8 +364,9 @@ MbCandidate evaluate_Mb(
                     union_anf[w] |= anf[w];
             }
             cand.union_T = count_T(union_anf.data(), m);
-        } else {
-            cand.union_T = cand.total_T;
+        }
+        if (!save_g_tt) {
+            cand.g_tt_raw.clear();
         }
     }
     return cand;

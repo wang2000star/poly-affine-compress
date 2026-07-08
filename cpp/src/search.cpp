@@ -137,10 +137,15 @@ std::vector<uint32_t> compute_dependency_set(
                     uint64_t val = tt.tt[oi][w];
                     uint64_t shifted;
                     if (j < 6) {
-                        // Bit flip within same word
-                        uint64_t lo = val & ((1ULL << bit_in_word) - 1);
-                        uint64_t hi = val >> (bit_in_word + 1);
-                        shifted = (hi << bit_in_word) | lo;
+                        // Compare f(x) with f(x^(1<<j)) via paired bits within same word
+                        int shift = 1 << j;
+                        uint64_t mask0 = 0;
+                        for (int b = 0; b < 64; b += 2 * shift)
+                            mask0 |= ((1ULL << shift) - 1) << b;
+                        uint64_t val0 = val & mask0;
+                        uint64_t val1 = (val >> shift) & mask0;
+                        if (val0 != val1) { depends = true; dep[oi] |= bit; continue; }
+                        continue;
                     } else {
                         // Bit flip across words
                         int64_t w_pair = w ^ word_offset;
