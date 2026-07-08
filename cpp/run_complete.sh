@@ -15,6 +15,9 @@
 # ====================================================================
 set -e
 
+# Signal handling — Ctrl+C kills all child processes
+trap 'echo ""; echo "Interrupted. Terminating..."; kill 0 2>/dev/null; exit 130' INT TERM
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/build"
 EXAMPLES_DIR="$SCRIPT_DIR/examples"

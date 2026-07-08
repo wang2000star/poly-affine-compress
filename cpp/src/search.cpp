@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <random>
 #include <thread>
+#include <csignal>
 #include <cstring>
 #include <filesystem>
 
@@ -1006,6 +1007,14 @@ void compute_output_info(TruthTable& tt, int n, std::vector<OutputInfo>& info) {
 }
 
 // ============================================================
+//  Signal handling — graceful interrupt
+// ============================================================
+
+static volatile sig_atomic_t g_interrupted = 0;
+
+static void on_signal(int) { g_interrupted = 1; }
+
+// ============================================================
 //  run_search — full pipeline (Phase 1..6)
 // ============================================================
 
@@ -1013,6 +1022,10 @@ void run_search(const TruthTable& tt, const Circuit& circ,
                 const std::vector<int>& output_indices,
                 const SearchParams& params)
 {
+    // Register signal handlers for graceful Ctrl+C handling
+    std::signal(SIGINT, on_signal);
+    std::signal(SIGTERM, on_signal);
+
     int n = tt.n;
     auto t0 = std::chrono::steady_clock::now();
     std::vector<MbCandidate> results;
@@ -1224,6 +1237,7 @@ void run_search(const TruthTable& tt, const Circuit& circ,
     };
 
     auto time_budget_exhausted = [&]() -> bool {
+        if (g_interrupted) return true;
         if (params.time_budget <= 0) return false;
         return elapsed() >= params.time_budget;
     };

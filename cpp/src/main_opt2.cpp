@@ -40,6 +40,7 @@
 #include <set>
 #include <filesystem>
 #include <chrono>
+#include <csignal>
 
 struct Opt2Result {
     int m;                              // total z variables
@@ -337,7 +338,13 @@ static MbCandidate search_single_output(
     return best_candidate;
 }
 
+static volatile sig_atomic_t g_interrupted_opt2 = 0;
+static void on_signal_opt2(int) { g_interrupted_opt2 = 1; }
+
 int main(int argc, char** argv) {
+    std::signal(SIGINT, on_signal_opt2);
+    std::signal(SIGTERM, on_signal_opt2);
+
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <circuit.txt> [options]\n";
         std::cerr << "  --max-m N      max z variables per output (default 12)\n";
@@ -421,14 +428,13 @@ int main(int argc, char** argv) {
     std::cout << "\nPhase 2: Per-output search\n";
     auto t_p2 = std::chrono::steady_clock::now();
     for (int oi = 0; oi < k; oi++) {
-        if (params.time_budget > 0) {
-            double elapsed = std::chrono::duration<double>(
-                std::chrono::steady_clock::now() - t_p2).count();
-            if (elapsed >= params.time_budget) {
-                std::cout << "  time budget exhausted after " << oi << "/" << k << " outputs\n";
-                timed_out = true;
-                break;
-            }
+        if (g_interrupted_opt2 || (params.time_budget > 0 &&
+            std::chrono::duration<double>(
+                std::chrono::steady_clock::now() - t_p2).count() >= params.time_budget)) {
+            std::cout << "  " << (g_interrupted_opt2 ? "interrupted" : "time budget exhausted")
+                      << " after " << oi << "/" << k << " outputs\n";
+            timed_out = true;
+            break;
         }
         std::cout << "  Output " << oi << "/" << k << " (" << circ.outputs[output_indices[oi]] << ")...\n";
         auto cand = search_single_output(tt, oi, n, params, result.m);
