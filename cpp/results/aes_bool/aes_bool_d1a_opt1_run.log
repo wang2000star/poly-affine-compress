@@ -65,3 +65,4 @@ Phase 4: Searching for M,b...
     hill climb #0: T_union=243 -> 240 (sum=905)
     hill climb #2: T_union=243 -> 237 (sum=927)
     hill climb #8: T_union=244 -> 231 (sum=926)
+    hill climb #272: T_union=246 -> 228 (sum=909)

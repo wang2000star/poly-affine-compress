@@ -1,0 +1,63 @@
+--- Circuit ---
+  Inputs: 8, Outputs to optimize: 8
+
+Phase 1: Computing truth table...
+  Truth table: 2^8 = 256 inputs, 4 batches, 8 output(s), 104 thread(s)
+
+Phase 2: Raw ANF baseline...
+  Sum T = 162
+  Max deg = 7
+    om_7: T=84, m=7
+    om_6: T=42, m=7
+    om_5: T=20, m=5
+    om_4: T=10, m=5
+    om_3: T=4, m=3
+    om_2: T=2, m=3
+    om_1: T=0, m=0
+    om_0: T=0, m=0
+
+Phase 2c: d1c product-based simplification...
+    [d1c] output 0 (t=8): T_nl 84 → 15 (b=0xe0)
+      → T_union=47
+    [d1c] output 1 (t=7): T_nl 42 → 10 (b=0xd0)
+      → T_union=46
+    [d1c] output 2 (t=6): T_nl 20 → 7 (b=0xc0)
+      → T_union=53
+    [d1c] output 3 (t=5): T_nl 10 → 5 (b=0xc0)
+      → T_union=53
+    [d1c] output 4 (t=4): T_nl 4 → 3 (b=0x20)
+      → T_union=98
+    [d1c] output 5 (t=3): T_nl 2 → 1 (b=0x40)
+      → T_union=89
+    Searched 8 output(s), 6 improved
+    d1c time: 0.0290114 s
+
+Phase 2b: Computing Aut(F) basis...
+  dim(Aut(F)) = 1
+  basis vectors: 32
+  Aut(F) time: 5.6883e-05 s
+  Dependency union: 8/8 bits (0 don't-care)
+
+Phase 3: Computing Walsh correlations...
+  Output om_7 top-5 bits: 0(31) 6(31) 7(31) 1(1) 2(1)
+  Output om_6 top-5 bits: 1(30) 6(30) 7(30) 2(2) 3(2)
+  Output om_5 top-5 bits: 2(28) 6(28) 7(28) 3(4) 4(4)
+  Output om_4 top-5 bits: 3(24) 6(24) 7(24) 4(8) 5(8)
+  Output om_3 top-5 bits: 4(16) 5(16) 6(16) 7(16) 0(0)
+  Output om_2 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output om_1 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Output om_0 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Walsh time: 0.00103682 s
+
+Phase 4: Searching for M,b...
+  4a-pr: Progressive M construction (max m=16)...
+    progressive result: m=8 T_union=162
+    progressive time: 0.00487918 s
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (100000 candidates)
+  Search time: 66.5271 s
+  4e: Hill climbing from top 100000 candidates (+ identity)
+    hill climb #0: T_union=46 -> 36 (sum=36)
+    hill climb #1: T_union=47 -> 27 (sum=29)
+    hill climb #89: T_union=141 -> 26 (sum=30)
