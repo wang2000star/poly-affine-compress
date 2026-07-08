@@ -160,8 +160,10 @@ run_single_output() {
     echo ""
     echo ">> $inst (5 strategies)"
     run_strat "$inst" "d1a_opt" "$circuit" "$P_COMMON"
-    run_strat "$inst" "d1b_opt" "$circuit" ""
-    run_strat "$inst" "d2_opt"  "$circuit" "$P_D2"
+    # DISABLED: d1b_opt — poor results (T=120 vs d3_opt T=6)
+    # run_strat "$inst" "d1b_opt" "$circuit" ""
+    # DISABLED: d2_opt — poor results, slow
+    # run_strat "$inst" "d2_opt"  "$circuit" "$P_D2"
     run_strat "$inst" "d3_opt"  "$circuit" "$P_COMMON"
     run_strat "$inst" "d1c_opt" "$circuit" "$P_D1C"
 }
@@ -172,9 +174,11 @@ run_multi_output() {
     echo ""
     echo ">> $inst (7 strategies)"
     run_strat "$inst" "d1a_opt1" "$circuit" "$P_COMMON"
-    run_strat "$inst" "d1a_opt2" "$circuit" "${OPT2_P[$inst]:-$P_DEFAULT_OPT2}"
+    # DISABLED: d1a_opt2 — unstable, crashes/hangs
+    # run_strat "$inst" "d1a_opt2" "$circuit" "${OPT2_P[$inst]:-$P_DEFAULT_OPT2}"
     run_strat "$inst" "d1b_opt2" "$circuit" ""
-    run_strat "$inst" "d2_opt2"  "$circuit" "$P_D2"
+    # DISABLED: d2_opt2 — poor results, slow
+    # run_strat "$inst" "d2_opt2"  "$circuit" "$P_D2"
     run_strat "$inst" "d3_opt1"  "$circuit" "$P_COMMON"
     run_strat "$inst" "d3_opt2"  "$circuit" "${D3_P[$inst]:-$P_DEFAULT_OPT2}"
     run_strat "$inst" "d1c_opt2" "$circuit" "$P_D1C"

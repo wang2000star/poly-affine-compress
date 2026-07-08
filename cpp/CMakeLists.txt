@@ -44,12 +44,13 @@ add_executable(optimize_anf_d1a_opt1
 target_include_directories(optimize_anf_d1a_opt1 PRIVATE include)
 target_compile_definitions(optimize_anf_d1a_opt1 PRIVATE DIRECTION_TAG="d1a" STRATEGY_TAG="opt1")
 
-add_executable(optimize_anf_d1a_opt2
-    src/main_large.cpp
-    ${CORE_SRC}
-)
-target_include_directories(optimize_anf_d1a_opt2 PRIVATE include)
-target_compile_definitions(optimize_anf_d1a_opt2 PRIVATE STRATEGY_TAG="opt2")
+# DISABLED: d1a_opt2 — unstable, crashes/hangs on most instances
+# add_executable(optimize_anf_d1a_opt2
+#     src/main_large.cpp
+#     ${CORE_SRC}
+# )
+# target_include_directories(optimize_anf_d1a_opt2 PRIVATE include)
+# target_compile_definitions(optimize_anf_d1a_opt2 PRIVATE STRATEGY_TAG="opt2")
 
 # ====================================================================
 # Direction 1b: Gate-builder-based construction
@@ -58,15 +59,16 @@ target_compile_definitions(optimize_anf_d1a_opt2 PRIVATE STRATEGY_TAG="opt2")
 #   Note: opt1 (shared) not applicable — gate builder is per-output by design
 # ====================================================================
 
-add_executable(optimize_anf_d1b_opt
-    src/main_gate_builder.cpp
-    src/sparse_anf.cpp
-    src/gate_builder.cpp
-    src/circuit.cpp
-)
-target_include_directories(optimize_anf_d1b_opt PRIVATE include)
-target_compile_definitions(optimize_anf_d1b_opt PRIVATE STRATEGY_TAG="opt")
-target_compile_options(optimize_anf_d1b_opt PRIVATE -O3 -march=native -mtune=native -pthread -std=c++17)
+# DISABLED: d1b_opt — poor results on single-output (T=120 vs d3_opt T=6)
+# add_executable(optimize_anf_d1b_opt
+#     src/main_gate_builder.cpp
+#     src/sparse_anf.cpp
+#     src/gate_builder.cpp
+#     src/circuit.cpp
+# )
+# target_include_directories(optimize_anf_d1b_opt PRIVATE include)
+# target_compile_definitions(optimize_anf_d1b_opt PRIVATE STRATEGY_TAG="opt")
+# target_compile_options(optimize_anf_d1b_opt PRIVATE -O3 -march=native -mtune=native -pthread -std=c++17)
 
 add_executable(optimize_anf_d1b_opt2
     src/main_gate_builder.cpp
@@ -85,19 +87,21 @@ target_compile_options(optimize_anf_d1b_opt2 PRIVATE -O3 -march=native -mtune=na
 #   Note: opt1 (shared) not applicable — sparse g is per-output by design
 # ====================================================================
 
-add_executable(optimize_anf_d2_opt
-    src/main_sparse_g.cpp
-    ${CORE_SRC}
-)
-target_include_directories(optimize_anf_d2_opt PRIVATE include)
-target_compile_definitions(optimize_anf_d2_opt PRIVATE STRATEGY_TAG="opt")
+# DISABLED: d2_opt — poor results, slow (T=120 vs d3_opt T=6 on hd08)
+# add_executable(optimize_anf_d2_opt
+#     src/main_sparse_g.cpp
+#     ${CORE_SRC}
+# )
+# target_include_directories(optimize_anf_d2_opt PRIVATE include)
+# target_compile_definitions(optimize_anf_d2_opt PRIVATE STRATEGY_TAG="opt")
 
-add_executable(optimize_anf_d2_opt2
-    src/main_sparse_g.cpp
-    ${CORE_SRC}
-)
-target_include_directories(optimize_anf_d2_opt2 PRIVATE include)
-target_compile_definitions(optimize_anf_d2_opt2 PRIVATE STRATEGY_TAG="opt2")
+# DISABLED: d2_opt2 — poor results (T=162 vs d3_opt2 T=23 on hd07)
+# add_executable(optimize_anf_d2_opt2
+#     src/main_sparse_g.cpp
+#     ${CORE_SRC}
+# )
+# target_include_directories(optimize_anf_d2_opt2 PRIVATE include)
+# target_compile_definitions(optimize_anf_d2_opt2 PRIVATE STRATEGY_TAG="opt2")
 
 # ====================================================================
 # Direction 3: Per-output Walsh + random + hill-climb

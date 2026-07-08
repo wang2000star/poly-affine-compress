@@ -130,7 +130,8 @@ echo "=== n=32 实例 (3 strategies each) ==="
 for inst in hd10 hd01 hd02 hd09 hd11 hd12; do
     echo ""
     echo ">> $inst"
-    run_strat "$inst" "d1a_opt2" "$EXAMPLES_DIR/${inst}.txt" "${N32_P[$inst]}"
+    # DISABLED: d1a_opt2 — unstable, crashes/hangs
+    # run_strat "$inst" "d1a_opt2" "$EXAMPLES_DIR/${inst}.txt" "${N32_P[$inst]}"
     run_strat "$inst" "d1b_opt2" "$EXAMPLES_DIR/${inst}.txt" ""
     run_strat "$inst" "d3_opt2"  "$EXAMPLES_DIR/${inst}.txt" "${N32_P[$inst]}"
 done

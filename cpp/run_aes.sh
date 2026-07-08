@@ -125,9 +125,11 @@ echo ""
 
 echo ">> $INST (7 strategies)"
 run_strat "d1a_opt1" "$EXAMPLES_DIR/${INST}.txt" "$P_COMMON"
-run_strat "d1a_opt2" "$EXAMPLES_DIR/${INST}.txt" "$P_OPT2"
+# DISABLED: d1a_opt2 — unstable, crashes/hangs
+# run_strat "d1a_opt2" "$EXAMPLES_DIR/${INST}.txt" "$P_OPT2"
 run_strat "d1b_opt2" "$EXAMPLES_DIR/${INST}.txt" ""
-run_strat "d2_opt2"  "$EXAMPLES_DIR/${INST}.txt" "$P_D2"
+# DISABLED: d2_opt2 — poor results, slow
+# run_strat "d2_opt2"  "$EXAMPLES_DIR/${INST}.txt" "$P_D2"
 run_strat "d3_opt1"  "$EXAMPLES_DIR/${INST}.txt" "$P_COMMON"
 run_strat "d3_opt2"  "$EXAMPLES_DIR/${INST}.txt" "$P_OPT2"
 run_strat "d1c_opt2" "$EXAMPLES_DIR/${INST}.txt" "$P_D1C"
