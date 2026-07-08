@@ -48,6 +48,7 @@
 #include <cmath>
 #include <filesystem>
 #include <map>
+#include <csignal>
 
 // Strategy tag from compile-time definition (STRATEGY_TAG is a macro set by CMake)
 #ifndef STRATEGY_TAG
@@ -719,7 +720,13 @@ static Candidate search_sparse_g(
 //  main()
 // ============================================================
 
+static volatile sig_atomic_t g_interrupted_sg = 0;
+static void on_signal_sg(int) { g_interrupted_sg = 1; }
+
 int main(int argc, char** argv) {
+    std::signal(SIGINT, on_signal_sg);
+    std::signal(SIGTERM, on_signal_sg);
+
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <circuit.txt> [options]\n";
         std::cerr << "  --max-m N        max z variables (default 5, max 20)\n";
@@ -815,6 +822,22 @@ int main(int argc, char** argv) {
     int64_t total_sum_T = 0;
 
     for (int oi = 0; oi < k; oi++) {
+        if (g_interrupted_sg) {
+            std::cout << "  Interrupted after " << oi << "/" << k << " outputs\n";
+            for (int fj = oi; fj < k; fj++) {
+                Candidate id_cand;
+                id_cand.m = n;
+                id_cand.b = 0;
+                id_cand.total_T = 0;
+                for (int r = 0; r < n && r < 32; r++)
+                    id_cand.M_rows[r] = (1u << r);
+                results[fj] = id_cand;
+                std::cout << "  Output " << fj << "/" << k
+                          << " (" << circ.outputs[all_outputs[fj]]
+                          << ")... [identity fallback]\n";
+            }
+            break;
+        }
         std::cout << "  Output " << oi << "/" << k
                   << " (" << circ.outputs[all_outputs[oi]] << ")...\n";
 

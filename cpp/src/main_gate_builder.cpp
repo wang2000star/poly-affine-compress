@@ -22,6 +22,7 @@
 #include <set>
 #include <filesystem>
 #include <climits>
+#include <csignal>
 namespace fs = std::filesystem;
 
 static std::string trim(const std::string& s) {
@@ -114,7 +115,13 @@ static std::vector<OutputResult> process_outputs(
 //  Main
 // ====================================================================
 
+static volatile sig_atomic_t g_interrupted_gb = 0;
+static void on_signal_gb(int) { g_interrupted_gb = 1; }
+
 int main(int argc, char** argv) {
+    std::signal(SIGINT, on_signal_gb);
+    std::signal(SIGTERM, on_signal_gb);
+
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <circuit.txt> [--threshold N] [--out-dir DIR]\n";
         return 1;
