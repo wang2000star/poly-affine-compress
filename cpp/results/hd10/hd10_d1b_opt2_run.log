@@ -1,0 +1,3 @@
+GateBuilder: 3600
+  threshold=2147483647 out_dir=/home/wangfz/bool/cpp/results/hd10
+  ERROR: cannot open /home/wangfz/bool/cpp/3600

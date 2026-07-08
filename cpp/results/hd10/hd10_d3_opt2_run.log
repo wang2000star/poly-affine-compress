@@ -1,0 +1,8 @@
+--- Circuit ---
+  Inputs: 32, Outputs: 32, Strategy: opt2 (per-output transforms)
+
+Phase 1: Computing truth table...
+  Truth table: 2^32 = 4294967296 inputs, 67108864 batches, 32 outputs
+
+Phase 2: Per-output search
+  Output 0/32 (m_9)...

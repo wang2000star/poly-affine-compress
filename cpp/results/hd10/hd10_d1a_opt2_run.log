@@ -1,0 +1,144 @@
+--- Circuit ---
+  Inputs: 32, Outputs: 32, Gates: 102
+  Max-m: 20, Random: 20000, Hill-climb: 20000
+
+Phase 1: Per-output search (z-space evaluation)
+  Output 0/32 (m_9)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.66e-05 s)
+  Output 1/32 (m_8)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.4483e-05 s)
+  Output 2/32 (m_7)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.3886e-05 s)
+  Output 3/32 (m_6)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.3729e-05 s)
+  Output 4/32 (m_5)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.3383e-05 s)
+  Output 5/32 (m_4)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.3349e-05 s)
+  Output 6/32 (m_31)...
+    m≤20, search=20000 random + 20000 hill-climb
+    m=0 T=9223372036854775807 (5.3282 s)
+  Output 7/32 (m_30)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (3.0545e-05 s)
+  Output 8/32 (m_3)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.9442e-05 s)
+  Output 9/32 (m_29)...
+    m≤20, search=20000 random + 20000 hill-climb
+    m=0 T=9223372036854775807 (25.8907 s)
+  Output 10/32 (m_28)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (3.0812e-05 s)
+  Output 11/32 (m_27)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.9362e-05 s)
+  Output 12/32 (m_26)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.8602e-05 s)
+  Output 13/32 (m_25)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.8048e-05 s)
+  Output 14/32 (m_24)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.813e-05 s)
+  Output 15/32 (m_23)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.797e-05 s)
+  Output 16/32 (m_22)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.783e-05 s)
+  Output 17/32 (m_21)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.789e-05 s)
+  Output 18/32 (m_20)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7665e-05 s)
+  Output 19/32 (m_2)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7456e-05 s)
+  Output 20/32 (m_19)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7373e-05 s)
+  Output 21/32 (m_18)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7421e-05 s)
+  Output 22/32 (m_17)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7336e-05 s)
+  Output 23/32 (m_16)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (3.3079e-05 s)
+  Output 24/32 (m_15)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7414e-05 s)
+  Output 25/32 (m_14)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7282e-05 s)
+  Output 26/32 (m_13)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7188e-05 s)
+  Output 27/32 (m_12)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7409e-05 s)
+  Output 28/32 (m_11)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7366e-05 s)
+  Output 29/32 (m_10)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7263e-05 s)
+  Output 30/32 (m_1)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7416e-05 s)
+  Output 31/32 (m_0)...
+    m≤20, search=20000 random + 20000 hill-climb
+    AFFINE: y = 0 (2.7303e-05 s)
+  ** Output m_31: no valid transform found **
+  ** Output m_29: no valid transform found **
+  ** WARNING: 32 outputs, some have no valid transform. Continuing with partial results. **
+
+=== Results ===
+  m_9: AFFINE (mask=0x0, b=0)
+  m_8: AFFINE (mask=0x0, b=0)
+  m_7: AFFINE (mask=0x0, b=0)
+  m_6: AFFINE (mask=0x0, b=0)
+  m_5: AFFINE (mask=0x0, b=0)
+  m_4: AFFINE (mask=0x0, b=0)
+  m_31: T=9223372036854775807 m=0
+  m_30: AFFINE (mask=0x0, b=0)
+  m_3: AFFINE (mask=0x0, b=0)
+  m_29: T=9223372036854775807 m=0
+  m_28: AFFINE (mask=0x0, b=0)
+  m_27: AFFINE (mask=0x0, b=0)
+  m_26: AFFINE (mask=0x0, b=0)
+  m_25: AFFINE (mask=0x0, b=0)
+  m_24: AFFINE (mask=0x0, b=0)
+  m_23: AFFINE (mask=0x0, b=0)
+  m_22: AFFINE (mask=0x0, b=0)
+  m_21: AFFINE (mask=0x0, b=0)
+  m_20: AFFINE (mask=0x0, b=0)
+  m_2: AFFINE (mask=0x0, b=0)
+  m_19: AFFINE (mask=0x0, b=0)
+  m_18: AFFINE (mask=0x0, b=0)
+  m_17: AFFINE (mask=0x0, b=0)
+  m_16: AFFINE (mask=0x0, b=0)
+  m_15: AFFINE (mask=0x0, b=0)
+  m_14: AFFINE (mask=0x0, b=0)
+  m_13: AFFINE (mask=0x0, b=0)
+  m_12: AFFINE (mask=0x0, b=0)
+  m_11: AFFINE (mask=0x0, b=0)
+  m_10: AFFINE (mask=0x0, b=0)
+  m_1: AFFINE (mask=0x0, b=0)
+  m_0: AFFINE (mask=0x0, b=0)
+  Sum T = 0
+  Union T = 0 (30 affine outputs not counted)
+  ** No valid transforms for any nonlinear output — skipping save **
+# STATUS: has_solution no_timeout
+
+Total time: 31.2201 s

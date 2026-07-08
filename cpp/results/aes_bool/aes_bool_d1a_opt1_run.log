@@ -1,0 +1,67 @@
+--- Circuit ---
+  Inputs: 8, Outputs to optimize: 8
+
+Phase 1: Computing truth table...
+  Truth table: 2^8 = 256 inputs, 4 batches, 8 output(s), 104 thread(s)
+
+Phase 2: Raw ANF baseline...
+  Sum T = 978
+  Max deg = 7
+    y_0: T=127, m=7
+    y_1: T=128, m=7
+    y_2: T=141, m=7
+    y_3: T=132, m=7
+    y_4: T=126, m=7
+    y_5: T=110, m=7
+    y_6: T=108, m=7
+    y_7: T=106, m=7
+
+Phase 2c: d1c product-based simplification...
+    [d1c] output 0 (t=8): T_nl 127 → 104 (b=0xd8)
+      → T_union=246
+    [d1c] output 1 (t=8): T_nl 128 → 104 (b=0x73)
+      → T_union=246
+    [d1c] output 2 (t=8): T_nl 141 → 112 (b=0x1b)
+      → T_union=246
+    [d1c] output 3 (t=8): T_nl 132 → 106 (b=0xec)
+      → T_union=246
+    [d1c] output 4 (t=8): T_nl 126 → 105 (b=0x57)
+      → T_union=246
+    [d1c] output 5 (t=8): T_nl 110 → 96 (b=0x61)
+      → T_union=246
+    [d1c] output 6 (t=8): T_nl 108 → 99 (b=0xfc)
+      → T_union=246
+    [d1c] output 7 (t=8): T_nl 106 → 94 (b=0xbe)
+      → T_union=246
+    Searched 8 output(s), 8 improved
+    d1c time: 0.0452233 s
+
+Phase 2b: Computing Aut(F) basis...
+  dim(Aut(F)) = 6
+  basis vectors: 5 2 12 8 16 32
+  Aut(F) time: 6.4485e-05 s
+  Dependency union: 8/8 bits (0 don't-care)
+
+Phase 3: Computing Walsh correlations...
+  Output y_0 top-5 bits: 6(32) 7(32) 3(10) 2(8) 5(4)
+  Output y_1 top-5 bits: 6(28) 7(28) 2(8) 1(6) 5(4)
+  Output y_2 top-5 bits: 6(35) 7(35) 1(7) 0(5) 5(5)
+  Output y_3 top-5 bits: 6(37) 7(37) 4(7) 3(3) 5(3)
+  Output y_4 top-5 bits: 6(32) 7(32) 0(4) 3(4) 1(2)
+  Output y_5 top-5 bits: 6(29) 7(29) 2(7) 3(7) 5(5)
+  Output y_6 top-5 bits: 6(26) 7(26) 1(8) 2(2) 4(2)
+  Output y_7 top-5 bits: 6(34) 7(34) 4(6) 2(4) 5(4)
+  Walsh time: 0.000901103 s
+
+Phase 4: Searching for M,b...
+  4a-pr: Progressive M construction (max m=16)...
+    progressive result: m=8 T_union=246
+    progressive time: 0.00562874 s
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (100000 candidates)
+  Search time: 69.545 s
+  4e: Hill climbing from top 100000 candidates (+ identity)
+    hill climb #0: T_union=243 -> 240 (sum=905)
+    hill climb #2: T_union=243 -> 237 (sum=927)
+    hill climb #8: T_union=244 -> 231 (sum=926)

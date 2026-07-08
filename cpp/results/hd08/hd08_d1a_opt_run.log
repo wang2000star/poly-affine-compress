@@ -1,0 +1,39 @@
+--- Circuit ---
+  Inputs: 8, Outputs to optimize: 1
+
+Phase 1: Computing truth table...
+  Truth table: 2^8 = 256 inputs, 4 batches, 1 output(s), 104 thread(s)
+
+Phase 2: Raw ANF baseline...
+  Sum T = 120
+  Max deg = 7
+    om_0: T=120, m=7
+
+Phase 2c: d1c product-based simplification...
+    [d1c] output 0 (t=8): T_nl 120 → 8 (b=0xff)
+      → T_union=8
+    Searched 1 output(s), 1 improved
+    d1c time: 0.00113658 s
+
+Phase 2b: Computing Aut(F) basis...
+  dim(Aut(F)) = 6
+  basis vectors: 1 2 4 8 16 32
+  Aut(F) time: 2.4944e-05 s
+  Dependency union: 8/8 bits (0 don't-care)
+
+Phase 3: Computing Walsh correlations...
+  Output om_0 top-5 bits: 0(0) 1(0) 2(0) 3(0) 4(0)
+  Walsh time: 0.000162063 s
+
+Phase 4: Searching for M,b...
+  4a-pr: Progressive M construction (max m=16)...
+    progressive result: m=8 T_union=120
+    progressive time: 0.000850221 s
+  4a: Single-row Walsh (80 candidates)
+  4b: Multi-row Walsh (10 progressive + pair combinations)
+  4c: Random M,b (100000 candidates)
+  Search time: 15.586 s
+  4e: Hill climbing from top 100000 candidates (+ identity)
+    hill climb #2: T_union=24 -> 7 (sum=7)
+    hill climb #4: T_union=24 -> 6 (sum=6)
+    hill climb (complement) #605: T_union=58 -> 5 (sum=5)
