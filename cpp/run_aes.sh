@@ -14,17 +14,46 @@ PREPROCESS_DIR="$SCRIPT_DIR/preprocessed"
 RESULTS_DIR="$SCRIPT_DIR/results"
 INST="aes_bool"
 
+MODE="${1:-test}"
+
 TIMEOUT="${TIMEOUT:-86400}"
 
 # 按实例×策略的超时配置（覆盖 $TIMEOUT）
 [ -f "$SCRIPT_DIR/time.cfg" ] && source "$SCRIPT_DIR/time.cfg"
 
-# ---- 参数 ----
-# n=8 评估极快 (2^8=256 穷举)，搜索可以很激进
-P_COMMON="--random 100000 --hill-climb 100000"
-P_D2="--random 100000 --hill-climb 100000 --max-m 12"
-P_D1C="--walsh-k 100 --random 10000 --hill-climb 10000"
-P_OPT2="--random 100000 --hill-climb 2000 --max-m 12"
+# ---- 参数集 ----
+if [ "$MODE" = "--full" ]; then
+    # n=8 评估极快 (2^8=256 穷举)，搜索可以很激进
+    P_COMMON="--random 100000 --hill-climb 100000"
+    P_D2="--random 100000 --hill-climb 100000 --max-m 12"
+    P_D1C="--walsh-k 100 --random 10000 --hill-climb 10000"
+    P_OPT2="--random 100000 --hill-climb 2000 --max-m 12"
+elif [ "$MODE" = "--list" ]; then
+    echo "=== AES S-box Strategy Matrix ==="
+    echo ""
+    echo "aes_bool: n=8, k=8, 1983 gates"
+    echo "7 strategies: d1a_opt1 d1a_opt2 d1b_opt2 d2_opt2 d3_opt1 d3_opt2 d1c_opt2"
+    echo ""
+    echo "---"
+    echo "  ./run_aes.sh              快速测试"
+    echo "  ./run_aes.sh --full       完整运行"
+    echo "  ./run_aes.sh --clean      清理 results/aes_bool/ 下文件"
+    exit 0
+elif [ "$MODE" = "--clean" ]; then
+    echo "=== Cleaning results/aes_bool/ ==="
+    if [ -d "$RESULTS_DIR/$INST" ]; then
+        find "$RESULTS_DIR/$INST" -type f -delete 2>/dev/null
+        rmdir "$RESULTS_DIR/$INST" 2>/dev/null || true
+    fi
+    echo "  Done"
+    exit 0
+else
+    # 快速测试
+    P_COMMON="--random 20 --walsh-k 10 --hill-climb 2"
+    P_D2="--random 20 --hill-climb 2 --max-m 4"
+    P_D1C="--walsh-k 10 --random 10 --hill-climb 2"
+    P_OPT2="--random 20 --hill-climb 2 --max-m 8"
+fi
 
 # ---- 配色 ----
 RED='\033[0;31m'; BLUE='\033[0;34m'; NC='\033[0m'
@@ -75,6 +104,7 @@ run_strat() {
 # ====================================================================
 echo "============================================"
 echo " AES S-box ANF Optimization (7 strategies)"
+echo " Mode: ${MODE}"
 echo "============================================"
 echo ""
 
